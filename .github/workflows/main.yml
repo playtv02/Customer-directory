@@ -1,0 +1,72 @@
+name: Fix sync status display
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-sync-ui:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Update sync status logic
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import sys
+
+          pages = list(Path(".").glob("*.html"))
+          if len(pages) != 1:
+              sys.exit(
+                  "Stopped safely: expected exactly one HTML page in the repository root."
+              )
+
+          page = pages[0]
+          text = page.read_text(encoding="utf-8")
+
+          def function_block(source, name):
+              marker = f"function {name}("
+              start = source.find(marker)
+              if start < 0:
+                  raise RuntimeError(f"Could not find {name}().")
+
+              brace_start = source.find("{", start)
+              depth = 0
+              quote = None
+              escaped = False
+
+              for pos in range(brace_start, len(source)):
+                  char = source[pos]
+
+                  if quote:
+                      if escaped:
+                          escaped = False
+                      elif char == "\\":
+                          escaped = True
+                      elif char == quote:
+                          quote = None
+                      continue
+
+                  if char in ("'", '"', "`"):
+                      quote = char
+                  elif char == "{":
+                      depth += 1
+                  elif char == "}":
+                      depth -= 1
+                      if depth == 0:
+                          return start, pos + 1, source[start:pos + 1]
+
+              raise RuntimeError(f"Could not read {name}().")
+
+          def replace_function(source, name, replacement):
+              start, end, _ = function_block(source, name)
+              return source[:start] + replacement + source[end:]
+
+          sync_status
+          
