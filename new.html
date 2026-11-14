@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kabir Emporium Customer Directory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col pb-12">
+
+    <!-- Top Gradient Header Banner -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 pt-6 pb-8 shadow-md rounded-b-3xl">
+        <div class="max-w-xl mx-auto space-y-4">
+            <!-- Status Badge & Sync Status -->
+            <div class="flex justify-between items-center text-xs">
+                <span class="bg-blue-500/40 backdrop-blur-md px-3 py-1 rounded-full font-medium border border-blue-400/30">🟢 Live System • 2026</span>
+                <div class="flex items-center gap-2">
+                    <span id="syncStatus" class="bg-blue-800/60 px-2.5 py-1 rounded-full">Ready</span>
+                    <button onclick="syncToGitHub()" class="bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-full transition">Sync</button>
+                </div>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <div class="text-center space-y-1">
+                <h1 class="text-2xl font-bold tracking-tight">Kabir Emporium</h1>
+                <p class="text-blue-100 text-xs font-medium">Advanced Customer & Order Directory</p>
+            </div>
+
+            <!-- Header Action Buttons -->
+            <div class="flex gap-2 pt-2">
+                <button onclick="exportJSON()" class="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
+                    📥 Backup JSON
+                </button>
+                <button onclick="document.getElementById('importFile').click()" class="flex-1 bg-white text-blue-600 hover:bg-blue-50 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition">
+                    📤 Restore JSON
+                </button>
+                <input type="file" id="importFile" accept=".json" onchange="importJSON(event)" class="hidden">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-xl w-full mx-auto px-4 -mt-4 space-y-4 flex-grow">
+
+        <!-- GitHub PAT Settings Collapsible -->
+        <details class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 text-xs">
+            <summary class="font-semibold text-blue-600 cursor-pointer">⚙️ GitHub Sync Settings (PAT Token)</summary>
+            <div class="mt-3 space-y-2">
+                <div>
+                    <label class="block text-gray-400 mb-1">GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" class="w-full border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Repository (user/repo)</label>
+                    <input type="text" id="githubRepo" value="playtv02/Customer-directory" class="w-full border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <button onclick="saveSettings()" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-gray-700">Save Token</button>
+            </div>
+        </details>
+
+        <!-- Stats Grid Cards -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold">₹</div>
+                <div>
+                    <div class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">Revenue</div>
+                    <div id="statRevenue" class="text-base font-bold text-gray-900">₹0.00</div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">👥</div>
+                <div>
+                    <div class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">Records</div>
+                    <div id="statRecords" class="text-base font-bold text-gray-900">0</div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">📦</div>
+                <div>
+                    <div class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">Items Sold</div>
+                    <div id="statItems" class="text-base font-bold text-gray-900">0</div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">📍</div>
+                <div>
+                    <div class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">Cities</div>
+                    <div id="statCities" class="text-base font-bold text-gray-900">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Customer Record Form Card -->
+        <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-base font-bold text-gray-800">Add New Customer Record</h2>
+                    <p class="text-xs text-gray-400">Enter transaction details below.</p>
+                </div>
+                <span class="bg-blue-50 text-blue-600 text-[10px] font-semibold px-2.5 py-1 rounded-full">Quick Entry</span>
+            </div>
+
+            <form id="customerForm" onsubmit="addCustomer(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Customer Name</label>
+                    <input type="text" id="name" placeholder="e.g. Ramesh Patel" required class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50/50">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">City</label>
+                    <input type="text" id="city" placeholder="e.g. Tarapur" required class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50/50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Item Count</label>
+                        <input type="number" id="items" value="1" min="1" required class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Price Per Item (₹)</label>
+                        <input type="number" id="price" placeholder="0.00" min="0" step="0.01" required class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50/50">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Date (DD/MM/YYYY)</label>
+                    <input type="date" id="entryDate" required class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50/50">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 text-sm">
+                    <span>+ Save Customer</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Search Bar & Record Count -->
+        <div class="space-y-2">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">🔍</span>
+                <input type="text" id="searchInput" oninput="renderList()" placeholder="Search customer or city..." class="w-full border border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm bg-white shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div class="text-right text-xs text-gray-400 font-medium px-1" id="recordCountLabel">Showing 0 records</div>
+        </div>
+
+        <!-- Customer Card List -->
+        <div id="customerList" class="space-y-3">
+            <!-- Populated dynamically -->
+        </div>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let customers = JSON.parse(localStorage.getItem('kabir_customers')) || [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set today's date as default in date picker (YYYY-MM-DD for input value)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entryDate').value = today;
+
+            const savedToken = localStorage.getItem('github_pat');
+            const savedRepo = localStorage.getItem('github_repo');
+            if (savedToken) document.getElementById('githubToken').value = savedToken;
+            if (savedRepo) document.getElementById('githubRepo').value = savedRepo;
+
+            renderList();
+            if (savedToken) {
+                pullFromGitHub(true);
+            }
+        });
+
+        function saveSettings() {
+            const token = document.getElementById('githubToken').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            localStorage.setItem('github_pat', token);
+            localStorage.setItem('github_repo', repo);
+            alert('GitHub settings saved successfully!');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            // If stored as YYYY-MM-DD or ISO string, format to DD/MM/YYYY
+            const d = new Date(dateStr);
+            if (isNaN(d)) return dateStr;
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function addCustomer(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const items = parseInt(document.getElementById('items').value) || 1;
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const dateVal = document.getElementById('entryDate').value;
+
+            const newEntry = {
+                id: Date.now(),
+                date: dateVal,
+                name,
+                city,
+                items,
+                price,
+                total: items * price
+            };
+
+            customers.unshift(newEntry);
+            saveAndRefresh();
+            document.getElementById('customerForm').reset();
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // FIXED DELETE FUNCTION: Robust string comparison preventing ID mismatch
+        function deleteEntry(id) {
+            if (!confirm("Are you sure you want to delete this record?")) return;
+            
+            customers = customers.filter(c => String(c.id) !== String(id));
+            saveAndRefresh();
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('kabir_customers', JSON.stringify(customers));
+            renderList();
+            syncToGitHub();
+        }
+
+        function updateStats(filteredCustomers) {
+            const totalRevenue = customers.reduce((sum, c) => sum + (c.total || (c.items * c.price)), 0);
+            const totalItems = customers.reduce((sum, c) => sum + c.items, 0);
+            const uniqueCities = new Set(customers.map(c => c.city.trim().toLowerCase())).size;
+
+            document.getElementById('statRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
+            document.getElementById('statRecords').textContent = customers.length;
+            document.getElementById('statItems').textContent = totalItems;
+            document.getElementById('statCities').textContent = uniqueCities;
+            document.getElementById('recordCountLabel').textContent = `Showing ${filteredCustomers.length} records`;
+        }
+
+        function renderList() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const container = document.getElementById('customerList');
+            container.innerHTML = '';
+
+            const filtered = customers.filter(c => 
+                c.name.toLowerCase().includes(query) || c.city.toLowerCase().includes(query)
+            );
+
+            updateStats(filtered);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-gray-100 text-gray-400 text-sm">
+                        No customer records found.
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const total = c.total || (c.items * c.price);
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-gray-900 text-base">${escapeHtml(c.name)}</h3>
+                            <span class="inline-block mt-1 bg-blue-50 text-blue-700 text-[11px] font-medium px-2.5 py-0.5 rounded-md">${escapeHtml(c.city)}</span>
+                        </div>
+                        <span class="text-xs text-gray-400 font-medium">${formatDate(c.date)}</span>
+                    </div>
+                    <div class="flex justify-between items-end pt-2 border-t border-gray-50">
+                        <div class="text-xs text-gray-500 font-medium">
+                            ${c.items} items × ₹${c.price.toFixed(2)}
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] uppercase font-bold text-gray-400">Total</div>
+                            <div class="text-base font-bold text-blue-600">₹${total.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-1">
+                        <button onclick="deleteEntry('${c.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                            🗑️ Delete Record
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(customers, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `kabir_emporium_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        customers = imported;
+                        saveAndRefresh();
+                        alert('Customer records successfully restored!');
+                    } else {
+                        alert('Invalid backup file format.');
+                    }
+                } catch (err) {
+                    alert('Failed to parse JSON file.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // GitHub REST API Sync
+        async function syncToGitHub() {
+            const token = localStorage.getItem('github_pat');
+            const repo = localStorage.getItem('github_repo');
+            const statusEl = document.getElementById('syncStatus');
+
+            if (!token || !repo) {
+                statusEl.textContent = 'Offline';
+                return;
+            }
+
+            statusEl.textContent = 'Syncing...';
+            const path = 'kabir_emporium_backup.json';
+            const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+
+            try {
+                let sha = '';
+                const getRes = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+                });
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    sha = fileData.sha;
+                }
+
+                const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(customers, null, 2))));
+                const body = {
+                    message: `Auto-backup: ${new Date().toLocaleString()}`,
+                    content: contentEncoded,
+                    sha: sha ? sha : undefined
+                };
+
+                const putRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (putRes.ok) {
+                    statusEl.textContent = 'Synced ✓';
+                } else {
+                    statusEl.textContent = 'Sync Error';
+                }
+            } catch (err) {
+                statusEl.textContent = 'Sync Error';
+            }
+        }
+
+        async function pullFromGitHub(silent = false) {
+            const token = localStorage.getItem('github_pat');
+            const repo = localStorage.getItem('github_repo');
+            if (!token || !repo) return;
+
+            const path = 'kabir_emporium_backup.json';
+            const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+                });
+                if (res.ok) {
+                    const fileData = await res.json();
+                    const decoded = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+                    if (Array.isArray(decoded) && decoded.length > 0) {
+                        customers = decoded;
+                        localStorage.setItem('kabir_customers', JSON.stringify(customers));
+                        renderList();
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
