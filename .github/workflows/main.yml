@@ -1,3 +1,4 @@
+
 name: Fix sync status display
 
 on:
@@ -13,26 +14,26 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Update sync status logic
         shell: python
         run: |
           from pathlib import Path
-          import re
           import sys
 
-          pages = list(Path(".").glob("*.html"))
-          if len(pages) != 1:
-              sys.exit(
-                  "Stopped safely: expected exactly one HTML page in the repository root."
-              )
+          page = Path("index.html")
 
-          page = pages[0]
+          if not page.exists():
+              sys.exit("Stopped safely: index.html was not found in the repository root.")
+
           text = page.read_text(encoding="utf-8")
 
           def function_block(source, name):
               marker = f"function {name}("
               start = source.find(marker)
+
               if start < 0:
                   raise RuntimeError(f"Could not find {name}().")
 
@@ -44,7 +45,7 @@ jobs:
               for pos in range(brace_start, len(source)):
                   char = source[pos]
 
-                  if quote:
+                  if quote is not None:
                       if escaped:
                           escaped = False
                       elif char == "\\":
@@ -62,11 +63,108 @@ jobs:
                       if depth == 0:
                           return start, pos + 1, source[start:pos + 1]
 
-              raise RuntimeError(f"Could not read {name}().")
+              raise RuntimeError(f"Could not finish reading {name}().")
 
           def replace_function(source, name, replacement):
               start, end, _ = function_block(source, name)
               return source[:start] + replacement + source[end:]
 
-          sync_status
-          
+          def update_save_calls(source, function_name):
+              start, end, block = function_block(source, function_name)
+
+              if "updateSyncStatusDisplay('unsynced')" not in block:
+                  block = block.replace(
+                      "saveRecords();",
+                      "saveRecords();\n                updateSyncStatusDisplay('unsynced');"
+                  )
+
+              return source[:start] + block + source[end:]
+
+          new_status_function = """function updateSyncStatusDisplay(status, message = '') {
+              githubSyncBtn.disabled = status === 'syncing';
+
+              if (status === 'synced') {
+                  syncDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+                  syncStatusText.textContent = 'Data synced';
+                  githubSyncBtnText.textContent = 'Synced';
+                  syncIcon.className = 'fa-solid fa-circle-check text-base';
+                  githubSyncBtn.title = 'Your data is synced';
+              } else if (status === 'syncing') {
+                  syncDot.className = 'w-2 h-2 rounded-full bg-amber-300 animate-ping';
+                  syncStatusText.textContent = 'Syncing data...';
+                  githubSyncBtnText.textContent = 'Syncing...';
+                  syncIcon.className = 'fa-solid fa-spinner fa-spin text-base';
+                  githubSyncBtn.title = 'Sync in progress';
+              } else if (status === 'unsynced') {
+                  syncDot.className = 'w-2 h-2 rounded-full bg-amber-400';
+                  syncStatusText.textContent = 'Changes not synced';
+                  githubSyncBtnText.textContent = 'Sync now';
+                  syncIcon.className = 'fa-solid fa-cloud-arrow-up text-base';
+                  githubSyncBtn.title = 'Local changes need to be synced';
+              } else if (status === 'failed') {
+                  syncDot.className = 'w-2 h-2 rounded-full bg-red-400';
+                  syncStatusText.textContent = message || 'Sync failed';
+                  githubSyncBtnText.textContent = 'Retry sync';
+                  syncIcon.className = 'fa-solid fa-triangle-exclamation text-base';
+                  githubSyncBtn.title = message || 'Unable to sync data';
+              }
+          }"""
+
+          text = replace_function(
+              text,
+              "updateSyncStatusDisplay",
+              new_status_function
+          )
+
+          text = update_save_calls(text, "handleFormSubmit")
+          text = update_save_calls(text, "executeConfirmedDelete")
+
+          old_catch = """} catch (err) {
+                  console.warn('Cloud sync note:', err);
+                  isSyncing = false;
+                  updateSyncStatusDisplay('synced'); // graceful fallback to local sync
+                  if (!isBackground) showToast('Synced locally & across connected devices!', 'success');
+              }"""
+
+          new_catch = """} catch (err) {
+                  console.error('Cloud sync failed:', err);
+                  isSyncing = false;
+
+                  const message = navigator.onLine
+                      ? 'Sync failed — tap to retry'
+                      : 'Offline — data not synced';
+
+                  updateSyncStatusDisplay('failed', message);
+
+                  if (!isBackground) {
+                      showToast(message, 'error');
+                  }
+              }"""
+
+          if old_catch in text:
+              text = text.replace(old_catch, new_catch)
+          else:
+              print("Warning: expected cloud-sync catch block was not found.")
+
+          startup_sync = "triggerCloudSync(true);"
+          startup_status = "updateSyncStatusDisplay('unsynced');\n            triggerCloudSync(true);"
+
+          if startup_sync in text and startup_status not in text:
+              text = text.replace(startup_sync, startup_status, 1)
+
+          page.write_text(text, encoding="utf-8")
+
+      - name: Commit the HTML update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+
+          if git diff --cached --quiet; then
+            echo "No new changes were needed."
+          else
+            git commit -m "Fix sync status display"
+            git push origin main
+          fi
