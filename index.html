@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kabir Emporium — Customer Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #0f172a;
+      --primary-hover: #1e293b;
+      --accent: #b45309;
+      --accent-soft: #fef3c7;
+      --radius: 14px;
+      --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 48px;
+    }
+
+    .app-container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.5px;
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .brand p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Stateful Sync Status Button */
+    .sync-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .sync-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(0.96);
+    }
+
+    .sync-btn:disabled {
+      cursor: wait;
+      opacity: 0.9;
+    }
+
+    .sync-dot {
+      font-size: 0.8rem;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    /* Sync Button States */
+    .sync-btn.status-ready {
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
+    }
+    .sync-btn.status-ready .sync-dot { color: #10b981; }
+
+    .sync-btn.status-syncing {
+      background: #eff6ff;
+      color: #1e40af;
+      border-color: #bfdbfe;
+    }
+    .sync-btn.status-syncing .sync-dot {
+      color: #3b82f6;
+      animation: spin 0.9s linear infinite;
+    }
+
+    .sync-btn.status-synced {
+      background: #f0fdf4;
+      color: #166534;
+      border-color: #86efac;
+    }
+    .sync-btn.status-synced .sync-dot { color: #16a34a; }
+
+    .sync-btn.status-offline {
+      background: #f1f5f9;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+    .sync-btn.status-offline .sync-dot { color: #94a3b8; }
+
+    .sync-btn.status-error {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+    .sync-btn.status-error .sync-dot { color: #ef4444; }
+
+    .token-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.15s ease;
+    }
+
+    .token-btn:hover {
+      color: var(--text);
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Hero Section */
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .hero h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .stat-card small {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .stat-card strong {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Main Layout */
+    main {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      gap: 8px;
+    }
+
+    .panel-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .panel-header p {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 11px 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.15s ease;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Directory Search & List */
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-box span {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .search-box input {
+      padding-left: 36px;
+    }
+
+    .records-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+    }
+
+    .record-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      gap: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    .record-item:hover {
+      border-color: #cbd5e1;
+    }
+
+    .record-main h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .record-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .record-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .record-amount {
+      text-align: right;
+    }
+
+    .record-amount strong {
+      display: block;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .record-amount small {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #ef4444;
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .delete-btn:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    /* Connect GitHub Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 16px;
+      max-width: 420px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+    }
+
+    .modal-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 14px;
+    }
+
+    .modal h2 {
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+
+    .modal p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .modal-error {
+      color: #dc2626 !important;
+      font-size: 0.8rem !important;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: #f1f5f9;
+      color: #334155;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .secondary-btn:hover {
+      background: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="brand">
+        <div class="brand-logo">KE</div>
+        <div>
+          <h1>Kabir Emporium</h1>
+          <p>Customer management</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Stateful Sync Button showing real-time status -->
+        <button id="syncBtn" class="sync-btn status-ready" onclick="handleSyncClick()" title="Click to sync with GitHub">
+          <span class="sync-dot" id="syncDot">●</span>
+          <span id="syncText">Ready</span>
+        </button>
+        <button class="token-btn" onclick="openTokenModal()" title="GitHub Sync Settings">⌁</button>
+      </div>
+    </header>
+
+    <!-- GitHub Token Modal -->
+    <div id="tokenModal" class="modal-backdrop hidden">
+      <div class="modal">
+        <div class="modal-icon">⌁</div>
+        <h2>Connect GitHub</h2>
+        <p>Enter your GitHub token once. It will be saved on this device for automatic syncing on future launches.</p>
+        <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
+        <p id="tokenError" class="modal-error">Please enter a GitHub token or choose continue without syncing.</p>
+        <div class="modal-actions">
+          <button class="submit-btn" onclick="saveTokenAndSync()">Connect &amp; Sync</button>
+          <button class="secondary-btn" onclick="continueOffline()">Continue without syncing</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-tag">Business overview · 2026</div>
+      <h2>Your customers, organised.</h2>
+      <p>Track transactions, manage customer records and monitor your business.</p>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">₹</div>
+        <div>
+          <small>Total revenue</small>
+          <strong id="statRevenue">₹0.00</strong>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">♙</div>
+        <div>
+          <small>Customers</small>
+          <strong id="statCustomers">0</strong>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">▣</div>
+        <div>
+          <small>Items sold</small>
+          <strong id="statItems">0</strong>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⌖</div>
+        <div>
+          <small>Cities</small>
+          <strong id="statCities">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h3>Add customer</h3>
+            <p>Enter a new transaction</p>
+          </div>
+          <span class="badge">QUICK ENTRY</span>
+        </div>
+
+        <form id="customerForm" onsubmit="handleAddCustomer(event)">
+          <div class="form-group">
+            <label for="custName">Customer name *</label>
+            <input type="text" id="custName" required placeholder="e.g. Aarav Sharma" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="custPhone">Phone</label>
+              <input type="tel" id="custPhone" placeholder="9876543210" />
+            </div>
+            <div class="form-group">
+              <label for="custCity">City *</label>
+              <input type="text" id="custCity" required placeholder="e.g. Jaipur" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="custItems">Items sold *</label>
+              <input type="number" id="custItems" min="1" value="1" required />
+            </div>
+            <div class="form-group">
+              <label for="custAmount">Amount (₹) *</label>
+              <input type="number" id="custAmount" min="0" step="0.01" required placeholder="0.00" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="custNote">Item / Notes</label>
+            <input type="text" id="custNote" placeholder="e.g. Silk Saree, Bridal Lehenga" />
+          </div>
+          <button type="submit" class="submit-btn">Save Transaction</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h3>Customer directory</h3>
+            <p>Search and manage your saved records</p>
+          </div>
+          <span class="badge" id="recordCountBadge">0 RECORDS</span>
+        </div>
+
+        <div class="search-box">
+          <span>⌕</span>
+          <input type="text" id="searchInput" placeholder="Search by name, city, phone, or item..." oninput="renderDirectory()" />
+        </div>
+
+        <div class="records-list" id="recordsList">
+          <div class="empty-state">No customer records yet.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // GitHub Repository Configuration
+    const GITHUB_OWNER = 'playtv02';
+    const GITHUB_REPO  = 'Customer-directory';
+    const DATA_FILE    = 'customers.json';
+
+    const STORAGE_KEYS = {
+      TOKEN: 'ke_github_token',
+      RECORDS: 'ke_customer_records',
+      SKIP_SYNC: 'ke_skip_sync'
+    };
+
+    let customers = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECORDS) || '[]');
+    let resetStatusTimer = null;
+
+    // Update the Sync Button UI & Status
+    function setSyncStatus(state, customLabel) {
+      const btn  = document.getElementById('syncBtn');
+      const dot  = document.getElementById('syncDot');
+      const text = document.getElementById('syncText');
+      if (!btn || !dot || !text) return;
+
+      clearTimeout(resetStatusTimer);
+      btn.className = `sync-btn status-${state}`;
+      btn.disabled = (state === 'syncing');
+
+      const states = {
+        ready:   { icon: '●', label: customLabel || 'Ready · Sync' },
+        syncing: { icon: '↻', label: customLabel || 'Syncing...' },
+        synced:  { icon: '✓', label: customLabel || 'Synced' },
+        offline: { icon: '○', label: customLabel || 'Local only' },
+        error:   { icon: '⚠', label: customLabel || 'Sync failed · Retry' }
+      };
+
+      const current = states[state] || states.ready;
+      dot.textContent  = current.icon;
+      text.textContent = current.label;
+
+      if (state === 'synced') {
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        btn.title = `Last synced at ${now}. Click to sync again.`;
+        resetStatusTimer = setTimeout(() => {
+          setSyncStatus('ready');
+        }, 3000);
+      }
+    }
+
+    // Handle clicking the Sync Status button directly
+    async function handleSyncClick() {
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+      if (!token) {
+        openTokenModal();
+        return;
+      }
+      await syncWithGitHub('push');
+    }
+
+    // Pull or Push `customers.json` with GitHub Repository
+    async function syncWithGitHub(direction = 'push') {
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+      if (!token) {
+        setSyncStatus('offline');
+        return;
+      }
+
+      setSyncStatus('syncing', direction === 'pull' ? 'Loading...' : 'Syncing...');
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${DATA_FILE}`;
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json'
+      };
+
+      try {
+        let sha = null;
+        const getRes = await fetch(apiUrl, { headers });
+
+        if (getRes.ok) {
+          const fileData = await getRes.json();
+          sha = fileData.sha;
+
+          if (direction === 'pull') {
+            const decoded = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+            const remoteRecords = JSON.parse(decoded);
+            if (Array.isArray(remoteRecords)) {
+              customers = remoteRecords;
+              localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(customers));
+              updateUI();
+            }
+            setSyncStatus('synced', 'Synced');
+            return;
+          }
+        } else if (getRes.status === 401 || getRes.status === 403) {
+          throw new Error('Invalid GitHub token');
+        }
+
+        // Push current customer records to GitHub
+        const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(customers, null, 2))));
+        const putRes = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Sync customer directory (${customers.length} records)`,
+            content: encodedContent,
+            ...(sha ? { sha } : {})
+          })
+        });
+
+        if (!putRes.ok) {
+          throw new Error(`GitHub API error ${putRes.status}`);
+        }
+
+        setSyncStatus('synced', 'Synced');
+      } catch (err) {
+        console.error('GitHub Sync Error:', err);
+        setSyncStatus('error');
+      }
+    }
+
+    // Add New Customer Transaction
+    async function handleAddCustomer(e) {
+      e.preventDefault();
+      const record = {
+        id: Date.now().toString(),
+        name: document.getElementById('custName').value.trim(),
+        phone: document.getElementById('custPhone').value.trim(),
+        city: document.getElementById('custCity').value.trim(),
+        items: parseInt(document.getElementById('custItems').value, 10) || 1,
+        amount: parseFloat(document.getElementById('custAmount').value) || 0,
+        note: document.getElementById('custNote').value.trim(),
+        date: new Date().toISOString()
+      };
+
+      customers.unshift(record);
+      localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(customers));
+      e.target.reset();
+      document.getElementById('custItems').value = 1;
+      updateUI();
+
+      if (localStorage.getItem(STORAGE_KEYS.TOKEN)) {
+        await syncWithGitHub('push');
+      }
+    }
+
+    // Delete Customer Record
+    async function deleteCustomer(id) {
+      customers = customers.filter(c => c.id !== id);
+      localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(customers));
+      updateUI();
+
+      if (localStorage.getItem(STORAGE_KEYS.TOKEN)) {
+        await syncWithGitHub('push');
+      }
+    }
+
+    // Update Dashboard Metrics & Directory
+    function updateUI() {
+      const totalRevenue = customers.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+      const totalItems   = customers.reduce((sum, c) => sum + (Number(c.items) || 0), 0);
+      const uniqueCities = new Set(customers.map(c => (c.city || '').toLowerCase().trim()).filter(Boolean)).size;
+
+      document.getElementById('statRevenue').textContent   = `₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('statCustomers').textContent = customers.length;
+      document.getElementById('statItems').textContent     = totalItems;
+      document.getElementById('statCities').textContent    = uniqueCities;
+      document.getElementById('recordCountBadge').textContent = `${customers.length} RECORD${customers.length === 1 ? '' : 'S'}`;
+
+      renderDirectory();
+    }
+
+    function renderDirectory() {
+      const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const list  = document.getElementById('recordsList');
+
+      const filtered = customers.filter(c =>
+        c.name.toLowerCase().includes(query) ||
+        (c.city && c.city.toLowerCase().includes(query)) ||
+        (c.phone && c.phone.toLowerCase().includes(query)) ||
+        (c.note && c.note.toLowerCase().includes(query))
+      );
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state">${customers.length === 0 ? 'No customer records yet.' : 'No matching records found.'}</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(c => `
+        <div class="record-item">
+          <div class="record-main">
+            <h4>${escapeHtml(c.name)}</h4>
+            <div class="record-meta">
+              <span>⌖ ${escapeHtml(c.city || '—')}</span>
+              ${c.phone ? `<span>☎ ${escapeHtml(c.phone)}</span>` : ''}
+              ${c.note ? `<span>▣ ${escapeHtml(c.note)}</span>` : ''}
+            </div>
+          </div>
+          <div class="record-right">
+            <div class="record-amount">
+              <strong>₹${Number(c.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+              <small>${c.items} item${c.items > 1 ? 's' : ''}</small>
+            </div>
+            <button class="delete-btn" onclick="deleteCustomer('${c.id}')" title="Delete record">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[s]));
+    }
+
+    // Modal Controls
+    function openTokenModal() {
+      const existing = localStorage.getItem(STORAGE_KEYS.TOKEN) || '';
+      document.getElementById('githubTokenInput').value = existing;
+      document.getElementById('tokenError').style.display = 'none';
+      document.getElementById('tokenModal').classList.remove('hidden');
+    }
+
+    async function saveTokenAndSync() {
+      const token = document.getElementById('githubTokenInput').value.trim();
+      if (!token) {
+        document.getElementById('tokenError').style.display = 'block';
+        return;
+      }
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.removeItem(STORAGE_KEYS.SKIP_SYNC);
+      document.getElementById('tokenModal').classList.add('hidden');
+      await syncWithGitHub('pull');
+    }
+
+    function continueOffline() {
+      localStorage.setItem(STORAGE_KEYS.SKIP_SYNC, 'true');
+      document.getElementById('tokenModal').classList.add('hidden');
+      setSyncStatus('offline');
+    }
+
+    // Initialize on Launch
+    window.addEventListener('DOMContentLoaded', () => {
+      updateUI();
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+      const skip  = localStorage.getItem(STORAGE_KEYS.SKIP_SYNC);
+
+      if (token) {
+        syncWithGitHub('pull');
+      } else if (skip) {
+        setSyncStatus('offline');
+      } else {
+        setSyncStatus('offline');
+        openTokenModal();
+      }
+    });
+  </script>
+</body>
+</html>
