@@ -66,7 +66,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Centered Brand Header Card with Corner Shubh Labh */
+        /* Centered Brand Header Card with Corner Animated Shubh Labh */
         .brand-header-card {
             background: var(--surface);
             border-radius: var(--radius);
@@ -96,18 +96,35 @@
             color: var(--accent);
             letter-spacing: 0.08em;
             background: var(--surface-hover);
-            padding: 3px 10px;
-            border-radius: 6px;
+            padding: 4px 12px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
+            animation: shubhPulse 2.5s infinite ease-in-out;
         }
 
         .shubh-labh-left {
             left: 16px;
+            transform-origin: left center;
         }
 
         .shubh-labh-right {
             right: 16px;
+            animation-delay: 1.25s;
+            transform-origin: right center;
+        }
+
+        @keyframes shubhPulse {
+            0%, 100% {
+                transform: scale(1) translateY(0);
+                box-shadow: var(--shadow-sm);
+                border-color: var(--border);
+            }
+            50% {
+                transform: scale(1.06) translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+                border-color: var(--accent);
+            }
         }
 
         .brand-info {
@@ -412,10 +429,10 @@
             letter-spacing: -0.02em;
         }
 
-        /* Search & List */
+        /* Search & Autocomplete Suggestions & Floating Cities */
         .search-wrapper {
             position: relative;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
         }
 
         .search-wrapper input {
@@ -437,12 +454,97 @@
             color: var(--accent);
         }
 
+        /* Autocomplete Suggestions Dropdown */
+        .suggestions-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestions-dropdown.active {
+            display: block;
+            animation: fadeIn 0.2s var(--transition-smooth);
+        }
+
+        .suggestion-item {
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition-smooth);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: var(--surface-hover);
+            color: var(--accent);
+        }
+
+        /* Hovering Cities Bar Below Search Bar */
+        .hovering-cities-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 2px 12px 2px;
+            margin-bottom: 8px;
+            scrollbar-width: thin;
+        }
+
+        .hovering-cities-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .hovering-cities-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .city-hover-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-spring);
+        }
+
+        .city-hover-pill:hover, .city-hover-pill.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
         .showing-text {
             text-align: right;
             font-size: 0.75rem;
             font-weight: 500;
             color: var(--text-muted);
-            margin-top: -12px;
+            margin-top: 0;
             margin-bottom: 16px;
             padding-right: 8px;
         }
@@ -651,7 +753,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Centered Brand Header Card with Shubh Labh Corners -->
+        <!-- Centered Brand Header Card with Corner Animated Shubh Labh -->
         <div class="brand-header-card">
             <span class="shubh-labh-left">ॐ शुभ</span>
             <span class="shubh-labh-right">लाभ 卐</span>
@@ -741,11 +843,17 @@
             <div class="records-title">📋 Sale Records & Items</div>
         </div>
 
-        <!-- Search & List -->
+        <!-- Search & Predictive Autocomplete Bar -->
         <div class="search-wrapper">
             <span class="search-icon">🔍</span>
-            <input type="text" id="search-bar" class="form-control" placeholder="e.g. Aman or Tarapur..." oninput="renderRecords()">
+            <input type="text" id="search-bar" class="form-control" placeholder="Search by name or city..." oninput="handleSearchInput()" autocomplete="off">
+            <!-- Predictive Suggestions Dropdown -->
+            <div id="search-suggestions" class="suggestions-dropdown"></div>
         </div>
+
+        <!-- Hovering Cities Bar Below Search Bar -->
+        <div id="hovering-cities" class="hovering-cities-container"></div>
+
         <div class="showing-text" id="showing-count">📊 0 records</div>
         <div id="records-container"></div>
     </div>
@@ -779,6 +887,13 @@
             document.getElementById('banner-year').textContent = today.getFullYear();
             updateDashboard();
             checkTokenAndLoad();
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-wrapper')) {
+                    document.getElementById('search-suggestions').classList.remove('active');
+                }
+            });
         });
 
         // Custom Toast function
@@ -813,6 +928,7 @@
                 closeModal();
                 updateDashboard();
                 renderRecords();
+                renderHoveringCities();
                 await pushDataToGitHub();
                 showToast('✅ Record deleted from GitHub');
             }
@@ -862,11 +978,13 @@
                     records = JSON.parse(decodeBase64(data.content));
                     updateDashboard();
                     renderRecords();
+                    renderHoveringCities();
                     updateStatus('Synced (Online)', 'active');
                 } else if (response.status === 404) {
                     records = [];
                     updateDashboard();
                     renderRecords();
+                    renderHoveringCities();
                     updateStatus('Ready (New File)', 'active');
                 } else {
                     throw new Error('Auth Error');
@@ -944,11 +1062,94 @@
             });
             updateDashboard();
             renderRecords();
+            renderHoveringCities();
             document.getElementById('record-form').reset();
             document.getElementById('cust-date').valueAsDate = new Date();
             updateDashboard();
             await pushDataToGitHub();
         });
+
+        // Predictive Search Input Handler & Autocomplete
+        function handleSearchInput() {
+            const query = document.getElementById('search-bar').value.trim().toLowerCase();
+            renderRecords();
+            renderHoveringCities();
+
+            const dropdown = document.getElementById('search-suggestions');
+            if (!query) {
+                dropdown.classList.remove('active');
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            // Find matching unique names or cities for autocomplete suggestions
+            const matches = new Set();
+            records.forEach(r => {
+                if (r.name.toLowerCase().includes(query)) matches.add({type: '👤 Customer', text: r.name});
+                if (r.city.toLowerCase().includes(query)) matches.add({type: '🏙️ City', text: r.city});
+            });
+
+            const matchList = Array.from(matches).slice(0, 5);
+            if (matchList.length > 0) {
+                dropdown.innerHTML = matchList.map(m => `
+                    <div class="suggestion-item" onclick="selectSuggestion('${m.text}')">
+                        <span>${m.text}</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">${m.type}</span>
+                    </div>
+                `).join('');
+                dropdown.classList.add('active');
+            } else {
+                dropdown.classList.remove('active');
+                dropdown.innerHTML = '';
+            }
+        }
+
+        function selectSuggestion(val) {
+            document.getElementById('search-bar').value = val;
+            document.getElementById('search-suggestions').classList.remove('active');
+            renderRecords();
+            renderHoveringCities();
+        }
+
+        // Render Hovering City Pills
+        function renderHoveringCities() {
+            const container = document.getElementById('hovering-cities');
+            const currentQuery = document.getElementById('search-bar').value.trim().toLowerCase();
+            
+            // Extract unique cities
+            const citiesMap = {};
+            records.forEach(r => {
+                if (r.city) {
+                    const cityName = r.city.trim();
+                    const key = cityName.toLowerCase();
+                    if (!citiesMap[key]) citiesMap[key] = { name: cityName, count: 0 };
+                    citiesMap[key].count++;
+                }
+            });
+
+            const uniqueCities = Object.values(citiesMap);
+            if (uniqueCities.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="city-hover-pill ${currentQuery === '' ? 'active' : ''}" onclick="filterByCity('')">
+                    🌐 All Cities
+                </div>
+            ` + uniqueCities.map(c => `
+                <div class="city-hover-pill ${currentQuery === c.name.toLowerCase() ? 'active' : ''}" onclick="filterByCity('${c.name}')">
+                    📍 ${c.name} <span style="opacity: 0.7; font-size: 0.65rem;">(${c.count})</span>
+                </div>
+            `).join('');
+        }
+
+        function filterByCity(cityName) {
+            document.getElementById('search-bar').value = cityName;
+            document.getElementById('search-suggestions').classList.remove('active');
+            renderRecords();
+            renderHoveringCities();
+        }
 
         function renderRecords() {
             const query = document.getElementById('search-bar').value.toLowerCase();
@@ -981,7 +1182,7 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </div>
-                    <span class="badge">📍 ${r.city}</span>
+                    <span class="badge" style="cursor: pointer;" onclick="filterByCity('${r.city}')">📍 ${r.city}</span>
                     <div class="record-details">
                         <div class="record-calc">📦 ${r.items} × ₹${r.price.toFixed(2)}</div>
                         <div class="record-total">₹${Number(total).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
