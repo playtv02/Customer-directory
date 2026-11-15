@@ -2,1450 +2,1093 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Customer directory for Kabir Emporium">
-    <title>Kabir Emporium Directory</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kabir Emporium - Customer Directory</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a365d">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons script -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         :root {
-            --bg-grad: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #cbd5e1 100%);
-            --surface-3d: linear-gradient(145deg, #ffffff, #f8fafc);
-            --surface-hover-3d: linear-gradient(145deg, #ffffff, #f1f5f9);
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border-highlight: rgba(255, 255, 255, 0.9);
-            --border-shadow: rgba(203, 213, 225, 0.5);
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --accent-depth: #1e3a8a;
-            --danger: #ef4444;
-            --danger-depth: #991b1b;
+            --primary: #1a365d;
+            --primary-light: #2a4a7f;
+            --secondary: #e2e8f0;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
             --success: #10b981;
-            --warning: #f59e0b;
-            --radius: 20px;
-            
-            /* 3D Shadows */
-            --shadow-3d: 
-                8px 12px 20px rgba(15, 23, 42, 0.08), 
-                -4px -4px 12px rgba(255, 255, 255, 0.8),
-                inset 2px 2px 4px rgba(255, 255, 255, 1),
-                inset -2px -2px 6px rgba(15, 23, 42, 0.03);
-                
-            --shadow-3d-hover: 
-                12px 18px 28px rgba(15, 23, 42, 0.12), 
-                -6px -6px 16px rgba(255, 255, 255, 0.9),
-                inset 2px 2px 4px rgba(255, 255, 255, 1),
-                inset -2px -2px 6px rgba(15, 23, 42, 0.04);
-                
-            --shadow-pressed: 
-                inset 4px 4px 8px rgba(15, 23, 42, 0.08), 
-                inset -4px -4px 8px rgba(255, 255, 255, 0.9),
-                0 2px 2px rgba(255, 255, 255, 0.6);
-                
-            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --danger: #ef4444;
+            --border: #cbd5e1;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
-        *, *::before, *::after {
+        * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            margin: 0;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-grad);
-            background-attachment: fixed;
+            background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 40px 16px;
             line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        input, button, textarea, select {
-            font-family: inherit;
+            padding-bottom: 80px;
         }
 
         .container {
-            max-width: 640px;
+            max-width: 800px;
             margin: 0 auto;
-            perspective: 1500px; /* Perspective for 3D tilts */
-            animation: fadeIn 0.6s var(--transition-smooth);
+            padding: 16px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* 3D Core Card Style */
-        .card-3d {
-            background: var(--surface-3d);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-3d);
-            border-top: 1px solid var(--border-highlight);
-            border-left: 1px solid var(--border-highlight);
-            border-right: 1px solid var(--border-shadow);
-            border-bottom: 1px solid var(--border-shadow);
-            transition: var(--transition-spring);
-            transform-style: preserve-3d;
-            position: relative;
-        }
-
-        .card-3d:hover {
-            box-shadow: var(--shadow-3d-hover);
-            transform: translateY(-6px) rotateX(2deg) rotateY(-1deg);
-        }
-
-        /* Brand Header Card */
-        .brand-header-card {
-            padding: 36px 28px 28px;
-            margin-bottom: 32px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* Banner & Header */
+        .banner {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 24px 16px;
+            border-radius: 16px;
             text-align: center;
-            gap: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(26, 54, 93, 0.15);
+            position: relative;
+            overflow: hidden;
         }
-
-        /* 3D Shubh Labh */
-        .shubh-labh-left, .shubh-labh-right {
+        
+        .banner::before {
+            content: '';
             position: absolute;
-            top: -12px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: 0.08em;
-            background: #ffffff;
-            padding: 6px 14px;
-            border-radius: 12px;
-            box-shadow: 
-                0 6px 0 #cbd5e1, 
-                0 10px 15px rgba(15, 23, 42, 0.15),
-                inset 0 2px 2px rgba(255, 255, 255, 1);
-            border: 1px solid rgba(255,255,255,0.8);
-            animation: float3D 3s infinite ease-in-out alternate;
-            transform-style: preserve-3d;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHBhdGggZD0iTTAgMGgyMHYyMEgwem0xMCAxMGgxMHYxMEgxMHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=');
+            opacity: 0.5;
         }
 
-        .om-symbol { color: var(--danger); font-size: 0.9rem; text-shadow: 0 1px 1px rgba(239, 68, 68, 0.4); }
-        .swastik-symbol { color: var(--warning); font-size: 0.9rem; text-shadow: 0 1px 1px rgba(245, 158, 11, 0.4); }
-
-        .shubh-labh-left { left: 20px; animation-delay: 0s; }
-        .shubh-labh-right { right: 20px; animation-delay: 1.5s; }
-
-        @keyframes float3D {
-            0% { transform: translateY(0) translateZ(10px) rotateZ(-2deg); }
-            100% { transform: translateY(-8px) translateZ(20px) rotateZ(2deg); }
-        }
-
-        .brand-info {
+        .auspicious-symbols {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .om-symbol { font-size: 1.4rem; color: #fbbf24; }
+        .swastik-symbol { font-size: 1.2rem; color: #fbbf24; }
+
+        .banner-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .banner span {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .sync-status {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            margin-top: 8px;
-            transform: translateZ(20px);
-        }
-
-        .brand-title {
-            font-size: 1.9rem;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            text-shadow: 2px 2px 4px rgba(15, 23, 42, 0.1);
-        }
-
-        .brand-subtitle {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        /* 3D Sync Pill */
-        .sync-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--surface-3d);
-            padding: 8px 18px;
-            border-radius: 99px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-main);
-            box-shadow: 
-                3px 4px 8px rgba(15,23,42,0.06), 
-                -2px -2px 6px rgba(255,255,255,0.8),
-                inset 1px 1px 2px rgba(255,255,255,1);
-            transform: translateZ(15px);
-            transition: var(--transition-smooth);
-        }
-
-        .sync-pill:hover {
-            transform: translateZ(25px) scale(1.05);
-            box-shadow: 5px 6px 12px rgba(15,23,42,0.1), -3px -3px 8px rgba(255,255,255,0.9);
-        }
-
-        .bank-holiday-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            max-width: 100%;
-            margin-top: -6px;
-            padding: 8px 16px;
-            border-radius: 99px;
-            background: linear-gradient(145deg, #fff7ed, #ffedd5);
-            color: #9a3412;
-            border: 1px solid #fed7aa;
-            box-shadow: 0 4px 10px rgba(154, 52, 18, 0.08), inset 1px 1px 2px rgba(255,255,255,0.9);
-            font-size: 0.74rem;
-            font-weight: 800;
-            line-height: 1.4;
-            text-align: center;
-            transform: translateZ(12px);
-        }
-
-        .bank-holiday-pill.today {
-            background: linear-gradient(145deg, #fee2e2, #fecaca);
-            color: #991b1b;
-            border-color: #fca5a5;
-        }
-
-        .bank-holiday-pill.weekly-closure {
-            background: linear-gradient(145deg, #eff6ff, #dbeafe);
-            color: #1e40af;
-            border-color: #bfdbfe;
-        }
-
-        .bank-holiday-icon {
-            flex: 0 0 auto;
-            font-size: 0.95rem;
-        }
-
-        @media (max-width: 380px) {
-            .bank-holiday-pill {
-                padding: 7px 11px;
-                font-size: 0.68rem;
-            }
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
         }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: var(--text-muted);
-            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.5), inset -1px -1px 2px rgba(0,0,0,0.2);
-            transition: var(--transition-smooth);
-        }
-
-        .status-dot.active {
-            background: var(--success);
-            box-shadow: 0 0 12px var(--success), inset 2px 2px 4px rgba(255,255,255,0.6);
-        }
-
-        .status-dot.error {
-            background: var(--danger);
-            box-shadow: 0 0 12px var(--danger), inset 2px 2px 4px rgba(255,255,255,0.6);
-        }
-
-        /* Layout Cards Margin */
-        .card { padding: 32px; margin-bottom: 32px; }
-
-        /* Chunky 3D Year Banner */
-        .year-banner {
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            color: #ffffff;
-            padding: 18px 24px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            border-top: 2px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 
-                0 8px 0 var(--accent-depth), 
-                0 15px 25px rgba(37, 99, 235, 0.3), 
-                inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            transition: var(--transition-spring);
-        }
-
-        .year-banner:hover {
-            transform: translateY(-4px);
-            box-shadow: 
-                0 12px 0 var(--accent-depth), 
-                0 20px 30px rgba(37, 99, 235, 0.4), 
-                inset 0 2px 4px rgba(255, 255, 255, 0.4);
-        }
-
-        /* Dashboard 3D Grid */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 36px;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 22px 16px;
-            border-radius: 18px;
-        }
-
-        .stat-label {
-            font-size: 0.65rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            transform: translateZ(5px);
-        }
-
-        .stat-value {
-            font-size: 1.45rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            color: var(--accent);
-            text-shadow: 1px 1px 0 rgba(255,255,255,1);
-            transform: translateZ(10px);
-        }
-
-        @media (max-width: 480px) {
-            .dashboard { grid-template-columns: 1fr 1fr; }
-        }
-
-        /* Year-Wise Breakdown Grid */
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 36px;
-        }
-
-        .year-card {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .year-card-title {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .year-card-total {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: var(--text-main);
-        }
-
-        /* 3D Forms & Inputs (Carved Inset Effect) */
-        .form-group { margin-bottom: 24px; }
-
-        .form-group label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 16px 20px;
-            background: #eef2f6; /* slightly darker for carve effect */
-            border: 2px solid transparent;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-main);
-            box-shadow: var(--shadow-pressed);
-            transition: var(--transition-smooth);
-            outline: none;
-            appearance: none;
-        }
-
-        .form-control:focus {
-            background: #ffffff;
-            border-color: var(--accent);
-            box-shadow: 
-                inset 2px 2px 4px rgba(15,23,42,0.04), 
-                0 0 0 4px var(--focus-ring);
-        }
-
-        /* Chunky 3D Buttons */
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 1.05rem;
-            font-weight: 800;
-            cursor: pointer;
-            text-align: center;
-            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #ffffff;
-            border: 1px solid var(--accent-hover);
-            border-top: 2px solid rgba(255,255,255,0.3);
-            box-shadow: 
-                0 8px 0 var(--accent-depth), 
-                0 15px 20px rgba(37, 99, 235, 0.3), 
-                inset 0 2px 4px rgba(255, 255, 255, 0.2);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-            margin-bottom: 8px; /* Room for shadow */
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 
-                0 10px 0 var(--accent-depth), 
-                0 20px 25px rgba(37, 99, 235, 0.4), 
-                inset 0 2px 4px rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(8px);
-            box-shadow: 
-                0 0px 0 var(--accent-depth), 
-                0 2px 5px rgba(37, 99, 235, 0.4), 
-                inset 0 4px 6px rgba(0, 0, 0, 0.2);
-            border-top: 1px solid transparent;
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: translateY(8px);
-            box-shadow: 0 0px 0 var(--accent-depth);
-        }
-
-        /* Records Header Section */
-        .records-section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 0 8px;
-        }
-
-        .records-title {
-            font-size: 1.3rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
-        }
-
-        /* Search & Autocomplete Suggestions & Floating Cities */
-        .search-wrapper {
-            position: relative;
-            margin-bottom: 12px;
-        }
-
-        .search-wrapper input {
-            padding-left: 54px;
-            border-radius: 99px;
-            background: #eef2f6;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 22px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.6;
-            font-size: 1.1rem;
-            transition: var(--transition-smooth);
-        }
-
-        .search-wrapper input:focus ~ .search-icon {
-            opacity: 1;
-            color: var(--accent);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        /* Autocomplete Suggestions Dropdown */
-        .suggestions-dropdown {
-            position: absolute;
-            top: calc(100% + 12px);
-            left: 0;
-            right: 0;
-            background: var(--surface-3d);
-            border-radius: 16px;
-            box-shadow: var(--shadow-3d-hover);
-            border: 1px solid var(--border-highlight);
-            z-index: 100;
-            max-height: 220px;
-            overflow-y: auto;
-            display: none;
-            padding: 8px;
-        }
-
-        .suggestions-dropdown.active {
-            display: block;
-            animation: fadeIn 0.2s var(--transition-smooth);
-        }
-
-        .suggestion-item {
-            padding: 14px 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 10px;
-            transition: var(--transition-smooth);
-        }
-
-        .suggestion-item:hover {
-            background: var(--bg-grad);
-            color: var(--accent);
-            transform: scale(0.98);
-        }
-
-        /* Hovering Cities Bar Below Search Bar */
-        .hovering-cities-container {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 8px 4px 16px 4px;
-            margin-bottom: 12px;
-            scrollbar-width: none; /* hide scrollbar for cleaner 3D look */
-        }
-        .hovering-cities-container::-webkit-scrollbar { display: none; }
-
-        .city-hover-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--surface-3d);
-            border: 1px solid var(--border-highlight);
-            padding: 8px 18px;
-            border-radius: 99px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            cursor: pointer;
-            white-space: nowrap;
-            box-shadow: 
-                4px 6px 10px rgba(15,23,42,0.06), 
-                -2px -2px 6px rgba(255,255,255,0.8),
-                inset 1px 1px 2px rgba(255,255,255,1);
-            transition: var(--transition-spring);
-        }
-
-        .city-hover-pill:hover, .city-hover-pill.active {
-            background: var(--accent);
-            color: #ffffff;
-            border-color: var(--accent-hover);
-            box-shadow: 
-                0 6px 0 var(--accent-depth),
-                0 10px 15px rgba(37,99,235,0.3),
-                inset 0 2px 2px rgba(255,255,255,0.3);
-            transform: translateY(-4px);
+            background-color: #fbbf24; /* Yellow for connecting */
         }
         
-        .city-hover-pill:active {
-            transform: translateY(2px);
-            box-shadow: 0 0 0 var(--accent-depth), 0 2px 4px rgba(37,99,235,0.3);
+        .status-dot.online { background-color: #10b981; }
+        .status-dot.offline { background-color: #ef4444; }
+
+        .holiday-banner {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
         }
 
-        .showing-text {
-            text-align: right;
-            font-size: 0.8rem;
-            font-weight: 700;
+        /* Token Section */
+        .token-section {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .token-section h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .token-section p {
+            font-size: 0.85rem;
             color: var(--text-muted);
-            margin-top: 0;
-            margin-bottom: 20px;
-            padding-right: 8px;
-            text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
+            margin-bottom: 12px;
         }
 
-        /* 3D Record Cards */
-        .record-card {
-            padding: 26px;
-            margin-bottom: 20px;
+        .token-input-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .token-input-group input {
+            flex: 1;
+            margin-bottom: 0;
         }
 
-        .record-header {
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        /* Dashboard Metrics */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Forms & Inputs */
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .fiscal-year-display {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-group {
             margin-bottom: 16px;
         }
 
-        .record-name {
-            font-weight: 800;
-            font-size: 1.15rem;
-            letter-spacing: -0.01em;
-            color: var(--text-main);
-        }
-
-        .badge {
-            background: var(--surface-hover-3d);
-            color: var(--text-main);
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border: 1px solid var(--border-highlight);
-            box-shadow: 
-                2px 4px 8px rgba(15,23,42,0.05),
-                inset 1px 1px 2px rgba(255,255,255,1);
-        }
-
-        .record-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 2px dashed rgba(15,23,42,0.05);
-        }
-
-        .record-calc {
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
             font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .record-total {
-            font-weight: 800;
-            font-size: 1.4rem;
-            letter-spacing: -0.02em;
-            color: var(--accent);
-            text-shadow: 1px 1px 0 rgba(255,255,255,1);
-        }
-
-        /* 3D Icon Button */
-        .btn-icon {
-            background: var(--surface-3d);
-            border: 1px solid var(--border-highlight);
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 
-                0 4px 0 #cbd5e1, 
-                0 6px 10px rgba(15,23,42,0.08),
-                inset 1px 1px 2px rgba(255,255,255,1);
-            transition: var(--transition-spring);
-            margin-bottom: 4px;
-        }
-
-        .btn-icon:hover {
-            color: var(--danger);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 6px 0 #cbd5e1, 
-                0 10px 15px rgba(15,23,42,0.1),
-                inset 1px 1px 2px rgba(255,255,255,1);
+            color: var(--text-main);
         }
         
-        .btn-icon:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15,23,42,0.1);
+        .required-star {
+            color: var(--danger);
         }
 
-        /* Settings Area */
-        .settings-panel p {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-muted);
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.1);
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: var(--danger);
+        }
+
+        button:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Totals Area */
+        .totals-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .totals-header {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #yearTotalsList {
+            padding: 16px;
+        }
+        
+        .year-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        
+        .year-total-row:last-child {
+            border-bottom: none;
+        }
+        
+        .year-label { font-weight: 500; }
+        .year-amount { font-weight: 700; color: var(--primary); }
+
+        /* Search & Lists */
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .list-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box {
+            position: relative;
             margin-bottom: 20px;
         }
 
-        /* Toast Notifications */
-        #toast-container {
-            position: fixed;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%);
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            border-radius: 20px;
+            background-color: white;
+        }
+        
+        /* Day Grouping */
+        .day-group {
+            margin-bottom: 24px;
+        }
+        
+        .day-header {
+            background: var(--primary-light);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 12px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 9999;
-            pointer-events: none;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        .toast {
-            background: var(--text-main);
-            color: #ffffff;
-            padding: 16px 32px;
-            border-radius: 99px;
+        
+        .day-total {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 0.9rem;
+        }
+
+        .customer-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+        }
+
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .customer-name {
             font-weight: 700;
-            box-shadow: 0 10px 25px rgba(15,23,42,0.3), inset 0 2px 4px rgba(255,255,255,0.2);
-            animation: toastEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 1.1rem;
+            color: var(--primary);
         }
 
-        @keyframes toastEnter {
-            from { opacity: 0; transform: translateY(40px) scale(0.9) rotateX(-20deg); }
-            to { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+        .customer-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 12px;
         }
 
-        /* Custom Confirm Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            display: none;
-            place-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.4s var(--transition-smooth);
-            perspective: 1000px;
-        }
-
-        .modal-overlay.active {
+        .customer-details {
             display: grid;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: var(--surface-3d);
-            padding: 36px 32px;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: 0 30px 60px rgba(15,23,42,0.3), inset 2px 2px 4px rgba(255,255,255,1);
-            border: 1px solid var(--border-highlight);
-            transform: scale(0.9) translateY(20px) rotateX(10deg);
-            transition: var(--transition-spring);
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: scale(1) translateY(0) rotateX(0deg);
-        }
-
-        .modal-title {
-            font-weight: 800;
-            font-size: 1.3rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.9rem;
             margin-bottom: 12px;
             color: var(--text-main);
         }
 
-        .modal-text {
-            font-size: 0.9rem;
-            font-weight: 500;
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .detail-item i {
             color: var(--text-muted);
-            margin-bottom: 32px;
+            width: 16px;
+        }
+        
+        .total-amount-row {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border: 1px dashed #cbd5e1;
+        }
+        
+        .amount-value {
+            color: var(--success);
         }
 
+        /* Delete Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--danger);
+        }
+        
+        .modal-text {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
         .modal-actions {
             display: flex;
-            gap: 16px;
+            gap: 12px;
         }
 
-        .modal-btn {
-            flex: 1;
-            padding: 16px;
-            border-radius: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: var(--transition-spring);
-            margin-bottom: 6px;
-        }
-
-        .modal-btn-cancel {
-            background: var(--surface-3d);
-            color: var(--text-main);
-            border: 1px solid var(--border-highlight);
-            box-shadow: 0 6px 0 #cbd5e1, 0 8px 15px rgba(15,23,42,0.1), inset 1px 1px 2px rgba(255,255,255,1);
-        }
-        .modal-btn-cancel:active {
-            transform: translateY(6px);
-            box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15,23,42,0.1);
-        }
-
-        .modal-btn-danger {
-            background: var(--danger);
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
             color: white;
-            border: 1px solid var(--danger-depth);
-            border-top: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 6px 0 var(--danger-depth), 0 10px 15px rgba(239,68,68,0.3), inset 0 2px 2px rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .modal-btn-danger:active {
-            transform: translateY(6px);
-            box-shadow: 0 0 0 var(--danger-depth), 0 2px 4px rgba(239,68,68,0.3);
-        }
+
     </style>
 </head>
 <body>
+
     <div class="container">
-        <!-- Centered Brand Header Card with Corner Animated Shubh Labh -->
-        <div class="card-3d brand-header-card">
-            <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
-            <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
-            <div class="brand-info">
-                <h1 class="brand-title">📘 Kabir Emporium</h1>
-                <span class="brand-subtitle">Customer & Sales Directory System</span>
+        
+        <!-- Header Banner -->
+        <div class="banner">
+            <div class="auspicious-symbols">
+                <span class="om-symbol"><span style="font-family: sans-serif;">ॐ</span> शुभ</span>
+                <span>लाभ <span class="swastik-symbol" style="font-family: sans-serif;">卐</span></span>
             </div>
-            <div class="sync-pill">
-                <div id="status-dot" class="status-dot"></div>
-                <span id="status-text">Connecting...</span>
+            <div class="banner-content">
+                <h1><i data-lucide="book" style="width: 24px; height: 24px; display: inline-block; vertical-align: text-bottom;"></i> Kabir Emporium</h1>
+                <span>Customer & Sales Directory System</span>
             </div>
-            <div class="bank-holiday-pill" id="bank-holiday-pill" aria-live="polite">
-                <span class="bank-holiday-icon">🏦</span>
-                <span id="bank-holiday-text">Checking bank holidays...</span>
+            <div class="sync-status" id="syncStatusUI">
+                <div class="status-dot" id="syncDot"></div>
+                <span id="syncText">Connecting...</span>
+            </div>
+            <div class="holiday-banner" id="holidayBanner" aria-live="polite">
+                <i data-lucide="landmark" style="width: 16px; height: 16px;"></i>
+                <span id="holidayText">Checking bank holidays...</span>
             </div>
         </div>
 
-        <!-- GitHub Settings -->
-        <div id="settings-panel" class="card-3d card settings-panel" style="display: none;">
-            <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 800;">☁️ GitHub Cloud Connection</h3>
+        <!-- Token Section (Hidden once saved) -->
+        <div class="token-section" id="tokenSection">
+            <h3><i data-lucide="cloud" style="width: 18px; height: 18px;"></i> GitHub Cloud Connection</h3>
             <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
-            <div class="form-group" style="margin-bottom: 20px;">
-                <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
+            <div class="token-input-group">
+                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxx">
+                <button type="button" class="btn-primary" style="width: auto; padding: 12px 20px;" onclick="saveToken()">Connect</button>
             </div>
-            <button class="btn btn-primary" onclick="saveToken()">🔗 Connect to GitHub</button>
+            <p style="margin-top: 8px; font-size: 0.75rem; color: #ef4444;" id="tokenError"></p>
         </div>
 
         <!-- Dashboard -->
         <div class="dashboard">
-            <div class="card-3d stat-item">
-                <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
-                <span class="stat-value" id="stat-day-sale">₹0.00</span>
+            <div class="metric-card">
+                <span class="metric-title"><i data-lucide="trending-up" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-bottom;"></i> Day Sale</span>
+                <span class="metric-value" id="daySaleTotal">₹0.00</span>
             </div>
-            <div class="card-3d stat-item">
-                <span class="stat-label">📋 Records</span>
-                <span class="stat-value" id="stat-records">0</span>
+            <div class="metric-card">
+                <span class="metric-title"><i data-lucide="clipboard-list" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-bottom;"></i> Records</span>
+                <span class="metric-value" id="totalRecordsCount">0</span>
             </div>
-            <div class="card-3d stat-item">
-                <span class="stat-label">📦 Items</span>
-                <span class="stat-value" id="stat-items">0</span>
+            <div class="metric-card">
+                <span class="metric-title"><i data-lucide="package" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-bottom;"></i> Items</span>
+                <span class="metric-value" id="totalItemsCount">0</span>
             </div>
-            <div class="card-3d stat-item">
-                <span class="stat-label">📍 Cities/Villages</span>
-                <span class="stat-value" id="stat-cities">0</span>
+            <div class="metric-card">
+                <span class="metric-title"><i data-lucide="map-pin" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-bottom;"></i> Cities/Villages</span>
+                <span class="metric-value" id="totalCitiesCount">0</span>
             </div>
         </div>
 
-        <!-- Current Year Banner Above Form Box -->
-        <div class="year-banner">
-            <span>📅 Active Fiscal Year / Period</span>
-            <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
-        </div>
+        <!-- Input Form -->
+        <div class="card">
+            <div class="fiscal-year-display">
+                <span><i data-lucide="calendar" style="width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom;"></i> Active Fiscal Year / Period</span>
+                <span id="currentFiscalYear">2026</span>
+            </div>
 
-        <!-- Add Record Form -->
-        <div class="card-3d card">
-            <form id="record-form" novalidate>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label>👤 Customer Name</label>
-                        <input type="text" id="cust-name" class="form-control" required placeholder="e.g. Aman Bhatia">
+            <form id="recordForm">
+                <div class="input-group">
+                    <label>Date <span class="required-star">*</span></label>
+                    <!-- Default date logic handles DD/MM/YYYY visually -->
+                    <input type="date" id="date"> 
+                </div>
+                
+                <div class="input-group">
+                    <label>Customer Name <span class="required-star">*</span></label>
+                    <input type="text" id="name" placeholder="Enter full name">
+                </div>
+
+                <div class="input-group">
+                    <label>City / Village <span class="required-star">*</span></label>
+                    <input type="text" id="city" placeholder="Enter location">
+                </div>
+                
+                <div class="input-group">
+                    <label>Phone Number (Optional)</label>
+                    <input type="tel" id="phone" placeholder="10-digit number">
+                </div>
+                
+                <div class="two-col">
+                    <div class="input-group">
+                        <label>Price (₹) <span class="required-star">*</span></label>
+                        <input type="number" id="price" placeholder="0.00" step="0.01">
                     </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label>🏙️ City/Village</label>
-                        <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
-                    </div>
-                    <div class="form-group">
-                        <label>🔢 Item Count</label>
-                        <input type="number" id="cust-items" class="form-control" value="1" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label>💵 Price (₹)</label>
-                        <input type="number" id="cust-price" class="form-control" step="0.01" required placeholder="e.g. 500.00">
-                    </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label>📅 Date</label>
-                        <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
+                    <div class="input-group">
+                        <label>Number of Items <span class="required-star">*</span></label>
+                        <input type="number" id="number_of_items" placeholder="0">
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary" id="save-btn" style="margin-top: 12px; position: relative; z-index: 5; pointer-events: auto;">💾 Save directly to GitHub</button>
+
+                <button type="button" class="btn-primary" onclick="saveRecord()" id="saveBtn">
+                    <i data-lucide="save" style="width: 18px; height: 18px;"></i> Save Record
+                </button>
             </form>
         </div>
 
-        <!-- Year-Wise Summary Section -->
-        <div class="records-section-header">
-            <div class="records-title">📊 Year-Wise Totals</div>
-        </div>
-        <div id="year-summary-container" class="year-grid"></div>
-
-        <!-- Records Section Header -->
-        <div class="records-section-header">
-            <div class="records-title">📋 Sale Records & Items</div>
+        <!-- Year-Wise Totals Card -->
+        <div class="totals-card">
+            <div class="totals-header">
+                <i data-lucide="bar-chart-2" style="width: 18px; height: 18px;"></i>
+                Year-Wise Totals
+            </div>
+            <div id="yearTotalsList"></div>
         </div>
 
-        <!-- Search & Predictive Autocomplete Bar -->
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-bar" class="form-control" placeholder="Search by name or city..." oninput="handleSearchInput()" autocomplete="off">
-            <!-- Predictive Suggestions Dropdown -->
-            <div id="search-suggestions" class="suggestions-dropdown"></div>
+        <!-- List Section -->
+        <div class="list-header">
+            <h2><i data-lucide="list" style="width: 20px; height: 20px;"></i> Sale Records & Items</h2>
         </div>
 
-        <!-- Hovering Cities Bar Below Search Bar -->
-        <div id="hovering-cities" class="hovering-cities-container"></div>
+        <div class="search-box">
+            <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, city or phone..." onkeyup="filterRecords()">
+        </div>
 
-        <div class="showing-text" id="showing-count">📊 0 records</div>
-        <div id="records-container"></div>
+        <div id="recordsList"></div>
+
+        <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 20px;">
+            <i data-lucide="bar-chart" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-bottom;"></i> <span id="recordCount">0</span> records
+        </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container"></div>
-
-    <!-- Confirm Modal -->
-    <div class="modal-overlay" id="confirm-modal">
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
         <div class="modal-content">
             <div class="modal-title">⚠️ Delete Record?</div>
             <div class="modal-text">This will immediately update and sync to GitHub.</div>
             <div class="modal-actions">
-                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">❌ Cancel</button>
-                <button class="modal-btn modal-btn-danger" id="confirm-delete-btn">🗑️ Delete & Sync</button>
+                <button type="button" class="btn-outline" onclick="closeDeleteModal()" style="border: 1px solid var(--border); color: var(--text-main);">Cancel</button>
+                <button type="button" class="btn-danger" id="confirmDeleteBtn">Delete</button>
             </div>
         </div>
     </div>
 
+    <div id="toast"></div>
+
     <script>
-        const GITHUB_OWNER = 'playtv02';
-        const GITHUB_REPO = 'Customer-directory';
-        const FILE_PATH = 'data.json';
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // --- GITHUB SYNC LOGIC ---
+        const REPO_OWNER = 'playtv02';
+        const REPO_NAME = 'Customer-directory';
+        const FILE_PATH = 'kabir_emporium_backup.json';
+        
+        let githubToken = localStorage.getItem('kabir_gh_token');
         let records = [];
-        let fileSha = null;
-        let deleteTargetId = null;
+        let recordToDelete = null;
+        let fileSha = null; // Needed for updating files via GitHub API
 
-        // Gujarat (Ahmedabad) bank holidays for 2026, based on the
-        // Gujarat Government bank-holiday notification.
-        const GUJARAT_BANK_HOLIDAYS_2026 = [
-            ['2026-01-14', 'Makar Sankranti'],
-            ['2026-01-26', 'Republic Day'],
-            ['2026-03-04', 'Holi / Dhuleti'],
-            ['2026-03-21', 'Ramjan-Eid'],
-            ['2026-03-26', 'Shree Ram Navmi'],
-            ['2026-03-31', 'Mahavir Janma Kalyanak'],
-            ['2026-04-01', 'Annual bank account closing'],
-            ['2026-04-03', 'Good Friday'],
-            ['2026-04-14', 'Dr. Babasaheb Ambedkar Jayanti'],
-            ['2026-05-28', 'Eid-Ul-Adha (Bakri-Eid)'],
-            ['2026-08-15', 'Independence Day'],
-            ['2026-08-28', 'Raksha Bandhan'],
-            ['2026-09-04', 'Janmashtami'],
-            ['2026-09-15', 'Samvatsari'],
-            ['2026-10-02', 'Mahatma Gandhi Jayanti'],
-            ['2026-10-20', 'Dusshera'],
-            ['2026-10-31', "Sardar Vallabhbhai Patel's Birthday"],
-            ['2026-11-10', 'Vikram Samvat New Year'],
-            ['2026-12-25', 'Christmas']
-        ];
+        // Set default date on load
+        document.getElementById('date').valueAsDate = new Date();
 
-        function updateBankHolidayPill() {
-            const pill = document.getElementById('bank-holiday-pill');
-            const label = document.getElementById('bank-holiday-text');
-            if (!pill || !label) return;
-
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-            const holidayToday = GUJARAT_BANK_HOLIDAYS_2026.find(([date]) => date === dateKey);
-            const day = today.getDay();
-            const weekOfMonth = Math.floor((today.getDate() - 1) / 7) + 1;
-            const isSaturdayClosure = day === 6 && (weekOfMonth === 2 || weekOfMonth === 4);
-            const isSundayClosure = day === 0;
-
-            pill.classList.remove('today', 'weekly-closure');
-
-            if (holidayToday) {
-                pill.classList.add('today');
-                label.textContent = `Bank Holiday Today: ${holidayToday[1]}`;
-                return;
-            }
-
-            if (isSaturdayClosure || isSundayClosure) {
-                pill.classList.add('weekly-closure');
-                label.textContent = isSundayClosure
-                    ? 'Banks Closed Today: Sunday'
-                    : 'Banks Closed Today: 2nd / 4th Saturday';
-                return;
-            }
-
-            const nextHoliday = GUJARAT_BANK_HOLIDAYS_2026.find(([date]) => {
-                const [year, month, dayOfMonth] = date.split('-').map(Number);
-                return new Date(year, month - 1, dayOfMonth) > today;
-            });
-
-            if (nextHoliday) {
-                const [date, name] = nextHoliday;
-                const holidayDate = new Date(`${date}T00:00:00`);
-                const formattedDate = holidayDate.toLocaleDateString('en-IN', {
-                    day: 'numeric', month: 'short'
-                });
-                label.textContent = `Next Bank Holiday: ${name} • ${formattedDate}`;
+        // UI for Token and Status
+        function updateUIState() {
+            const tokenSec = document.getElementById('tokenSection');
+            const syncDot = document.getElementById('syncDot');
+            const syncText = document.getElementById('syncText');
+            
+            if (githubToken) {
+                tokenSec.style.display = 'none';
+                syncDot.className = 'status-dot online';
+                syncText.innerText = 'Connected to GitHub';
+                loadFromGitHub();
             } else {
-                label.textContent = '2026 bank holiday list completed';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date();
-            document.getElementById('cust-date').valueAsDate = today;
-            document.getElementById('banner-year').textContent = today.getFullYear();
-            updateDashboard();
-            updateBankHolidayPill();
-            checkTokenAndLoad();
-
-            // Close suggestions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-wrapper')) {
-                    document.getElementById('search-suggestions').classList.remove('active');
-                }
-            });
-        });
-
-        // Custom Toast function
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(40px) scale(0.9) rotateX(20deg)';
-                toast.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
-
-        // Custom Modal
-        function openModal(id) {
-            deleteTargetId = id;
-            document.getElementById('confirm-modal').classList.add('active');
-        }
-
-        function closeModal() {
-            deleteTargetId = null;
-            document.getElementById('confirm-modal').classList.remove('active');
-        }
-
-        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-            if (deleteTargetId) {
-                records = records.filter(r => r.id !== deleteTargetId);
-                closeModal();
-                updateDashboard();
-                renderRecords();
-                renderHoveringCities();
-                await pushDataToGitHub();
-                showToast('✅ Record deleted from GitHub');
-            }
-        });
-
-        // UI Status
-        function updateStatus(message, state) {
-            document.getElementById('status-text').textContent = message;
-            document.getElementById('status-dot').className = 'status-dot ' + state;
-        }
-
-        // GitHub Logic (Online Only)
-        function checkTokenAndLoad() {
-            const token = localStorage.getItem('ke_gh_token');
-            if (!token) {
-                document.getElementById('settings-panel').style.display = 'block';
-                updateStatus('Disconnected', 'error');
-            } else {
-                document.getElementById('settings-panel').style.display = 'none';
-                fetchDataFromGitHub();
+                tokenSec.style.display = 'block';
+                syncDot.className = 'status-dot offline';
+                syncText.innerText = 'Offline - Missing Token';
+                showToast('Please enter GitHub Token to connect.');
             }
         }
 
         function saveToken() {
-            const val = document.getElementById('gh-token').value.trim();
-            if (val) {
-                localStorage.setItem('ke_gh_token', val);
-                checkTokenAndLoad();
-                showToast('🔑 Token saved');
+            const input = document.getElementById('githubToken').value.trim();
+            if (input) {
+                localStorage.setItem('kabir_gh_token', input);
+                githubToken = input;
+                document.getElementById('tokenError').innerText = '';
+                updateUIState();
+            } else {
+                document.getElementById('tokenError').innerText = 'Token cannot be empty.';
             }
         }
 
-        const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
-        const decodeBase64 = str => decodeURIComponent(escape(atob(str)));
-
-        async function fetchDataFromGitHub() {
-            updateStatus('Fetching cloud data...', 'syncing');
-            const token = localStorage.getItem('ke_gh_token');
+        // GitHub API Helpers
+        async function loadFromGitHub() {
             try {
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-                    headers: { 'Authorization': `token ${token}` },
-                    cache: 'no-store'
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
-                if (response.ok) {
-                    const data = await response.json();
-                    fileSha = data.sha;
-                    records = JSON.parse(decodeBase64(data.content));
-                    updateDashboard();
-                    renderRecords();
-                    renderHoveringCities();
-                    updateStatus('Synced (Online)', 'active');
-                } else if (response.status === 404) {
+
+                if (response.status === 404) {
+                    // File doesn't exist yet, that's okay.
                     records = [];
-                    updateDashboard();
                     renderRecords();
-                    renderHoveringCities();
-                    updateStatus('Ready (New File)', 'active');
-                } else {
-                    throw new Error('Auth Error');
+                    return;
                 }
-            } catch (e) {
-                updateStatus('Cloud Error', 'error');
-                document.getElementById('settings-panel').style.display = 'block';
-                showToast('❌ Failed to fetch from GitHub repository');
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                fileSha = data.sha;
+                
+                // Decode base64 content
+                const content = decodeURIComponent(escape(atob(data.content)));
+                records = JSON.parse(content);
+                renderRecords();
+                showToast('Data loaded from GitHub');
+
+            } catch (error) {
+                console.error("Load Error:", error);
+                document.getElementById('syncDot').className = 'status-dot offline';
+                document.getElementById('syncText').innerText = 'Sync Error (Check Token)';
+                if (error.message.includes('401')) {
+                    localStorage.removeItem('kabir_gh_token');
+                    githubToken = null;
+                    updateUIState();
+                    showToast('Token invalid or expired. Please re-enter.');
+                }
             }
         }
 
-        async function pushDataToGitHub(recordsToSave = records) {
-            const token = localStorage.getItem('ke_gh_token');
-            const saveBtn = document.getElementById('save-btn');
-
-            if (!token) {
-                document.getElementById('settings-panel').style.display = 'block';
-                updateStatus('GitHub token required', 'error');
-                showToast('❌ Add your GitHub token in Settings, then tap Save again.');
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 Save directly to GitHub';
-                }
-                return false;
-            }
-
-            updateStatus('Syncing to GitHub...', 'syncing');
-            if (saveBtn) {
+        async function saveToGitHub() {
+            const saveBtn = document.getElementById('saveBtn');
+            const originalBtnText = saveBtn.innerHTML;
+            
+            if(saveBtn) {
+                saveBtn.innerHTML = '<i data-lucide="loader" style="width: 18px; height: 18px; animation: spin 2s linear infinite;"></i> Syncing...';
                 saveBtn.disabled = true;
-                saveBtn.textContent = '⏳ Saving to GitHub...';
+                lucide.createIcons();
             }
+            
+            document.getElementById('syncText').innerText = 'Syncing...';
+            document.getElementById('syncDot').className = 'status-dot';
 
             try {
-                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-                const headers = {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(records, null, 2))));
+                
+                const body = {
+                    message: `Update customer directory: ${new Date().toISOString()}`,
+                    content: content
                 };
-
-                // Always get the latest SHA before updating an existing data file.
-                const checkRes = await fetch(apiUrl, { headers, cache: 'no-store' });
-                if (checkRes.ok) {
-                    const checkData = await checkRes.json();
-                    fileSha = checkData.sha;
-                } else if (checkRes.status === 404) {
-                    fileSha = null; // First save: create data.json.
-                } else {
-                    const errorData = await checkRes.json().catch(() => ({}));
-                    throw new Error(errorData.message || `GitHub read failed (HTTP ${checkRes.status})`);
+                
+                if (fileSha) {
+                    body.sha = fileSha;
                 }
 
-                const body = {
-                    message: `Save customer records (${new Date().toLocaleString()})`,
-                    content: encodeBase64(JSON.stringify(recordsToSave, null, 2))
-                };
-                if (fileSha) body.sha = fileSha;
-
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                     method: 'PUT',
-                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(body)
                 });
 
-                const result = await response.json().catch(() => ({}));
                 if (!response.ok) {
-                    throw new Error(result.message || `GitHub save failed (HTTP ${response.status})`);
+                    throw new Error(`Failed to save: ${response.status}`);
                 }
 
-                fileSha = result.content?.sha || fileSha;
-                updateStatus('Synced (Online)', 'active');
-                showToast('✅ Successfully saved to GitHub');
-                return true;
+                const data = await response.json();
+                fileSha = data.content.sha; // Update SHA for next time
+                
+                document.getElementById('syncDot').className = 'status-dot online';
+                document.getElementById('syncText').innerText = 'Connected to GitHub';
+                showToast('Successfully synced to GitHub!');
+
             } catch (error) {
-                updateStatus('Sync Failed', 'error');
-                showToast(`❌ Save failed: ${error.message}`);
-                return false;
+                console.error("Save Error:", error);
+                document.getElementById('syncDot').className = 'status-dot offline';
+                document.getElementById('syncText').innerText = 'Sync Failed';
+                showToast('Error syncing to cloud. Try again.');
             } finally {
-                if (saveBtn) {
+                if(saveBtn) {
+                    saveBtn.innerHTML = originalBtnText;
                     saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 Save directly to GitHub';
+                    lucide.createIcons();
                 }
             }
         }
 
-        // Save handler is called directly by the button (mobile-safe) and by form submit.
-        async function saveCustomerRecord(event) {
-            if (event) event.preventDefault();
-            const form = document.getElementById('record-form');
-
-            if (!form.checkValidity()) {
-                const firstInvalid = form.querySelector(':invalid');
-                showToast('⚠️ Please complete all required fields before saving.');
-                if (firstInvalid) {
-                    firstInvalid.focus();
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+        // --- APP LOGIC ---
+        function saveRecord() {
+            if (!githubToken) {
+                showToast('Please connect to GitHub first.');
                 return;
             }
 
-            const saveBtn = document.getElementById('save-btn');
-            const newRecord = {
-                id: Date.now().toString(),
-                name: document.getElementById('cust-name').value.trim(),
-                city: document.getElementById('cust-city').value.trim(),
-                items: parseInt(document.getElementById('cust-items').value, 10),
-                price: parseFloat(document.getElementById('cust-price').value),
-                date: document.getElementById('cust-date').value
+            const date = document.getElementById('date').value;
+            const name = document.getElementById('name').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const price = parseFloat(document.getElementById('price').value);
+            const numberOfItems = parseInt(document.getElementById('number_of_items').value, 10);
+
+            // Manual Validation check fixing the silent bug
+            if (!date || !name || !city || isNaN(price) || isNaN(numberOfItems)) {
+                alert("Action Blocked: Please fill out all mandatory fields (Date, Name, City, Price, and Number of Items) before saving.");
+                return;
+            }
+
+            const totalAmount = price * numberOfItems;
+
+            const record = {
+                id: Date.now().toString(), // Ensure ID is string for GitHub JSON
+                date,
+                name,
+                city,
+                phone,
+                price,
+                numberOfItems,
+                totalAmount
             };
 
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.textContent = '⏳ Saving...';
-            }
-            showToast('Connecting to GitHub...');
-            const updatedRecords = [newRecord, ...records];
-            const saved = await pushDataToGitHub(updatedRecords);
-            if (!saved) {
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 Save directly to GitHub';
-                }
+            records.unshift(record); // Add to top
+            
+            // Clear form
+            document.getElementById('name').value = '';
+            document.getElementById('city').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('number_of_items').value = '';
+            
+            renderRecords();
+            saveToGitHub();
+        }
+        
+        // Format Date to DD/MM/YYYY for display
+        function formatDateToDDMMYYYY(dateString) {
+            if(!dateString) return "";
+            const parts = dateString.split('-');
+            if(parts.length !== 3) return dateString;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function renderRecords(recordsToRender = records) {
+            const list = document.getElementById('recordsList');
+            const totalsList = document.getElementById('yearTotalsList');
+            list.innerHTML = '';
+            totalsList.innerHTML = '';
+
+            document.getElementById('recordCount').innerText = recordsToRender.length;
+
+            if (recordsToRender.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px 0;"><i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5;"></i><br>No records found</div>';
+                lucide.createIcons();
+                updateDashboard(records);
                 return;
             }
 
-            records = updatedRecords;
-            updateDashboard();
-            renderRecords();
-            renderHoveringCities();
-            form.reset();
-            document.getElementById('cust-date').valueAsDate = new Date();
-            updateDashboard();
+            // Group records by Date
+            const groupedRecords = {};
+            recordsToRender.forEach(r => {
+                if (!groupedRecords[r.date]) {
+                    groupedRecords[r.date] = [];
+                }
+                groupedRecords[r.date].push(r);
+            });
+
+            // Sort dates descending
+            const sortedDates = Object.keys(groupedRecords).sort((a, b) => new Date(b) - new Date(a));
+
+            sortedDates.forEach(dateStr => {
+                const group = groupedRecords[dateStr];
+                
+                // Calculate day total
+                const dayTotal = group.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+                const displayDate = formatDateToDDMMYYYY(dateStr);
+
+                // Create Day Header
+                const dayGroupHTML = document.createElement('div');
+                dayGroupHTML.className = 'day-group';
+                
+                dayGroupHTML.innerHTML = `
+                    <div class="day-header">
+                        <span><i data-lucide="calendar-days" style="width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; margin-right: 6px;"></i>${displayDate}</span>
+                        <span class="day-total">Total: ₹${dayTotal.toFixed(2)}</span>
+                    </div>
+                    <div class="day-records" id="day-${dateStr}"></div>
+                `;
+                
+                list.appendChild(dayGroupHTML);
+                const dayRecordsContainer = dayGroupHTML.querySelector('.day-records');
+
+                // Add records for this day
+                group.forEach(record => {
+                    const card = document.createElement('div');
+                    card.className = 'customer-card';
+                    card.innerHTML = `
+                        <div class="customer-header">
+                            <div class="customer-name">${record.name}</div>
+                            <div style="display:flex; gap:8px;">
+                                <button type="button" class="btn-danger" style="padding: 6px 12px; width: auto; font-size: 0.8rem;" onclick="promptDelete('${record.id}')">
+                                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="customer-details">
+                            <div class="detail-item"><i data-lucide="map-pin"></i> ${record.city}</div>
+                            ${record.phone ? `<div class="detail-item"><i data-lucide="phone"></i> ${record.phone}</div>` : '<div></div>'}
+                        </div>
+                        
+                        <div class="customer-details" style="margin-bottom: 8px;">
+                            <div class="detail-item"><i data-lucide="tag"></i> Price: ₹${record.price.toFixed(2)}</div>
+                            <div class="detail-item"><i data-lucide="package"></i> Items: ${record.numberOfItems}</div>
+                        </div>
+                        
+                        <div class="total-amount-row">
+                            <span>Total Amount</span>
+                            <span class="amount-value">₹${(record.totalAmount || 0).toFixed(2)}</span>
+                        </div>
+                    `;
+                    dayRecordsContainer.appendChild(card);
+                });
+            });
+
+            // Calculate Year-Wise Totals
+            const yearTotals = {};
+            recordsToRender.forEach(record => {
+                const year = record.date.substring(0, 4); // Extract YYYY
+                if (!yearTotals[year]) yearTotals[year] = 0;
+                yearTotals[year] += (record.totalAmount || 0);
+            });
+
+            // Sort years descending and render
+            const sortedYears = Object.keys(yearTotals).sort((a, b) => b - a);
+            if (sortedYears.length > 0) {
+                sortedYears.forEach(year => {
+                    totalsList.innerHTML += `
+                        <div class="year-total-row">
+                            <span class="year-label">FY ${year}</span>
+                            <span class="year-amount">₹${yearTotals[year].toFixed(2)}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                totalsList.innerHTML = '<div style="text-align: center; color: var(--text-muted);">No data for totals</div>';
+            }
+
+            lucide.createIcons();
+            updateDashboard(recordsToRender);
         }
 
-        // Direct button click handler: avoids mobile form-submit quirks.
-        document.getElementById('save-btn').addEventListener('click', async (event) => {
-            event.preventDefault();
-            try {
-                await saveCustomerRecord(event);
-            } catch (error) {
-                console.error('Customer save error:', error);
-                updateStatus('Save error', 'error');
-                showToast('❌ Save error: ' + (error.message || 'Please try again.'));
+        function updateDashboard(currentRecords) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            let todayTotal = 0;
+            let totalItems = 0;
+            const cities = new Set();
+            
+            currentRecords.forEach(r => {
+                if(r.date === today) {
+                    todayTotal += (r.totalAmount || 0);
+                }
+                totalItems += (r.numberOfItems || 0);
+                if(r.city) cities.add(r.city.toLowerCase().trim());
+            });
+            
+            document.getElementById('daySaleTotal').innerText = `₹${todayTotal.toFixed(2)}`;
+            document.getElementById('totalRecordsCount').innerText = currentRecords.length;
+            document.getElementById('totalItemsCount').innerText = totalItems;
+            document.getElementById('totalCitiesCount').innerText = cities.size;
+        }
+
+        function filterRecords() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = records.filter(r => 
+                (r.name && r.name.toLowerCase().includes(term)) || 
+                (r.city && r.city.toLowerCase().includes(term)) || 
+                (r.phone && r.phone.includes(term))
+            );
+            renderRecords(filtered);
+        }
+
+        function promptDelete(id) {
+            recordToDelete = id;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            recordToDelete = null;
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (recordToDelete) {
+                // Filter out ensuring string comparison
+                records = records.filter(r => r.id.toString() !== recordToDelete.toString());
+                renderRecords();
+                saveToGitHub();
+                closeDeleteModal();
+                showToast('Record deleted');
             }
         });
 
-        // Predictive Search Input Handler & Autocomplete
-        function handleSearchInput() {
-            const query = document.getElementById('search-bar').value.trim().toLowerCase();
-            renderRecords();
-            renderHoveringCities();
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+        }
 
-            const dropdown = document.getElementById('search-suggestions');
-            if (!query) {
-                dropdown.classList.remove('active');
-                dropdown.innerHTML = '';
-                return;
-            }
-
-            // Find matching unique names or cities for autocomplete suggestions
-            const matches = new Set();
-            records.forEach(r => {
-                if (r.name.toLowerCase().includes(query)) matches.add({type: '👤 Customer', text: r.name});
-                if (r.city.toLowerCase().includes(query)) matches.add({type: '🏙️ City', text: r.city});
-            });
-
-            const matchList = Array.from(matches).slice(0, 5);
-            if (matchList.length > 0) {
-                dropdown.innerHTML = matchList.map(m => `
-                    <div class="suggestion-item" onclick="selectSuggestion('${m.text}')">
-                        <span>${m.text}</span>
-                        <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted);">${m.type}</span>
-                    </div>
-                `).join('');
-                dropdown.classList.add('active');
+        // Bank Holiday Check (Dummy implementation for UI)
+        function checkBankHolidays() {
+            const holidayText = document.getElementById('holidayText');
+            const today = new Date();
+            const day = today.getDay();
+            
+            if (day === 0) {
+                holidayText.innerText = "Today is Sunday - Bank Holiday";
+            } else if (day === 6) {
+                // Rough check for 2nd/4th Saturday
+                const date = today.getDate();
+                const isSecondOrFourth = (date > 7 && date <= 14) || (date > 21 && date <= 28);
+                if (isSecondOrFourth) {
+                    holidayText.innerText = "Today is 2nd/4th Saturday - Bank Holiday";
+                } else {
+                    holidayText.innerText = "Banks are open today";
+                }
             } else {
-                dropdown.classList.remove('active');
-                dropdown.innerHTML = '';
+                holidayText.innerText = "Banks are open today";
             }
         }
 
-        function selectSuggestion(val) {
-            document.getElementById('search-bar').value = val;
-            document.getElementById('search-suggestions').classList.remove('active');
-            renderRecords();
-            renderHoveringCities();
-        }
-
-        // Render Hovering City Pills
-        function renderHoveringCities() {
-            const container = document.getElementById('hovering-cities');
-            const currentQuery = document.getElementById('search-bar').value.trim().toLowerCase();
-            
-            // Extract unique cities
-            const citiesMap = {};
-            records.forEach(r => {
-                if (r.city) {
-                    const cityName = r.city.trim();
-                    const key = cityName.toLowerCase();
-                    if (!citiesMap[key]) citiesMap[key] = { name: cityName, count: 0 };
-                    citiesMap[key].count++;
-                }
-            });
-
-            const uniqueCities = Object.values(citiesMap);
-            if (uniqueCities.length === 0) {
-                container.innerHTML = '';
-                return;
+        // Initialization
+        window.onload = function() {
+            checkBankHolidays();
+            updateUIState();
+        };
+        
+        // Add simple spin animation for sync button
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
             }
+        `;
+        document.head.appendChild(style);
 
-            container.innerHTML = `
-                <div class="city-hover-pill ${currentQuery === '' ? 'active' : ''}" onclick="filterByCity('')">
-                    🌐 All Cities
-                </div>
-            ` + uniqueCities.map(c => `
-                <div class="city-hover-pill ${currentQuery === c.name.toLowerCase() ? 'active' : ''}" onclick="filterByCity('${c.name}')">
-                    📍 ${c.name} <span style="opacity: 0.6; font-size: 0.7rem;">(${c.count})</span>
-                </div>
-            `).join('');
-        }
-
-        function filterByCity(cityName) {
-            document.getElementById('search-bar').value = cityName;
-            document.getElementById('search-suggestions').classList.remove('active');
-            renderRecords();
-            renderHoveringCities();
-        }
-
-        function renderRecords() {
-            const query = document.getElementById('search-bar').value.toLowerCase();
-            const container = document.getElementById('records-container');
-            container.innerHTML = '';
-            
-            const filtered = records.filter(r => 
-                r.name.toLowerCase().includes(query) || r.city.toLowerCase().includes(query) || (r.itemName || '').toLowerCase().includes(query)
-            );
-            
-            document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No matching records found</div>`;
-                return;
-            }
-            
-            filtered.forEach(r => {
-                const total = (r.items * r.price).toFixed(2);
-                const [y, m, d] = r.date.split('-');
-                const card = document.createElement('div');
-                card.className = 'card-3d record-card';
-                card.innerHTML = `
-                    <div class="record-header">
-                        <div>
-                            <div class="record-name">👤 ${r.name}</div>
-                            <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 4px;">📅 ${d}/${m}/${y}</div>
-                        </div>
-                        <button class="btn-icon" onclick="openModal('${r.id}')" title="Delete">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    </div>
-                    <span class="badge" style="cursor: pointer;" onclick="filterByCity('${r.city}')">📍 ${r.city}</span>
-                    <div class="record-details">
-                        <div class="record-calc">📦 ${r.items} × ₹${r.price.toFixed(2)}</div>
-                        <div class="record-total">₹${Number(total).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function updateDashboard() {
-            const selectedDate = document.getElementById('cust-date').value;
-            let daySale = 0, totalItems = 0, cities = new Set();
-            const yearMap = {};
-            
-            records.forEach(r => {
-                if (r.date === selectedDate) {
-                    daySale += (r.items * r.price);
-                }
-                totalItems += r.items;
-                cities.add(r.city.toLowerCase());
-
-                const year = r.date ? r.date.split('-')[0] : 'Unknown';
-                if (!yearMap[year]) {
-                    yearMap[year] = { sale: 0, count: 0, items: 0 };
-                }
-                yearMap[year].sale += (r.items * r.price);
-                yearMap[year].count += 1;
-                yearMap[year].items += r.items;
-            });
-
-            if (selectedDate) {
-                const [y, m, d] = selectedDate.split('-');
-                document.getElementById('stat-day-label').textContent = `📈 Sale (${d}/${m})`;
-            } else {
-                document.getElementById('stat-day-label').textContent = '📈 Day Sale';
-            }
-
-            document.getElementById('stat-day-sale').textContent = `₹${daySale.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('stat-records').textContent = records.length;
-            document.getElementById('stat-items').textContent = totalItems;
-            document.getElementById('stat-cities').textContent = cities.size;
-
-            renderYearSummary(yearMap);
-        }
-
-        function renderYearSummary(yearMap) {
-            const container = document.getElementById('year-summary-container');
-            container.innerHTML = '';
-
-            const sortedYears = Object.keys(yearMap).sort((a, b) => b.localeCompare(a));
-
-            if (sortedYears.length === 0) {
-                container.innerHTML = `<div class="card-3d year-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-weight: 700;">No year data available</div>`;
-                return;
-            }
-
-            sortedYears.forEach(year => {
-                const data = yearMap[year];
-                const card = document.createElement('div');
-                card.className = 'card-3d year-card';
-                card.innerHTML = `
-                    <div class="year-card-title">
-                        <span>📅 ${year}</span>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">${data.count} records</span>
-                    </div>
-                    <div class="year-card-total">₹${data.sale.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">📦 ${data.items} items sold</div>
-                `;
-                container.appendChild(card);
-            });
-        }
     </script>
 </body>
 </html>
