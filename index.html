@@ -885,7 +885,7 @@
                         <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 12px;">💾 Save directly to GitHub</button>
+                <button type="button" class="btn btn-primary" id="save-btn" onclick="saveCustomerRecord(event)" style="margin-top: 12px; position: relative; z-index: 5; pointer-events: auto;">💾 Save directly to GitHub</button>
             </form>
         </div>
 
@@ -1249,18 +1249,14 @@
             updateDashboard();
         }
 
-        const recordForm = document.getElementById('record-form');
-        recordForm.addEventListener('submit', async (event) => {
+        // Direct button click handler: avoids mobile form-submit quirks.
+        document.getElementById('save-btn').addEventListener('click', async (event) => {
             event.preventDefault();
             try {
                 await saveCustomerRecord(event);
             } catch (error) {
                 console.error('Customer save error:', error);
-                const saveBtn = document.getElementById('save-btn');
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 Save directly to GitHub';
-                }
+                updateStatus('Save error', 'error');
                 showToast('❌ Save error: ' + (error.message || 'Please try again.'));
             }
         });
