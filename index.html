@@ -1149,7 +1149,11 @@
             if (!token) {
                 document.getElementById('settings-panel').style.display = 'block';
                 updateStatus('GitHub token required', 'error');
-                showToast('❌ Connect GitHub before saving');
+                showToast('❌ Add your GitHub token in Settings, then tap Save again.');
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '💾 Save directly to GitHub';
+                }
                 return false;
             }
 
@@ -1245,7 +1249,13 @@
             showToast('Connecting to GitHub...');
             const updatedRecords = [newRecord, ...records];
             const saved = await pushDataToGitHub(updatedRecords);
-            if (!saved) return;
+            if (!saved) {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '💾 Save directly to GitHub';
+                }
+                return;
+            }
 
             records = updatedRecords;
             updateDashboard();
