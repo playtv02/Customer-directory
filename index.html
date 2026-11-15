@@ -59,6 +59,114 @@
             margin: 0 auto;
         }
 
+        /* Redesigned Brand Header Card */
+        .brand-header-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .brand-header-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.01em;
+        }
+
+        /* Redesigned Sync Pill */
+        .sync-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface-hover);
+            padding: 10px 16px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .sync-pill:hover {
+            box-shadow: var(--shadow);
+            background: var(--surface);
+            border-color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: background var(--transition), box-shadow var(--transition);
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-dot.error {
+            background: var(--danger);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-dot.syncing {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .brand-header-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+            }
+            .sync-pill {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         /* Deep 3D Layout & Cards */
         .card {
             background: var(--surface);
@@ -90,71 +198,6 @@
             box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.25);
             letter-spacing: 0.03em;
             border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            padding: 0 4px;
-        }
-
-        .header h1 {
-            font-size: 1.85rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            white-space: nowrap;
-            margin: 0;
-        }
-
-        .sync-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--surface);
-            padding: 8px 14px;
-            border-radius: 99px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-
-        .sync-badge:hover {
-            box-shadow: var(--shadow);
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--text-muted);
-            transition: background var(--transition), box-shadow var(--transition);
-        }
-
-        .status-dot.active {
-            background: var(--success);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
-
-        .status-dot.error {
-            background: var(--danger);
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-
-        .status-dot.syncing {
-            background: var(--warning);
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
         }
 
         /* Dashboard 3D Grid */
@@ -562,12 +605,13 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div>
-                <h1>Kabir Emporium</h1>
+        <!-- Redesigned Brand Header Card & Sync Pill -->
+        <div class="brand-header-card">
+            <div class="brand-info">
+                <h1 class="brand-title">📒 Kabir Emporium</h1>
+                <span class="brand-subtitle">Customer & Sales Directory System</span>
             </div>
-            <div class="sync-badge">
+            <div class="sync-pill">
                 <div id="status-dot" class="status-dot"></div>
                 <span id="status-text">Connecting...</span>
             </div>
