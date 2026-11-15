@@ -11,34 +11,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f7f7f9;
+            --bg: #eef2f6;
             --surface: #ffffff;
-            --surface-hover: #f4f4f5;
-            --text-main: #111113;
-            --text-muted: #71717a;
-            --border: #e4e4e7;
-            --accent: #000000;
-            --focus-ring: rgba(0, 0, 0, 0.15);
+            --surface-hover: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #cbd5e1;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --focus-ring: rgba(37, 99, 235, 0.25);
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
             --radius: 16px;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+            --shadow-3d: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+            --shadow-btn: 0 4px 12px rgba(37, 99, 235, 0.3);
             --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #09090b;
-                --surface: #18181b;
-                --surface-hover: #27272a;
-                --text-main: #fafafa;
-                --text-muted: #a1a1aa;
-                --border: #27272a;
-                --accent: #ffffff;
-                --focus-ring: rgba(255, 255, 255, 0.2);
-                --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            }
         }
 
         *, *::before, *::after {
@@ -50,7 +38,7 @@
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
-            padding: 24px 16px;
+            padding: 32px 16px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
@@ -64,29 +52,36 @@
             margin: 0 auto;
         }
 
-        /* Layout & Cards */
+        /* Layout & 3D Cards */
         .card {
             background: var(--surface);
             border-radius: var(--radius);
             padding: 24px;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-3d);
             margin-bottom: 24px;
             border: 1px solid var(--border);
+            transform: translateY(0);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.12);
         }
 
         /* Year Banner */
         .year-banner {
-            background: linear-gradient(135deg, #111113, #27272a);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
+            padding: 14px 20px;
+            border-radius: 14px;
             font-size: 0.85rem;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.3);
             letter-spacing: 0.03em;
         }
 
@@ -95,45 +90,47 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
-            padding: 0 8px;
+            margin-bottom: 28px;
+            padding: 0 4px;
         }
 
         .header h1 {
-            font-size: 1.75rem;
+            font-size: 1.85rem;
             font-weight: 700;
             letter-spacing: -0.03em;
-            white-space: nowrap;
+            color: #0f172a;
+            margin: 0;
         }
 
         .sync-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: var(--surface-hover);
-            padding: 6px 12px;
+            background: var(--surface);
+            padding: 8px 14px;
             border-radius: 99px;
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-main);
             border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
 
         .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #a1a1aa;
+            background: #94a3b8;
         }
 
         .status-dot.active {
             background: var(--success);
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         .status-dot.error {
             background: var(--danger);
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
 
         .status-dot.syncing {
@@ -152,23 +149,23 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .stat-item {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             background: var(--surface);
-            padding: 16px;
-            border-radius: 12px;
+            padding: 18px 14px;
+            border-radius: 14px;
             border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-3d);
         }
 
         .stat-label {
             font-size: 0.65rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -176,8 +173,9 @@
 
         .stat-value {
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.02em;
+            color: #0f172a;
         }
 
         @media (max-width: 480px) {
@@ -190,16 +188,16 @@
         .year-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 24px;
         }
 
         .year-card {
             background: var(--surface);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-3d);
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -215,9 +213,10 @@
         }
 
         .year-card-total {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: -0.02em;
+            color: #0f172a;
         }
 
         .year-card-meta {
@@ -232,31 +231,32 @@
 
         .form-group label {
             display: block;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-main);
             margin-bottom: 8px;
         }
 
         .form-control {
             width: 100%;
             padding: 14px 16px;
-            background: var(--surface-hover);
-            border: 1px solid var(--border);
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
             border-radius: 12px;
             font-size: 0.95rem;
             color: var(--text-main);
-            transition: border-color var(--transition), box-shadow var(--transition);
+            transition: all var(--transition);
             outline: none;
-            appearance: none;
+            box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.02);
         }
 
         .form-control:focus {
             background: var(--surface);
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--focus-ring);
+            box-shadow: 0 0 0 4px var(--focus-ring), inset 0 1px 2px rgba(15, 23, 42, 0.02);
         }
 
+        /* 3D Tactile Buttons */
         .btn {
             display: inline-block;
             width: 100%;
@@ -266,24 +266,32 @@
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: all 0.15s ease;
             text-align: center;
         }
 
         .btn-primary {
             background: var(--accent);
-            color: var(--bg);
+            color: white;
+            box-shadow: var(--shadow-btn);
         }
 
         .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
 
         .btn-primary:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         /* Records Header Section */
@@ -296,9 +304,10 @@
         }
 
         .records-title {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 700;
             letter-spacing: -0.02em;
+            color: #0f172a;
         }
 
         /* Search & List */
@@ -308,16 +317,18 @@
         }
 
         .search-wrapper input {
-            padding-left: 44px;
+            padding-left: 46px;
             border-radius: 99px;
+            background: var(--surface);
+            box-shadow: var(--shadow-3d);
         }
 
         .search-icon {
             position: absolute;
-            left: 16px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            opacity: 0.4;
+            opacity: 0.5;
         }
 
         .showing-text {
@@ -327,21 +338,22 @@
             margin-top: -12px;
             margin-bottom: 16px;
             padding-right: 8px;
+            font-weight: 500;
         }
 
         .record-card {
             background: var(--surface);
             padding: 20px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-3d);
             border: 1px solid var(--border);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             transition: transform var(--transition), box-shadow var(--transition);
         }
 
         .record-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -8px rgba(15, 23, 42, 0.12);
         }
 
         .record-header {
@@ -352,18 +364,19 @@
         }
 
         .record-name {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.05rem;
             letter-spacing: -0.01em;
+            color: #0f172a;
         }
 
         .badge {
-            background: var(--surface-hover);
+            background: #f1f5f9;
             color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 500;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
             border: 1px solid var(--border);
         }
 
@@ -377,32 +390,40 @@
         .record-calc {
             font-size: 0.85rem;
             color: var(--text-muted);
+            font-weight: 500;
         }
 
         .record-total {
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            color: #0f172a;
         }
 
         .btn-icon {
-            background: transparent;
-            border: none;
+            background: #f8fafc;
+            border: 1px solid var(--border);
             color: var(--text-muted);
             cursor: pointer;
-            padding: 4px;
+            padding: 8px;
             transition: var(--transition);
-            border-radius: 6px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .btn-icon:hover {
             color: var(--danger);
             background: #fef2f2;
+            border-color: #fecaca;
+            transform: translateY(-1px);
         }
 
         /* Settings Area */
         .settings-panel {
             background: var(--surface);
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-3d);
         }
 
         .settings-panel p {
@@ -424,13 +445,13 @@
         }
 
         .toast {
-            background: var(--text-main);
-            color: var(--bg);
-            padding: 12px 24px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 24px;
             border-radius: 99px;
             font-size: 0.85rem;
-            font-weight: 500;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-weight: 600;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.25);
             animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -443,8 +464,8 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
             display: none;
             place-items: center;
             z-index: 1000;
@@ -459,12 +480,12 @@
 
         .modal-content {
             background: var(--surface);
-            padding: 24px;
+            padding: 28px;
             border-radius: 20px;
             width: 90%;
-            max-width: 320px;
+            max-width: 340px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
             border: 1px solid var(--border);
             transform: scale(0.95);
             transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -475,12 +496,14 @@
         }
 
         .modal-title {
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.15rem;
             margin-bottom: 8px;
+            color: #0f172a;
         }
 
         .modal-text {
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
             margin-bottom: 24px;
         }
@@ -492,16 +515,21 @@
 
         .modal-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
             border: none;
             font-weight: 600;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: transform 0.1s;
+        }
+
+        .modal-btn:active {
+            transform: scale(0.97);
         }
 
         .modal-btn-cancel {
-            background: var(--surface-hover);
+            background: #f1f5f9;
             color: var(--text-main);
             border: 1px solid var(--border);
         }
@@ -509,6 +537,7 @@
         .modal-btn-danger {
             background: var(--danger);
             color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
     </style>
 </head>
@@ -527,7 +556,7 @@
 
         <!-- GitHub Settings -->
         <div id="settings-panel" class="card settings-panel" style="display: none;">
-            <h3 style="margin-bottom: 8px; font-size: 1rem;">☁️ GitHub Cloud Connection</h3>
+            <h3 style="margin-bottom: 8px; font-size: 1rem; color: #0f172a;">☁️ GitHub Cloud Connection</h3>
             <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
             <div class="form-group" style="margin-bottom: 12px;">
                 <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
@@ -902,7 +931,7 @@
                 card.innerHTML = `
                     <div class="year-card-title">
                         <span>📅 ${year}</span>
-                        <span style="font-size: 0.7rem; font-weight: 500; color: var(--text-muted);">${data.count} records</span>
+                        <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted);">${data.count} records</span>
                     </div>
                     <div class="year-card-total">₹${data.sale.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     <div class="year-card-meta">📦 ${data.items} items sold</div>
