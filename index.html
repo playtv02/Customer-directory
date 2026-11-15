@@ -35,139 +35,881 @@
                 --text-main: #fafafa;
                 --text-muted: #a1a1aa;
                 --border: #27272a;
-                --accent: #fafafa;
-                --focus-ring: rgba(250, 250, 250, 0.2);
+                --accent: #ffffff;
+                --focus-ring: rgba(255, 255, 255, 0.2);
+                --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
             }
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
         }
 
         body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
+            padding: 24px 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        input, button, textarea, select {
+            font-family: inherit;
         }
 
         .container {
-            width: 100%;
-            max-width: 600px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Layout & Cards */
+        .card {
             background: var(--surface);
-            border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 2rem;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        /* Year Banner */
+        .year-banner {
+            background: linear-gradient(135deg, #111113, #27272a);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            letter-spacing: 0.03em;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 0 8px;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            white-space: nowrap;
+        }
+
+        .sync-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-hover);
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #a1a1aa;
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .status-dot.error {
+            background: var(--danger);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .status-dot.syncing {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
             box-shadow: var(--shadow);
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-align: center;
+        .stat-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .form-group {
-            margin-bottom: 1.2rem;
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
 
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--text-main);
+        @media (max-width: 480px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
-        input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+        /* Year-Wise Breakdown Grid */
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .year-card {
             background: var(--surface);
-            color: var(--text-main);
-            transition: var(--transition);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        input:focus {
+        .year-card-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .year-card-total {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .year-card-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            transition: border-color var(--transition), box-shadow var(--transition);
             outline: none;
+            appearance: none;
+        }
+
+        .form-control:focus {
+            background: var(--surface);
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--focus-ring);
         }
 
-        button {
+        .btn {
+            display: inline-block;
             width: 100%;
-            padding: 0.75rem;
-            font-size: 1rem;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.95rem;
             font-weight: 600;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+            text-align: center;
+        }
+
+        .btn-primary {
             background: var(--accent);
             color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Records Header Section */
+        .records-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .records-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Search & List */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-wrapper input {
+            padding-left: 44px;
+            border-radius: 99px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.4;
+        }
+
+        .showing-text {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -12px;
+            margin-bottom: 16px;
+            padding-right: 8px;
+        }
+
+        .record-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .record-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+        }
+
+        .badge {
+            background: var(--surface-hover);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+        }
+
+        .record-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 16px;
+        }
+
+        .record-calc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .record-total {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .btn-icon {
+            background: transparent;
             border: none;
-            border-radius: 8px;
+            color: var(--text-muted);
             cursor: pointer;
+            padding: 4px;
             transition: var(--transition);
-            margin-top: 0.5rem;
+            border-radius: 6px;
         }
 
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .required-mark {
+        .btn-icon:hover {
             color: var(--danger);
+            background: #fef2f2;
+        }
+
+        /* Settings Area */
+        .settings-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .settings-panel p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--text-main);
+            color: var(--bg);
+            padding: 12px 24px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Confirm Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            place-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.active {
+            display: grid;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            transform: scale(0.95);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .modal-btn-cancel {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn-danger {
+            background: var(--danger);
+            color: white;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h1>Kabir Emporium Directory</h1>
-        
-        <form id="customerForm">
-            <!-- Name (Compulsory) -->
-            <div class="form-group">
-                <label for="name">Name <span class="required-mark">*</span></label>
-                <input type="text" id="name" name="name" required placeholder="Enter customer name">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>Kabir Emporium</h1>
             </div>
-
-            <!-- Price (Compulsory) -->
-            <div class="form-group">
-                <label for="price">Price <span class="required-mark">*</span></label>
-                <input type="number" id="price" name="price" required min="0" step="0.01" placeholder="Enter price">
+            <div class="sync-badge">
+                <div id="status-dot" class="status-dot"></div>
+                <span id="status-text">Connecting...</span>
             </div>
+        </div>
 
-            <!-- City (Compulsory) -->
-            <div class="form-group">
-                <label for="city">City <span class="required-mark">*</span></label>
-                <input type="text" id="city" name="city" required placeholder="Enter city">
+        <!-- GitHub Settings -->
+        <div id="settings-panel" class="card settings-panel" style="display: none;">
+            <h3 style="margin-bottom: 8px; font-size: 1rem;">☁️ GitHub Cloud Connection</h3>
+            <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
             </div>
+            <button class="btn btn-primary" onclick="saveToken()">🔗 Connect to GitHub</button>
+        </div>
 
-            <button type="submit">Save Entry</button>
-        </form>
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <div class="stat-item">
+                <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
+                <span class="stat-value" id="stat-day-sale">₹0.00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">📋 Records</span>
+                <span class="stat-value" id="stat-records">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">📦 Items</span>
+                <span class="stat-value" id="stat-items">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">📍 Cities/Villages</span>
+                <span class="stat-value" id="stat-cities">0</span>
+            </div>
+        </div>
+
+        <!-- Current Year Banner Above Form Box -->
+        <div class="year-banner">
+            <span>📅 Active Fiscal Year / Period</span>
+            <span style="font-size: 1rem; font-weight: 700;" id="banner-year">2026</span>
+        </div>
+
+        <!-- Add Record Form -->
+        <div class="card">
+            <form id="record-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>👤 Customer Name</label>
+                        <input type="text" id="cust-name" class="form-control" required placeholder="e.g. Aman Bhatia">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>🏙️ City/Village</label>
+                        <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 Item Count</label>
+                        <input type="number" id="cust-items" class="form-control" value="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>💵 Price (₹)</label>
+                        <input type="number" id="cust-price" class="form-control" step="0.01" required placeholder="e.g. 500.00">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>📅 Date</label>
+                        <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 8px;">💾 Save directly to GitHub</button>
+            </form>
+        </div>
+
+        <!-- Year-Wise Summary Section -->
+        <div class="records-section-header">
+            <div class="records-title">📊 Year-Wise Totals</div>
+        </div>
+        <div id="year-summary-container" class="year-grid"></div>
+
+        <!-- Records Section Header -->
+        <div class="records-section-header">
+            <div class="records-title">📋 Sale Records & Items</div>
+        </div>
+
+        <!-- Search & List -->
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-bar" class="form-control" placeholder="e.g. Aman or Tarapur..." oninput="renderRecords()">
+        </div>
+        <div class="showing-text" id="showing-count">📊 0 records</div>
+        <div id="records-container"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Delete Record?</div>
+            <div class="modal-text">This will immediately update and sync to GitHub.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">❌ Cancel</button>
+                <button class="modal-btn modal-btn-danger" id="confirm-delete-btn">🗑️ Delete & Sync</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        document.getElementById('customerForm').addEventListener('submit', function(event) {
-            const name = document.getElementById('name').value.trim();
-            const price = document.getElementById('price').value.trim();
-            const city = document.getElementById('city').value.trim();
+        const GITHUB_OWNER = 'playtv02';
+        const GITHUB_REPO = 'Customer-directory';
+        const FILE_PATH = 'data.json';
+        let records = [];
+        let fileSha = null;
+        let deleteTargetId = null;
 
-            if (!name || !price || !city) {
-                event.preventDefault();
-                alert('Name, Price, and City are compulsory entries!');
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            document.getElementById('cust-date').valueAsDate = today;
+            document.getElementById('banner-year').textContent = today.getFullYear();
+            updateDashboard();
+            checkTokenAndLoad();
+        });
+
+        // Custom Toast function
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Custom Modal
+        function openModal(id) {
+            deleteTargetId = id;
+            document.getElementById('confirm-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            deleteTargetId = null;
+            document.getElementById('confirm-modal').classList.remove('active');
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if (deleteTargetId) {
+                records = records.filter(r => r.id !== deleteTargetId);
+                closeModal();
+                updateDashboard();
+                renderRecords();
+                await pushDataToGitHub();
+                showToast('✅ Record deleted from GitHub');
+            }
+        });
+
+        // UI Status
+        function updateStatus(message, state) {
+            document.getElementById('status-text').textContent = message;
+            document.getElementById('status-dot').className = 'status-dot ' + state;
+        }
+
+        // GitHub Logic (Online Only)
+        function checkTokenAndLoad() {
+            const token = localStorage.getItem('ke_gh_token');
+            if (!token) {
+                document.getElementById('settings-panel').style.display = 'block';
+                updateStatus('Disconnected', 'error');
+            } else {
+                document.getElementById('settings-panel').style.display = 'none';
+                fetchDataFromGitHub();
+            }
+        }
+
+        function saveToken() {
+            const val = document.getElementById('gh-token').value.trim();
+            if (val) {
+                localStorage.setItem('ke_gh_token', val);
+                checkTokenAndLoad();
+                showToast('🔑 Token saved');
+            }
+        }
+
+        const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
+        const decodeBase64 = str => decodeURIComponent(escape(atob(str)));
+
+        async function fetchDataFromGitHub() {
+            updateStatus('Fetching cloud data...', 'syncing');
+            const token = localStorage.getItem('ke_gh_token');
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+                    headers: { 'Authorization': `token ${token}` },
+                    cache: 'no-store'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    fileSha = data.sha;
+                    records = JSON.parse(decodeBase64(data.content));
+                    updateDashboard();
+                    renderRecords();
+                    updateStatus('Synced (Online)', 'active');
+                } else if (response.status === 404) {
+                    records = [];
+                    updateDashboard();
+                    renderRecords();
+                    updateStatus('Ready (New File)', 'active');
+                } else {
+                    throw new Error('Auth Error');
+                }
+            } catch (e) {
+                updateStatus('Cloud Error', 'error');
+                document.getElementById('settings-panel').style.display = 'block';
+                showToast('❌ Failed to fetch from GitHub repository');
+            }
+        }
+
+        async function pushDataToGitHub() {
+            const token = localStorage.getItem('ke_gh_token');
+            const saveBtn = document.getElementById('save-btn');
+            if (!token) return showToast('⚠️ Error: GitHub Token missing');
+
+            updateStatus('Syncing to GitHub...', 'syncing');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ Saving to GitHub...';
+
+            try {
+                const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+                    headers: { 'Authorization': `token ${token}` },
+                    cache: 'no-store'
+                });
+                if (checkRes.ok) {
+                    const checkData = await checkRes.json();
+                    fileSha = checkData.sha;
+                }
+            } catch (err) {
+                // Ignore if file doesn't exist yet
+            }
+
+            const body = {
+                message: `Update records via cloud app (${new Date().toLocaleString()})`,
+                content: encodeBase64(JSON.stringify(records, null, 2))
+            };
+            if (fileSha) body.sha = fileSha;
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                if (response.ok) {
+                    fileSha = (await response.json()).content.sha;
+                    updateStatus('Synced (Online)', 'active');
+                    showToast('✨ Successfully saved to GitHub');
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                updateStatus('Sync Failed', 'error');
+                showToast('❌ Failed to save directly to GitHub');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Save directly to GitHub';
+            }
+        }
+
+        // App Logic
+        document.getElementById('record-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            records.unshift({
+                id: Date.now().toString(),
+                name: document.getElementById('cust-name').value.trim(),
+                city: document.getElementById('cust-city').value.trim(),
+                items: parseInt(document.getElementById('cust-items').value),
+                price: parseFloat(document.getElementById('cust-price').value),
+                date: document.getElementById('cust-date').value
+            });
+            updateDashboard();
+            renderRecords();
+            document.getElementById('record-form').reset();
+            document.getElementById('cust-date').valueAsDate = new Date();
+            updateDashboard();
+            await pushDataToGitHub();
+        });
+
+        function renderRecords() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            const container = document.getElementById('records-container');
+            container.innerHTML = '';
+            
+            const filtered = records.filter(r => 
+                r.name.toLowerCase().includes(query) || r.city.toLowerCase().includes(query)
+            );
+            
+            document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
+            
+            filtered.forEach(r => {
+                const total = (r.items * r.price).toFixed(2);
+                const [y, m, d] = r.date.split('-');
+                const card = document.createElement('div');
+                card.className = 'record-card';
+                card.innerHTML = `
+                    <div class="record-header">
+                        <div>
+                            <div class="record-name">👤 ${r.name}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">📅 ${d}/${m}/${y}</div>
+                        </div>
+                        <button class="btn-icon" onclick="openModal('${r.id}')" title="Delete">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                    <span class="badge">📍 ${r.city}</span>
+                    <div class="record-details">
+                        <div class="record-calc">📦 ${r.items} × ₹${r.price.toFixed(2)}</div>
+                        <div class="record-total">₹${Number(total).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateDashboard() {
+            const selectedDate = document.getElementById('cust-date').value;
+            let daySale = 0, totalItems = 0, cities = new Set();
+            const yearMap = {};
+            
+            records.forEach(r => {
+                if (r.date === selectedDate) {
+                    daySale += (r.items * r.price);
+                }
+                totalItems += r.items;
+                cities.add(r.city.toLowerCase());
+
+                // Year calculation
+                const year = r.date ? r.date.split('-')[0] : 'Unknown';
+                if (!yearMap[year]) {
+                    yearMap[year] = { sale: 0, count: 0, items: 0 };
+                }
+                yearMap[year].sale += (r.items * r.price);
+                yearMap[year].count += 1;
+                yearMap[year].items += r.items;
+            });
+
+            if (selectedDate) {
+                const [y, m, d] = selectedDate.split('-');
+                document.getElementById('stat-day-label').textContent = `📈 Sale (${d}/${m})`;
+            } else {
+                document.getElementById('stat-day-label').textContent = '📈 Day Sale';
+            }
+
+            document.getElementById('stat-day-sale').textContent = `₹${daySale.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('stat-records').textContent = records.length;
+            document.getElementById('stat-items').textContent = totalItems;
+            document.getElementById('stat-cities').textContent = cities.size;
+
+            // Render Year-Wise Breakdown Grid
+            renderYearSummary(yearMap);
+        }
+
+        function renderYearSummary(yearMap) {
+            const container = document.getElementById('year-summary-container');
+            container.innerHTML = '';
+
+            const sortedYears = Object.keys(yearMap).sort((a, b) => b.localeCompare(a));
+
+            if (sortedYears.length === 0) {
+                container.innerHTML = `<div class="year-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">No year data available</div>`;
                 return;
             }
-            
-            // Add your further submission handling logic here
-        });
+
+            sortedYears.forEach(year => {
+                const data = yearMap[year];
+                const card = document.createElement('div');
+                card.className = 'year-card';
+                card.innerHTML = `
+                    <div class="year-card-title">
+                        <span>📅 ${year}</span>
+                        <span style="font-size: 0.7rem; font-weight: 500; color: var(--text-muted);">${data.count} records</span>
+                    </div>
+                    <div class="year-card-total">₹${data.sale.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div class="year-card-meta">📦 ${data.items} items sold</div>
+                `;
+                container.appendChild(card);
+            });
+        }
     </script>
 </body>
 </html>
