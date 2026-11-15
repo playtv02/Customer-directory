@@ -88,17 +88,18 @@
             transform: translateY(-3px);
         }
 
+        /* UPDATED: Shubh Labh styles are now fully accent-colored */
         .shubh-labh-left, .shubh-labh-right {
             position: absolute;
             top: 12px;
             font-size: 0.72rem;
             font-weight: 700;
-            color: var(--accent);
+            color: #ffffff;
             letter-spacing: 0.08em;
-            background: var(--surface-hover);
+            background: var(--accent);
             padding: 4px 12px;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 1px solid var(--accent-hover);
             box-shadow: var(--shadow-sm);
             animation: shubhPulse 2.5s infinite ease-in-out;
         }
@@ -114,16 +115,15 @@
             transform-origin: right center;
         }
 
+        /* UPDATED: Pulse animation modified to suit the solid accent background */
         @keyframes shubhPulse {
             0%, 100% {
                 transform: scale(1) translateY(0);
                 box-shadow: var(--shadow-sm);
-                border-color: var(--border);
             }
             50% {
                 transform: scale(1.06) translateY(-2px);
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-                border-color: var(--accent);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
             }
         }
 
