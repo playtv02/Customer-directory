@@ -5,31 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Customer directory for Kabir Emporium">
     <title>Kabir Emporium Directory</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📒</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #eef2f7;
+            --bg: #f1f5f9;
             --surface: #ffffff;
             --surface-hover: #f8fafc;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --border: #cbd5e1;
-            --border-light: #e2e8f0;
-            --accent: #0f172a;
-            --accent-hover: #1e293b;
-            --focus-ring: rgba(15, 23, 42, 0.2);
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --focus-ring: rgba(37, 99, 235, 0.2);
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
-            --radius: 16px;
-            --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.06);
-            --shadow: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-            --shadow-lg: 0 20px 35px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
-            --shadow-pressed: 0 2px 5px rgba(15, 23, 42, 0.1) inset;
-            --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            --radius: 18px;
+            --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.05);
+            --shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 20px 40px -6px rgba(15, 23, 42, 0.1), 0 8px 12px -4px rgba(15, 23, 42, 0.05);
+            --shadow-pressed: 0 2px 4px rgba(15, 23, 42, 0.08) inset;
+            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-spring: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         html {
@@ -45,7 +46,7 @@
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
-            padding: 32px 16px;
+            padding: 40px 16px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
@@ -57,73 +58,82 @@
         .container {
             max-width: 640px;
             margin: 0 auto;
+            animation: fadeIn 0.6s var(--transition-smooth);
         }
 
-        /* Redesigned Brand Header Card */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Centered Brand Header Card */
         .brand-header-card {
             background: var(--surface);
             border-radius: var(--radius);
-            padding: 24px 28px;
+            padding: 32px 28px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
             border: 1px solid var(--border);
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
             gap: 16px;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: var(--transition-spring);
         }
 
         .brand-header-card:hover {
             box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
 
         .brand-info {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            gap: 6px;
         }
 
         .brand-title {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
             letter-spacing: -0.03em;
             color: var(--text-main);
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
         }
 
         .brand-subtitle {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--text-muted);
-            letter-spacing: 0.01em;
+            letter-spacing: 0.02em;
         }
 
-        /* Redesigned Sync Pill */
+        /* Sync Pill */
         .sync-pill {
             display: inline-flex;
             align-items: center;
             gap: 10px;
             background: var(--surface-hover);
-            padding: 10px 16px;
+            padding: 8px 18px;
             border-radius: 99px;
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-main);
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            white-space: nowrap;
+            transition: var(--transition-smooth);
         }
 
         .sync-pill:hover {
             box-shadow: var(--shadow);
             background: var(--surface);
             border-color: var(--text-muted);
+            transform: scale(1.02);
         }
 
         .status-dot {
@@ -131,43 +141,30 @@
             height: 8px;
             border-radius: 50%;
             background: var(--text-muted);
-            transition: background var(--transition), box-shadow var(--transition);
+            transition: var(--transition-smooth);
         }
 
         .status-dot.active {
             background: var(--success);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
         }
 
         .status-dot.error {
             background: var(--danger);
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
         }
 
         .status-dot.syncing {
             background: var(--warning);
-            animation: pulse 1s infinite;
+            animation: pulse 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
         }
 
         @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
         }
 
-        @media (max-width: 480px) {
-            .brand-header-card {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 20px;
-            }
-            .sync-pill {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Deep 3D Layout & Cards */
+        /* Layout Cards */
         .card {
             background: var(--surface);
             border-radius: var(--radius);
@@ -175,7 +172,7 @@
             box-shadow: var(--shadow);
             margin-bottom: 24px;
             border: 1px solid var(--border);
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: var(--transition-spring);
         }
 
         .card:hover {
@@ -185,9 +182,9 @@
 
         /* Year Banner */
         .year-banner {
-            background: linear-gradient(135deg, #0f172a, #334155);
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
             color: #ffffff;
-            padding: 14px 20px;
+            padding: 16px 24px;
             border-radius: 14px;
             font-size: 0.85rem;
             font-weight: 600;
@@ -195,9 +192,15 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-            box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3);
             letter-spacing: 0.03em;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition-smooth);
+        }
+
+        .year-banner:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4);
         }
 
         /* Dashboard 3D Grid */
@@ -213,16 +216,17 @@
             flex-direction: column;
             gap: 6px;
             background: var(--surface);
-            padding: 18px 14px;
+            padding: 20px 16px;
             border-radius: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: var(--transition-spring);
         }
 
         .stat-item:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
+            border-color: var(--accent);
         }
 
         .stat-label {
@@ -230,11 +234,11 @@
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
         }
 
         .stat-value {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
@@ -255,19 +259,21 @@
 
         .year-card {
             background: var(--surface);
-            padding: 18px;
+            padding: 20px;
             border-radius: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             gap: 6px;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: var(--transition-spring);
+            animation: fadeIn 0.5s var(--transition-smooth);
         }
 
         .year-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
+            border-color: var(--accent);
         }
 
         .year-card-title {
@@ -280,7 +286,7 @@
         }
 
         .year-card-total {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
@@ -290,7 +296,7 @@
             color: var(--text-muted);
         }
 
-        /* Forms & Inputs (3D Pressed Depth) */
+        /* Forms & Inputs */
         .form-group {
             margin-bottom: 20px;
         }
@@ -301,6 +307,7 @@
             font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 8px;
+            transition: var(--transition-smooth);
         }
 
         .form-control {
@@ -312,18 +319,23 @@
             font-size: 0.95rem;
             color: var(--text-main);
             box-shadow: var(--shadow-pressed);
-            transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+            transition: var(--transition-smooth);
             outline: none;
             appearance: none;
+        }
+
+        .form-control:hover {
+            border-color: var(--text-muted);
         }
 
         .form-control:focus {
             background: var(--surface);
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--focus-ring), var(--shadow-pressed);
+            transform: translateY(-1px);
         }
 
-        /* 3D Tactile Buttons */
+        /* Buttons */
         .btn {
             display: inline-block;
             width: 100%;
@@ -333,7 +345,7 @@
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
+            transition: var(--transition-spring);
             text-align: center;
             box-shadow: var(--shadow);
         }
@@ -345,7 +357,7 @@
 
         .btn-primary:hover {
             background: var(--accent-hover);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
         }
 
@@ -393,6 +405,12 @@
             top: 50%;
             transform: translateY(-50%);
             opacity: 0.5;
+            transition: var(--transition-smooth);
+        }
+
+        .search-wrapper input:focus ~ .search-icon {
+            opacity: 1;
+            color: var(--accent);
         }
 
         .showing-text {
@@ -412,12 +430,14 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             margin-bottom: 14px;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: var(--transition-spring);
+            animation: fadeIn 0.4s var(--transition-smooth);
         }
 
         .record-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
+            border-color: var(--border);
         }
 
         .record-header {
@@ -460,6 +480,7 @@
             font-weight: 700;
             font-size: 1.25rem;
             letter-spacing: -0.02em;
+            color: var(--accent);
         }
 
         .btn-icon {
@@ -468,7 +489,7 @@
             color: var(--text-muted);
             cursor: pointer;
             padding: 8px;
-            transition: var(--transition);
+            transition: var(--transition-spring);
             border-radius: 10px;
             box-shadow: var(--shadow-sm);
         }
@@ -477,7 +498,8 @@
             color: var(--danger);
             border-color: var(--danger);
             background: rgba(239, 68, 68, 0.05);
-            transform: translateY(-1px);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow);
         }
 
         /* Settings Area */
@@ -492,10 +514,10 @@
             margin-bottom: 16px;
         }
 
-        /* Toast Notifications (Floating 3D Card) */
+        /* Toast Notifications */
         #toast-container {
             position: fixed;
-            bottom: 24px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -506,19 +528,19 @@
         }
 
         .toast {
-            background: var(--accent);
+            background: var(--text-main);
             color: #ffffff;
-            padding: 12px 24px;
+            padding: 14px 26px;
             border-radius: 99px;
             font-size: 0.85rem;
             font-weight: 600;
             box-shadow: var(--shadow-lg);
-            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: toastEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(24px) scale(0.95); }
+        @keyframes toastEnter {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
@@ -526,13 +548,13 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(6px);
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(8px);
             display: none;
             place-items: center;
             z-index: 1000;
             opacity: 0;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.3s var(--transition-smooth);
         }
 
         .modal-overlay.active {
@@ -542,15 +564,15 @@
 
         .modal-content {
             background: var(--surface);
-            padding: 28px;
-            border-radius: 20px;
+            padding: 32px 28px;
+            border-radius: 22px;
             width: 90%;
             max-width: 340px;
             text-align: center;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border);
-            transform: scale(0.95) translateY(10px);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.9) translateY(15px);
+            transition: var(--transition-spring);
         }
 
         .modal-overlay.active .modal-content {
@@ -559,7 +581,7 @@
 
         .modal-title {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             margin-bottom: 8px;
         }
 
@@ -583,11 +605,11 @@
             cursor: pointer;
             font-size: 0.9rem;
             box-shadow: var(--shadow-sm);
-            transition: var(--transition);
+            transition: var(--transition-spring);
         }
 
         .modal-btn:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
             box-shadow: var(--shadow);
         }
 
@@ -605,10 +627,10 @@
 </head>
 <body>
     <div class="container">
-        <!-- Redesigned Brand Header Card & Sync Pill -->
+        <!-- Centered Brand Header Card & Sync Pill -->
         <div class="brand-header-card">
             <div class="brand-info">
-                <h1 class="brand-title">📒 Kabir Emporium</h1>
+                <h1 class="brand-title">📘 Kabir Emporium</h1>
                 <span class="brand-subtitle">Customer & Sales Directory System</span>
             </div>
             <div class="sync-pill">
@@ -742,7 +764,7 @@
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateY(24px) scale(0.95)';
+                toast.style.transform = 'translateY(24px) scale(0.9)';
                 toast.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
@@ -912,6 +934,11 @@
             );
             
             document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="card" style="text-align: center; color: var(--text-muted); padding: 32px;">No matching records found</div>`;
+                return;
+            }
             
             filtered.forEach(r => {
                 const total = (r.items * r.price).toFixed(2);
