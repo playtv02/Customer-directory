@@ -66,11 +66,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Centered Brand Header Card */
+        /* Centered Brand Header Card with Corner Shubh Labh */
         .brand-header-card {
             background: var(--surface);
             border-radius: var(--radius);
-            padding: 32px 28px;
+            padding: 36px 28px 28px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
             border: 1px solid var(--border);
@@ -79,6 +79,7 @@
             align-items: center;
             text-align: center;
             gap: 16px;
+            position: relative;
             transition: var(--transition-spring);
         }
 
@@ -87,11 +88,34 @@
             transform: translateY(-3px);
         }
 
+        .shubh-labh-left, .shubh-labh-right {
+            position: absolute;
+            top: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.08em;
+            background: var(--surface-hover);
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .shubh-labh-left {
+            left: 16px;
+        }
+
+        .shubh-labh-right {
+            right: 16px;
+        }
+
         .brand-info {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
+            margin-top: 4px;
         }
 
         .brand-title {
@@ -627,8 +651,10 @@
 </head>
 <body>
     <div class="container">
-        <!-- Centered Brand Header Card & Sync Pill -->
+        <!-- Centered Brand Header Card with Shubh Labh Corners -->
         <div class="brand-header-card">
+            <span class="shubh-labh-left">ॐ शुभ</span>
+            <span class="shubh-labh-right">लाभ 卐</span>
             <div class="brand-info">
                 <h1 class="brand-title">📘 Kabir Emporium</h1>
                 <span class="brand-subtitle">Customer & Sales Directory System</span>
