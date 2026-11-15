@@ -48,6 +48,22 @@
             margin-bottom: 24px;
         }
 
+        /* Year Banner */
+        .year-banner {
+            background: linear-gradient(135deg, #111113, #27272a);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            letter-spacing: 0.03em;
+        }
+
         /* Header */
         .header {
             display: flex;
@@ -191,7 +207,22 @@
             transform: none;
         }
 
-        /* Records */
+        /* Records Header Section */
+        .records-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .records-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Search & List */
         .search-wrapper {
             position: relative;
             margin-bottom: 24px;
@@ -411,7 +442,7 @@
             <h3 style="margin-bottom: 8px; font-size: 1rem;">☁️ Cloud Connection</h3>
             <p>Enter your GitHub Token to enable automatic cloud syncing.</p>
             <div class="form-group" style="margin-bottom: 12px;">
-                <input type="password" id="gh-token" class="form-control" placeholder="🔑 ghp_xxxxxxxxxxxx">
+                <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
             </div>
             <button class="btn btn-primary" onclick="saveToken()">🔗 Connect to Cloud</button>
         </div>
@@ -436,17 +467,23 @@
             </div>
         </div>
 
+        <!-- Current Year Banner Above Form Box -->
+        <div class="year-banner">
+            <span>📅 Active Fiscal Year / Period</span>
+            <span style="font-size: 1rem; font-weight: 700;" id="banner-year">2026</span>
+        </div>
+
         <!-- Add Record Form -->
         <div class="card">
             <form id="record-form">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div class="form-group" style="grid-column: span 2;">
                         <label>👤 Customer Name</label>
-                        <input type="text" id="cust-name" class="form-control" required placeholder="John Doe">
+                        <input type="text" id="cust-name" class="form-control" required placeholder="e.g. Aman Bhatia">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label>🏙️ City</label>
-                        <input type="text" id="cust-city" class="form-control" required placeholder="New York">
+                        <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
                     </div>
                     <div class="form-group">
                         <label>🔢 Item Count</label>
@@ -454,7 +491,7 @@
                     </div>
                     <div class="form-group">
                         <label>💵 Price (₹)</label>
-                        <input type="number" id="cust-price" class="form-control" step="0.01" required placeholder="0.00">
+                        <input type="number" id="cust-price" class="form-control" step="0.01" required placeholder="e.g. 500.00">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label>📅 Date</label>
@@ -465,10 +502,18 @@
             </form>
         </div>
 
+        <!-- Records Section Header with Year Banner Behind Items -->
+        <div class="records-section-header">
+            <div class="records-title">📋 Sale Records & Items</div>
+            <div class="sync-badge" style="background: #111113; color: white;">
+                <span>✨ Year: 2026</span>
+            </div>
+        </div>
+
         <!-- Search & List -->
         <div class="search-wrapper">
             <span class="search-icon">🔍</span>
-            <input type="text" id="search-bar" class="form-control" placeholder="Search customer or city..." oninput="renderRecords()">
+            <input type="text" id="search-bar" class="form-control" placeholder="e.g. Aman or Tarapur..." oninput="renderRecords()">
         </div>
         <div class="showing-text" id="showing-count">📊 0 records</div>
         <div id="records-container"></div>
