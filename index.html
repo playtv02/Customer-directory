@@ -901,7 +901,7 @@
                         <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 12px;">💾 Save directly to GitHub</button>
+                <button type="button" class="btn btn-primary" id="save-btn" onclick="saveCustomerRecord()" style="margin-top: 12px;">💾 Save directly to GitHub</button>
             </form>
         </div>
 
@@ -1212,11 +1212,11 @@
             }
         }
 
-        // App Logic
-        document.getElementById('record-form').addEventListener('submit', async e => {
-            e.preventDefault();
-            const form = e.currentTarget;
-            // Use explicit validation so missing fields never fail silently on mobile browsers.
+        // Save handler is called directly by the button (mobile-safe) and by form submit.
+        async function saveCustomerRecord(event) {
+            if (event) event.preventDefault();
+            const form = document.getElementById('record-form');
+
             if (!form.checkValidity()) {
                 const firstInvalid = form.querySelector(':invalid');
                 showToast('⚠️ Please complete all required fields before saving.');
@@ -1227,6 +1227,7 @@
                 return;
             }
 
+            const saveBtn = document.getElementById('save-btn');
             const newRecord = {
                 id: Date.now().toString(),
                 name: document.getElementById('cust-name').value.trim(),
@@ -1237,7 +1238,11 @@
                 date: document.getElementById('cust-date').value
             };
 
-            // Only add/reset the form after GitHub confirms the save.
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = '⏳ Saving...';
+            }
+            showToast('Connecting to GitHub...');
             const updatedRecords = [newRecord, ...records];
             const saved = await pushDataToGitHub(updatedRecords);
             if (!saved) return;
@@ -1249,7 +1254,9 @@
             form.reset();
             document.getElementById('cust-date').valueAsDate = new Date();
             updateDashboard();
-        });
+        }
+
+        document.getElementById('record-form').addEventListener('submit', saveCustomerRecord);
 
         // Predictive Search Input Handler & Autocomplete
         function handleSearchInput() {
