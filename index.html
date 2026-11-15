@@ -872,6 +872,22 @@
                         <label>🏙️ City/Village</label>
                         <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
                     </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>📦 Item Name</label>
+                        <select id="cust-item-name" class="form-control" required>
+                            <option value="" disabled selected>Select item name</option>
+                            <option value="Krushi patto (16X32)">Krushi patto (16X32)</option>
+                            <option value="Krushi patto (20X40)">Krushi patto (20X40)</option>
+                            <option value="Khatar-24">Khatar-24</option>
+                            <option value="Khatar-35">Khatar-35</option>
+                            <option value="Khatar-40">Khatar-40</option>
+                            <option value="Khatar-48">Khatar-48</option>
+                            <option value="UV (16X32)">UV (16X32)</option>
+                            <option value="UV (20X40)">UV (20X40)</option>
+                            <option value="RELIANCE (18X36)">RELIANCE (18X36)</option>
+                            <option value="RELIANCE (20X40)">RELIANCE (20X40)</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>🔢 Item Count</label>
                         <input type="number" id="cust-items" class="form-control" value="1" min="1" required>
@@ -1186,6 +1202,7 @@
                 id: Date.now().toString(),
                 name: document.getElementById('cust-name').value.trim(),
                 city: document.getElementById('cust-city').value.trim(),
+                itemName: document.getElementById('cust-item-name').value,
                 items: parseInt(document.getElementById('cust-items').value),
                 price: parseFloat(document.getElementById('cust-price').value),
                 date: document.getElementById('cust-date').value
@@ -1287,7 +1304,7 @@
             container.innerHTML = '';
             
             const filtered = records.filter(r => 
-                r.name.toLowerCase().includes(query) || r.city.toLowerCase().includes(query)
+                r.name.toLowerCase().includes(query) || r.city.toLowerCase().includes(query) || (r.itemName || '').toLowerCase().includes(query)
             );
             
             document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
@@ -1313,6 +1330,7 @@
                         </button>
                     </div>
                     <span class="badge" style="cursor: pointer;" onclick="filterByCity('${r.city}')">📍 ${r.city}</span>
+                    ${r.itemName ? `<div class="badge" style="margin-top: 10px; display: inline-block;">📦 ${r.itemName}</div>` : ''}
                     <div class="record-details">
                         <div class="record-calc">📦 ${r.items} × ₹${r.price.toFixed(2)}</div>
                         <div class="record-total">₹${Number(total).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
