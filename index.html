@@ -32,25 +32,6 @@
             --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #090d16;
-                --surface: #111827;
-                --surface-hover: #1f2937;
-                --text-main: #f8fafc;
-                --text-muted: #94a3b8;
-                --border: #334155;
-                --border-light: #1e293b;
-                --accent: #f8fafc;
-                --accent-hover: #ffffff;
-                --focus-ring: rgba(248, 250, 252, 0.25);
-                --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-                --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-                --shadow-lg: 0 20px 35px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
-                --shadow-pressed: 0 2px 6px rgba(0, 0, 0, 0.4) inset;
-            }
-        }
-
         html {
             scroll-behavior: smooth;
         }
@@ -67,7 +48,6 @@
             padding: 32px 16px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
-            transition: background-color var(--transition), color var(--transition);
         }
 
         input, button, textarea, select {
@@ -87,7 +67,7 @@
             box-shadow: var(--shadow);
             margin-bottom: 24px;
             border: 1px solid var(--border);
-            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition), border-color var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition);
         }
 
         .card:hover {
@@ -317,7 +297,7 @@
 
         .btn-primary {
             background: var(--accent);
-            color: var(--bg);
+            color: #ffffff;
         }
 
         .btn-primary:hover {
@@ -389,7 +369,7 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             margin-bottom: 14px;
-            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition);
         }
 
         .record-card:hover {
@@ -484,7 +464,7 @@
 
         .toast {
             background: var(--accent);
-            color: var(--bg);
+            color: #ffffff;
             padding: 12px 24px;
             border-radius: 99px;
             font-size: 0.85rem;
@@ -503,7 +483,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(6px);
             display: none;
             place-items: center;
