@@ -11,34 +11,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f7f7f9;
+            --bg: #eef2f7;
             --surface: #ffffff;
-            --surface-hover: #f4f4f5;
-            --text-main: #111113;
-            --text-muted: #71717a;
-            --border: #e4e4e7;
-            --accent: #000000;
-            --focus-ring: rgba(0, 0, 0, 0.15);
+            --surface-hover: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #cbd5e1;
+            --border-light: #e2e8f0;
+            --accent: #0f172a;
+            --accent-hover: #1e293b;
+            --focus-ring: rgba(15, 23, 42, 0.2);
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
             --radius: 16px;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.06);
+            --shadow: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 20px 35px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+            --shadow-pressed: 0 2px 5px rgba(15, 23, 42, 0.1) inset;
+            --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #09090b;
-                --surface: #18181b;
-                --surface-hover: #27272a;
-                --text-main: #fafafa;
-                --text-muted: #a1a1aa;
-                --border: #27272a;
-                --accent: #ffffff;
-                --focus-ring: rgba(255, 255, 255, 0.2);
-                --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+                --bg: #090d16;
+                --surface: #111827;
+                --surface-hover: #1f2937;
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --border: #334155;
+                --border-light: #1e293b;
+                --accent: #f8fafc;
+                --accent-hover: #ffffff;
+                --focus-ring: rgba(248, 250, 252, 0.25);
+                --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+                --shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+                --shadow-lg: 0 20px 35px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+                --shadow-pressed: 0 2px 6px rgba(0, 0, 0, 0.4) inset;
             }
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         *, *::before, *::after {
@@ -50,9 +64,10 @@
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
-            padding: 24px 16px;
+            padding: 32px 16px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            transition: background-color var(--transition), color var(--transition);
         }
 
         input, button, textarea, select {
@@ -64,30 +79,37 @@
             margin: 0 auto;
         }
 
-        /* Layout & Cards */
+        /* Deep 3D Layout & Cards */
         .card {
             background: var(--surface);
             border-radius: var(--radius);
-            padding: 24px;
+            padding: 28px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
             border: 1px solid var(--border);
+            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition), border-color var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
         }
 
         /* Year Banner */
         .year-banner {
-            background: linear-gradient(135deg, #111113, #27272a);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #0f172a, #334155);
+            color: #ffffff;
+            padding: 14px 20px;
+            border-radius: 14px;
             font-size: 0.85rem;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.25);
             letter-spacing: 0.03em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Header */
@@ -96,44 +118,52 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 32px;
-            padding: 0 8px;
+            padding: 0 4px;
         }
 
         .header h1 {
-            font-size: 1.75rem;
+            font-size: 1.85rem;
             font-weight: 700;
             letter-spacing: -0.03em;
             white-space: nowrap;
+            margin: 0;
         }
 
         .sync-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: var(--surface-hover);
-            padding: 6px 12px;
+            background: var(--surface);
+            padding: 8px 14px;
             border-radius: 99px;
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-main);
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .sync-badge:hover {
+            box-shadow: var(--shadow);
         }
 
         .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            background: #a1a1aa;
+            background: var(--text-muted);
+            transition: background var(--transition), box-shadow var(--transition);
         }
 
         .status-dot.active {
             background: var(--success);
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         .status-dot.error {
             background: var(--danger);
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
 
         .status-dot.syncing {
@@ -142,12 +172,12 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        /* Dashboard */
+        /* Dashboard 3D Grid */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -158,17 +188,23 @@
         .stat-item {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             background: var(--surface);
-            padding: 16px;
-            border-radius: 12px;
+            padding: 18px 14px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
         }
 
         .stat-label {
             font-size: 0.65rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -176,7 +212,7 @@
 
         .stat-value {
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.02em;
         }
 
@@ -190,19 +226,25 @@
         .year-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 14px;
+            margin-bottom: 28px;
         }
 
         .year-card {
             background: var(--surface);
-            padding: 16px;
-            border-radius: 12px;
+            padding: 18px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             gap: 6px;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .year-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
         }
 
         .year-card-title {
@@ -215,7 +257,7 @@
         }
 
         .year-card-total {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
@@ -225,7 +267,7 @@
             color: var(--text-muted);
         }
 
-        /* Forms */
+        /* Forms & Inputs (3D Pressed Depth) */
         .form-group {
             margin-bottom: 20px;
         }
@@ -233,7 +275,7 @@
         .form-group label {
             display: block;
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 8px;
         }
@@ -246,7 +288,8 @@
             border-radius: 12px;
             font-size: 0.95rem;
             color: var(--text-main);
-            transition: border-color var(--transition), box-shadow var(--transition);
+            box-shadow: var(--shadow-pressed);
+            transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
             outline: none;
             appearance: none;
         }
@@ -254,20 +297,22 @@
         .form-control:focus {
             background: var(--surface);
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--focus-ring);
+            box-shadow: 0 0 0 4px var(--focus-ring), var(--shadow-pressed);
         }
 
+        /* 3D Tactile Buttons */
         .btn {
             display: inline-block;
             width: 100%;
             padding: 16px;
             border-radius: 12px;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
             text-align: center;
+            box-shadow: var(--shadow);
         }
 
         .btn-primary {
@@ -276,14 +321,21 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-primary:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         /* Records Header Section */
@@ -296,7 +348,7 @@
         }
 
         .records-title {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
@@ -308,21 +360,22 @@
         }
 
         .search-wrapper input {
-            padding-left: 44px;
+            padding-left: 46px;
             border-radius: 99px;
         }
 
         .search-icon {
             position: absolute;
-            left: 16px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            opacity: 0.4;
+            opacity: 0.5;
         }
 
         .showing-text {
             text-align: right;
             font-size: 0.75rem;
+            font-weight: 500;
             color: var(--text-muted);
             margin-top: -12px;
             margin-bottom: 16px;
@@ -331,17 +384,17 @@
 
         .record-card {
             background: var(--surface);
-            padding: 20px;
+            padding: 22px;
             border-radius: 16px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            margin-bottom: 12px;
-            transition: transform var(--transition), box-shadow var(--transition);
+            margin-bottom: 14px;
+            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
         }
 
         .record-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
         }
 
         .record-header {
@@ -360,11 +413,12 @@
         .badge {
             background: var(--surface-hover);
             color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
             font-size: 0.7rem;
-            font-weight: 500;
+            font-weight: 600;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
         }
 
         .record-details {
@@ -381,22 +435,26 @@
 
         .record-total {
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
         }
 
         .btn-icon {
-            background: transparent;
-            border: none;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             color: var(--text-muted);
             cursor: pointer;
-            padding: 4px;
+            padding: 8px;
             transition: var(--transition);
-            border-radius: 6px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-icon:hover {
             color: var(--danger);
-            background: #fef2f2;
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+            transform: translateY(-1px);
         }
 
         /* Settings Area */
@@ -411,7 +469,7 @@
             margin-bottom: 16px;
         }
 
-        /* Toast Notifications */
+        /* Toast Notifications (Floating 3D Card) */
         #toast-container {
             position: fixed;
             bottom: 24px;
@@ -421,35 +479,37 @@
             flex-direction: column;
             gap: 10px;
             z-index: 9999;
+            pointer-events: none;
         }
 
         .toast {
-            background: var(--text-main);
+            background: var(--accent);
             color: var(--bg);
             padding: 12px 24px;
             border-radius: 99px;
             font-size: 0.85rem;
-            font-weight: 500;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(24px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         /* Custom Confirm Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
             display: none;
             place-items: center;
             z-index: 1000;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.25s ease;
         }
 
         .modal-overlay.active {
@@ -459,23 +519,24 @@
 
         .modal-content {
             background: var(--surface);
-            padding: 24px;
+            padding: 28px;
             border-radius: 20px;
             width: 90%;
-            max-width: 320px;
+            max-width: 340px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-lg);
             border: 1px solid var(--border);
-            transform: scale(0.95);
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .modal-overlay.active .modal-content {
-            transform: scale(1);
+            transform: scale(1) translateY(0);
         }
 
         .modal-title {
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1rem;
             margin-bottom: 8px;
         }
 
@@ -493,22 +554,29 @@
         .modal-btn {
             flex: 1;
             padding: 12px;
-            border-radius: 10px;
-            border: none;
+            border-radius: 12px;
+            border: 1px solid var(--border);
             font-weight: 600;
             cursor: pointer;
             font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
         }
 
         .modal-btn-cancel {
             background: var(--surface-hover);
             color: var(--text-main);
-            border: 1px solid var(--border);
         }
 
         .modal-btn-danger {
             background: var(--danger);
             color: white;
+            border-color: var(--danger);
         }
     </style>
 </head>
@@ -650,8 +718,8 @@
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                toast.style.transition = 'all 0.3s ease';
+                toast.style.transform = 'translateY(24px) scale(0.95)';
+                toast.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
@@ -833,7 +901,7 @@
                             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">📅 ${d}/${m}/${y}</div>
                         </div>
                         <button class="btn-icon" onclick="openModal('${r.id}')" title="Delete">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </div>
                     <span class="badge">📍 ${r.city}</span>
@@ -858,7 +926,6 @@
                 totalItems += r.items;
                 cities.add(r.city.toLowerCase());
 
-                // Year calculation
                 const year = r.date ? r.date.split('-')[0] : 'Unknown';
                 if (!yearMap[year]) {
                     yearMap[year] = { sale: 0, count: 0, items: 0 };
@@ -880,7 +947,6 @@
             document.getElementById('stat-items').textContent = totalItems;
             document.getElementById('stat-cities').textContent = cities.size;
 
-            // Render Year-Wise Breakdown Grid
             renderYearSummary(yearMap);
         }
 
