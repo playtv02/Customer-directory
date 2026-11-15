@@ -1677,7 +1677,7 @@
 
                 </div>
 
-                <button type="button" onclick="window.saveCustomerRecord(event)" class="btn btn-primary" id="save-btn" style="margin-top: 12px;">💾 Save directly to GitHub</button>
+                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 12px;">💾 Save directly to GitHub</button>
 
             </form>
 
@@ -2092,7 +2092,10 @@
             updateDashboard();
         };
 
-        document.getElementById('record-form').addEventListener('submit', window.saveCustomerRecord);
+        document.getElementById('record-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            window.saveCustomerRecord(event);
+        });
 
         // Predictive Search Input Handler & Autocomplete
 
