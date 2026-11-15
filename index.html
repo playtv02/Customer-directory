@@ -862,7 +862,7 @@
 
         <!-- Add Record Form -->
         <div class="card-3d card">
-            <form id="record-form">
+            <form id="record-form" novalidate>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group" style="grid-column: span 2;">
                         <label>👤 Customer Name</label>
@@ -1216,7 +1216,16 @@
         document.getElementById('record-form').addEventListener('submit', async e => {
             e.preventDefault();
             const form = e.currentTarget;
-            if (!form.reportValidity()) return;
+            // Use explicit validation so missing fields never fail silently on mobile browsers.
+            if (!form.checkValidity()) {
+                const firstInvalid = form.querySelector(':invalid');
+                showToast('⚠️ Please complete all required fields before saving.');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
 
             const newRecord = {
                 id: Date.now().toString(),
