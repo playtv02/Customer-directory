@@ -272,7 +272,6 @@
         .btn-primary:active { transform: translateY(8px); box-shadow: 0 0px 0 var(--accent-depth), 0 2px 5px rgba(37, 99, 235, 0.4), inset 0 4px 6px rgba(0, 0, 0, 0.2); border-top: 1px solid transparent; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: translateY(8px); box-shadow: 0 0px 0 var(--accent-depth); }
         /* Action Toolbar & Sort Bar */
-        .action-toolbar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
         .btn-secondary-3d {
             flex: 1;
             min-width: 130px;
@@ -578,12 +577,6 @@
         </div>
         <div id="year-summary-container" class="year-grid"></div>
 
-        <!-- Quick Action Toolbar -->
-        <div class="action-toolbar">
-            <button type="button" class="btn-secondary-3d" onclick="exportToCSV()">📥 Export CSV / Excel</button>
-            <button type="button" class="btn-secondary-3d" onclick="showTopInsights()">🏆 Top Cities & Buyers</button>
-        </div>
-
         <!-- Records Section Header -->
         <div class="records-section-header">
             <div class="records-title">📋 Sale Records & Items</div>
@@ -599,14 +592,8 @@
         <!-- Hovering Cities Bar -->
         <div id="hovering-cities" class="hovering-cities-container"></div>
 
-        <!-- Sort, Payment Filter & Backup Controls -->
+        <!-- Payment Filter Controls -->
         <div class="filter-controls">
-            <select id="sort-records" class="filter-select" onchange="renderRecords()">
-                <option value="newest">🕒 Sort: Newest First</option>
-                <option value="oldest">📅 Sort: Oldest First</option>
-                <option value="highest">💰 Sort: Highest Amount</option>
-                <option value="lowest">📉 Sort: Lowest Amount</option>
-            </select>
             <select id="filter-payment" class="filter-select" onchange="renderRecords()">
                 <option value="all">💳 All Transactions</option>
                 <option value="Cash">💵 Cash Only</option>
@@ -615,9 +602,7 @@
                 <option value="PendingCredit">📌 Pending Credit Balances</option>
             </select>
         </div>
-        <div style="margin-bottom: 16px;">
-            <button type="button" class="btn-secondary-3d" style="width: 100%;" onclick="downloadJsonBackup()">🛡️ JSON Backup</button>
-        </div>
+
         <div class="showing-text" id="showing-count">📊 0 records</div>
         <div id="records-container"></div>
     </div>
@@ -1120,12 +1105,9 @@
                 return true;
             });
 
-            const sortMode = document.getElementById('sort-records')?.value || 'newest';
+            // Default sort mode implementation without the select element
             filtered.sort((a, b) => {
-                if (sortMode === 'oldest') return (a.date || '').localeCompare(b.date || '');
-                if (sortMode === 'highest') return (b.items * b.price) - (a.items * a.price);
-                if (sortMode === 'lowest') return (a.items * a.price) - (b.items * b.price);
-                return (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id);
+                return (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id); // Sort Newest First
             });
 
             document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
@@ -1235,66 +1217,6 @@
                 `;
                 container.appendChild(card);
             });
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            if (records.length === 0) {
-                showToast('⚠️ No records to export');
-                return;
-            }
-            const headers = ['Date', 'Customer Name', 'City/Village', 'Items', 'Payment Mode', 'Deposit (INR)', 'Unit Price (INR)', 'Total (INR)'];
-            const rows = records.map(r => [
-                r.date,
-                `"${(r.name || '').replace(/"/g, '""')}"`,
-                `"${(r.city || '').replace(/"/g, '""')}"`,
-                r.items,
-                r.payment || 'Cash',
-                (r.deposit || 0).toFixed(2),
-                Number(r.price).toFixed(2),
-                (r.items * r.price).toFixed(2)
-            ]);
-            const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Kabir_Emporium_Sales_${getLocalTodayDate()}.csv`;
-            link.click();
-            URL.revokeObjectURL(url);
-            showToast('📥 CSV exported successfully');
-        }
-
-        function showTopInsights() {
-            if (records.length === 0) {
-                showToast('⚠️ Add records first to see insights');
-                return;
-            }
-            const cityTotals = {};
-            const buyerTotals = {};
-            records.forEach(r => {
-                const amt = r.items * r.price;
-                if (r.city) cityTotals[r.city] = (cityTotals[r.city] || 0) + amt;
-                if (r.name) buyerTotals[r.name] = (buyerTotals[r.name] || 0) + amt;
-            });
-            const topCity = Object.entries(cityTotals).sort((a, b) => b[1] - a[1])[0];
-            const topBuyer = Object.entries(buyerTotals).sort((a, b) => b[1] - a[1])[0];
-            showToast(`🏆 Top City: ${topCity[0]} (₹${topCity[1].toLocaleString()}) | Top Buyer: ${topBuyer[0]}`);
-        }
-
-        function downloadJsonBackup() {
-            if (records.length === 0) {
-                showToast('⚠️ No data to backup');
-                return;
-            }
-            const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `kabir_emporium_backup_${getLocalTodayDate()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('🛡️ JSON backup downloaded');
         }
     </script>
 </body>
