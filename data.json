@@ -15,21 +15,6 @@
     "date": "2026-11-01"
   },
   {
-    "id": "1794840120203",
-    "name": "Mahesh Rathod Shop",
-    "city": "Utwada",
-    "itemList": [
-      {
-        "desc": "Khatar - 35",
-        "qty": 2,
-        "price": 700
-      }
-    ],
-    "payment": "Cash",
-    "deposit": 0,
-    "date": "2026-11-01"
-  },
-  {
     "id": "1794832681331",
     "name": "Chandrakant Bhai Solanki",
     "city": "Utwada",
