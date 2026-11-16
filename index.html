@@ -3,1199 +3,279 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Customer directory for Kabir Emporium">
+  <meta name="description" content="Customer directory and sales record management for Kabir Emporium">
   <title>Kabir Emporium Directory</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --bg-grad: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #cbd5e1 100%);
-      --surface-3d: linear-gradient(145deg, #ffffff, #f8fafc);
-      --surface-hover-3d: linear-gradient(145deg, #ffffff, #f1f5f9);
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-main: #f8fafc;
+      --surface: #ffffff;
       --text-main: #0f172a;
-      --text-muted: #475569;
-      --border-highlight: rgba(255, 255, 255, 0.9);
-      --border-shadow: rgba(203, 213, 225, 0.5);
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --accent-depth: #1e3a8a;
-      --danger: #ef4444;
-      --danger-depth: #991b1b;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --radius: 20px;
-      --focus-ring: rgba(37, 99, 235, 0.25);
-
-      /* 3D Shadows */
-      --shadow-3d: 8px 12px 20px rgba(15, 23, 42, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8), inset 2px 2px 4px rgba(255, 255, 255, 1), inset -2px -2px 6px rgba(15, 23, 42, 0.03);
-      --shadow-3d-hover: 12px 18px 28px rgba(15, 23, 42, 0.12), -6px -6px 16px rgba(255, 255, 255, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 1), inset -2px -2px 6px rgba(15, 23, 42, 0.04);
-      --shadow-pressed: inset 4px 4px 8px rgba(15, 23, 42, 0.08), inset -4px -4px 8px rgba(255, 255, 255, 0.9), 0 2px 2px rgba(255, 255, 255, 0.6);
-      --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --badge-cash-bg: #dcfce7;
+      --badge-cash-txt: #15803d;
+      --badge-upi-bg: #e0e7ff;
+      --badge-upi-txt: #4338ca;
+      --badge-credit-bg: #ffedd5;
+      --badge-credit-txt: #c2410c;
     }
 
-    html { scroll-behavior: smooth; }
-    *, *::before, *::after { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); padding: 2rem 1rem; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; background: var(--surface); padding: 1.5rem 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 1rem; }
+    .brand-icon { width: 48px; height: 48px; background: #e0e7ff; color: var(--primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .brand h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+    .brand p { font-size: 0.875rem; color: var(--text-muted); }
 
-    body {
-      margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-grad);
-      background-attachment: fixed;
-      color: var(--text-main);
-      padding: 40px 16px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .stat-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .stat-card .value { font-size: 1.35rem; font-weight: 700; color: var(--text-main); }
 
-    input, button, textarea, select { font-family: inherit; }
+    .main-grid { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; }
+    @media (max-width: 850px) { .main-grid { grid-template-columns: 1fr; } }
 
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
-      perspective: 1500px;
-      animation: fadeIn 0.6s var(--transition-smooth);
-    }
+    .card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 1.5rem; height: fit-content; }
+    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main); }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .form-input { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; transition: border-color 0.2s; outline: none; background: #fff; }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; width: 100%; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
 
-    /* 3D Core Card Style */
-    .card-3d {
-      background: var(--surface-3d);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-3d);
-      border-top: 1px solid var(--border-highlight);
-      border-left: 1px solid var(--border-highlight);
-      border-right: 1px solid var(--border-shadow);
-      border-bottom: 1px solid var(--border-shadow);
-      transition: var(--transition-spring);
-      position: relative;
-    }
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .filter-input { flex: 1; min-width: 200px; }
+    .filter-select { width: 160px; }
 
-    .card-3d:hover {
-      box-shadow: var(--shadow-3d-hover);
-      transform: translateY(-4px);
-    }
+    .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-cash { background: var(--badge-cash-bg); color: var(--badge-cash-txt); }
+    .badge-upi { background: var(--badge-upi-bg); color: var(--badge-upi-txt); }
+    .badge-credit { background: var(--badge-credit-bg); color: var(--badge-credit-txt); }
 
-    /* Prevent form card from shifting/tilting on mobile tap so submit button never misses taps */
-    .form-card-static:hover {
-      transform: none;
-      box-shadow: var(--shadow-3d-hover);
-    }
+    .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th { background: #f8fafc; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+    td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-main); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
 
-    /* Brand Header Card */
-    .brand-header-card {
-      padding: 36px 28px 28px;
-      margin-bottom: 32px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 14px;
-    }
+    .action-btns { display: flex; gap: 0.4rem; }
+    .icon-btn { border: none; background: transparent; color: var(--text-muted); cursor: pointer; padding: 0.3rem 0.5rem; border-radius: var(--radius-sm); transition: background 0.2s; }
+    .icon-btn:hover { background: #e2e8f0; color: var(--text-main); }
+    .icon-btn.delete:hover { background: #fee2e2; color: #dc2626; }
+    .icon-btn.whatsapp:hover { background: #dcfce7; color: #16a34a; }
 
-    /* 3D Shubh Labh */
-    .shubh-labh-left, .shubh-labh-right {
-      position: absolute;
-      top: -12px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: var(--text-main);
-      letter-spacing: 0.08em;
-      background: #ffffff;
-      padding: 6px 14px;
-      border-radius: 12px;
-      box-shadow: 0 6px 0 #cbd5e1, 0 10px 15px rgba(15, 23, 42, 0.15), inset 0 2px 2px rgba(255, 255, 255, 1);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      animation: float3D 3s infinite ease-in-out alternate;
-    }
-
-    .om-symbol { color: var(--danger); font-size: 0.9rem; text-shadow: 0 1px 1px rgba(239, 68, 68, 0.4); }
-    .swastik-symbol { color: var(--warning); font-size: 0.9rem; text-shadow: 0 1px 1px rgba(245, 158, 11, 0.4); }
-    .shubh-labh-left { left: 20px; animation-delay: 0s; }
-    .shubh-labh-right { right: 20px; animation-delay: 1.5s; }
-
-    @keyframes float3D {
-      0% { transform: translateY(0) rotateZ(-2deg); }
-      100% { transform: translateY(-8px) rotateZ(2deg); }
-    }
-
-    .brand-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .brand-title {
-      font-size: 1.9rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      color: var(--text-main);
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      text-shadow: 2px 2px 4px rgba(15, 23, 42, 0.1);
-    }
-
-    .brand-subtitle {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    /* 3D Sync Pill */
-    .sync-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface-3d);
-      padding: 8px 18px;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-main);
-      box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
-      transition: var(--transition-smooth);
-      cursor: pointer;
-    }
-
-    .sync-pill:hover {
-      transform: scale(1.05);
-      box-shadow: 5px 6px 12px rgba(15, 23, 42, 0.1), -3px -3px 8px rgba(255, 255, 255, 0.9);
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--text-muted);
-      box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2);
-      transition: var(--transition-smooth);
-    }
-
-    .status-dot.active { background: var(--success); box-shadow: 0 0 12px var(--success), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
-    .status-dot.error { background: var(--danger); box-shadow: 0 0 12px var(--danger), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
-    .status-dot.syncing { background: var(--warning); box-shadow: 0 0 12px var(--warning), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
-
-    /* 3D Bank Holiday Pill (Matches Sync Pill UI) */
-    .bank-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface-3d);
-      padding: 7px 16px;
-      border-radius: 99px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
-      border: 1px solid var(--border-highlight);
-      transition: var(--transition-smooth);
-    }
-    .bank-status-pill.holiday { color: var(--danger); }
-    .bank-status-pill.open { color: var(--text-main); }
-
-    /* Layout Cards Margin */
-    .card { padding: 32px; margin-bottom: 32px; }
-
-    /* Chunky 3D Year Banner */
-    .year-banner {
-      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-      color: #ffffff;
-      padding: 18px 24px;
-      border-radius: 16px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-      border-top: 2px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 8px 0 var(--accent-depth), 0 15px 25px rgba(37, 99, 235, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-      transition: var(--transition-spring);
-    }
-
-    .year-banner:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 0 var(--accent-depth), 0 20px 30px rgba(37, 99, 235, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-    }
-
-    /* Dashboard 3D Grid */
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-      margin-bottom: 36px;
-    }
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 22px 16px;
-      border-radius: 18px;
-    }
-
-    .stat-label {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .stat-value {
-      font-size: 1.45rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--accent);
-      text-shadow: 1px 1px 0 rgba(255, 255, 255, 1);
-    }
-
-    @media (max-width: 480px) {
-      .dashboard { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* Year-Wise Breakdown Grid */
-    .year-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 20px;
-      margin-bottom: 36px;
-    }
-
-    .year-card {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .year-card-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .year-card-total {
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--text-main);
-    }
-
-    /* 3D Forms & Inputs (Carved Inset Effect) */
-    .form-group { margin-bottom: 24px; }
-    .form-group label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 16px 20px;
-      background: #eef2f6;
-      border: 2px solid transparent;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text-main);
-      box-shadow: var(--shadow-pressed);
-      transition: var(--transition-smooth);
-      outline: none;
-      appearance: none;
-    }
-
-    .form-control:focus {
-      background: #ffffff;
-      border-color: var(--accent);
-      box-shadow: inset 2px 2px 4px rgba(15, 23, 42, 0.04), 0 0 0 4px var(--focus-ring);
-    }
-
-    /* Live Total Preview Box inside Form (Carved Inset UI) */
-    .live-total-box {
-      background: #eef2f6;
-      padding: 14px 20px;
-      border-radius: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-pressed);
-      font-weight: 800;
-    }
-    .live-total-box span:first-child { font-size: 0.8rem; color: var(--text-muted); }
-    .live-total-box span:last-child { font-size: 1.25rem; color: var(--accent); text-shadow: 1px 1px 0 rgba(255, 255, 255, 1); }
-
-    /* Chunky 3D Buttons */
-    .btn {
-      display: inline-block;
-      width: 100%;
-      padding: 18px;
-      border-radius: 16px;
-      font-size: 1.05rem;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: center;
-      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-      outline: none;
-      touch-action: manipulation;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #ffffff;
-      border: 1px solid var(--accent-hover);
-      border-top: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 0 var(--accent-depth), 0 15px 20px rgba(37, 99, 235, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-      margin-bottom: 8px;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 0 var(--accent-depth), 0 20px 25px rgba(37, 99, 235, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-primary:active {
-      transform: translateY(8px);
-      box-shadow: 0 0px 0 var(--accent-depth), 0 2px 5px rgba(37, 99, 235, 0.4), inset 0 4px 6px rgba(0, 0, 0, 0.2);
-      border-top: 1px solid transparent;
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: translateY(8px);
-      box-shadow: 0 0px 0 var(--accent-depth);
-    }
-
-    /* Quick Action Toolbar & Sort Bar (Matches 3D Surface Buttons) */
-    .action-toolbar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .btn-secondary-3d {
-      flex: 1;
-      min-width: 130px;
-      background: var(--surface-3d);
-      color: var(--text-main);
-      border: 1px solid var(--border-highlight);
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 5px 0 #cbd5e1, 0 8px 15px rgba(15, 23, 42, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 1);
-      transition: var(--transition-spring);
-      margin-bottom: 4px;
-    }
-
-    .btn-secondary-3d:hover {
-      transform: translateY(-2px);
-      color: var(--accent);
-    }
-
-    .btn-secondary-3d:active {
-      transform: translateY(5px);
-      box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15, 23, 42, 0.1);
-    }
-
-    .filter-controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .filter-select {
-      flex: 1;
-      padding: 12px 16px;
-      border-radius: 14px;
-      background: var(--surface-3d);
-      border: 1px solid var(--border-highlight);
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-main);
-      box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
-      cursor: pointer;
-      outline: none;
-    }
-
-    /* Records Header Section */
-    .records-section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 0 8px;
-    }
-
-    .records-title {
-      font-size: 1.3rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
-    }
-
-    /* Search & Autocomplete Suggestions & Floating Cities */
-    .search-wrapper { position: relative; margin-bottom: 12px; }
-    .search-wrapper input { padding-left: 54px; border-radius: 99px; background: #eef2f6; }
-    .search-icon {
-      position: absolute;
-      left: 22px;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: 0.6;
-      font-size: 1.1rem;
-      transition: var(--transition-smooth);
-    }
-    .search-wrapper input:focus ~ .search-icon {
-      opacity: 1;
-      color: var(--accent);
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    /* Autocomplete Suggestions Dropdown */
-    .suggestions-dropdown {
-      position: absolute;
-      top: calc(100% + 12px);
-      left: 0;
-      right: 0;
-      background: var(--surface-3d);
-      border-radius: 16px;
-      box-shadow: var(--shadow-3d-hover);
-      border: 1px solid var(--border-highlight);
-      z-index: 100;
-      max-height: 220px;
-      overflow-y: auto;
-      display: none;
-      padding: 8px;
-    }
-    .suggestions-dropdown.active { display: block; animation: fadeIn 0.2s var(--transition-smooth); }
-    .suggestion-item {
-      padding: 14px 20px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 10px;
-      transition: var(--transition-smooth);
-    }
-    .suggestion-item:hover { background: var(--bg-grad); color: var(--accent); transform: scale(0.98); }
-
-    /* Hovering Cities Bar Below Search Bar */
-    .hovering-cities-container {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding: 8px 4px 16px 4px;
-      margin-bottom: 12px;
-      scrollbar-width: none;
-    }
-    .hovering-cities-container::-webkit-scrollbar { display: none; }
-
-    .city-hover-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface-3d);
-      border: 1px solid var(--border-highlight);
-      padding: 8px 18px;
-      border-radius: 99px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 4px 6px 10px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
-      transition: var(--transition-spring);
-    }
-
-    .city-hover-pill:hover, .city-hover-pill.active {
-      background: var(--accent);
-      color: #ffffff;
-      border-color: var(--accent-hover);
-      box-shadow: 0 6px 0 var(--accent-depth), 0 10px 15px rgba(37, 99, 235, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.3);
-      transform: translateY(-4px);
-    }
-
-    .city-hover-pill:active {
-      transform: translateY(2px);
-      box-shadow: 0 0 0 var(--accent-depth), 0 2px 4px rgba(37, 99, 235, 0.3);
-    }
-
-    .showing-text {
-      text-align: right;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-top: 0;
-      margin-bottom: 20px;
-      padding-right: 8px;
-      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
-    }
-
-    /* 3D Record Cards */
-    .record-card { padding: 26px; margin-bottom: 20px; }
-    .record-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px; }
-    .record-name { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; color: var(--text-main); }
-    .badge {
-      background: var(--surface-hover-3d);
-      color: var(--text-main);
-      padding: 6px 14px;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      border: 1px solid var(--border-highlight);
-      box-shadow: 2px 4px 8px rgba(15, 23, 42, 0.05), inset 1px 1px 2px rgba(255, 255, 255, 1);
-    }
-    .record-details {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 2px dashed rgba(15, 23, 42, 0.05);
-    }
-    .record-calc { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
-    .record-total {
-      font-weight: 800;
-      font-size: 1.4rem;
-      letter-spacing: -0.02em;
-      color: var(--accent);
-      text-shadow: 1px 1px 0 rgba(255, 255, 255, 1);
-    }
-
-    /* 3D Icon Button */
-    .record-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-icon {
-      background: var(--surface-3d);
-      border: 1px solid var(--border-highlight);
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 10px;
-      border-radius: 12px;
-      box-shadow: 0 4px 0 #cbd5e1, 0 6px 10px rgba(15, 23, 42, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 1);
-      transition: var(--transition-spring);
-      margin-bottom: 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-icon:hover {
-      color: var(--danger);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 0 #cbd5e1, 0 10px 15px rgba(15, 23, 42, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 1);
-    }
-    .btn-icon.edit:hover { color: var(--accent); }
-    .btn-icon.whatsapp:hover { color: var(--success); }
-    .btn-icon:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15, 23, 42, 0.1);
-    }
-
-    /* Settings Area */
-    .settings-panel p { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-bottom: 20px; }
-
-    /* Toast Notifications */
-    #toast-container {
-      position: fixed;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 9999;
-      pointer-events: none;
-    }
-    .toast {
-      background: var(--text-main);
-      color: #ffffff;
-      padding: 16px 32px;
-      border-radius: 99px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
-      animation: toastEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-      white-space: nowrap;
-    }
-    @keyframes toastEnter {
-      from { opacity: 0; transform: translateY(40px) scale(0.9); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    /* Custom Confirm Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(10px);
-      display: none;
-      place-items: center;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.4s var(--transition-smooth);
-    }
-    .modal-overlay.active { display: grid; opacity: 1; }
-    .modal-content {
-      background: var(--surface-3d);
-      padding: 36px 32px;
-      border-radius: 24px;
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.3), inset 2px 2px 4px rgba(255, 255, 255, 1);
-      border: 1px solid var(--border-highlight);
-      transform: scale(0.9) translateY(20px);
-      transition: var(--transition-spring);
-    }
-    .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
-    .modal-title { font-weight: 800; font-size: 1.3rem; margin-bottom: 12px; color: var(--text-main); }
-    .modal-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-bottom: 32px; }
-    .modal-actions { display: flex; gap: 16px; }
-    .modal-btn {
-      flex: 1;
-      padding: 16px;
-      border-radius: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: var(--transition-spring);
-      margin-bottom: 6px;
-    }
-    .modal-btn-cancel {
-      background: var(--surface-3d);
-      color: var(--text-main);
-      border: 1px solid var(--border-highlight);
-      box-shadow: 0 6px 0 #cbd5e1, 0 8px 15px rgba(15, 23, 42, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 1);
-    }
-    .modal-btn-cancel:active { transform: translateY(6px); box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15, 23, 42, 0.1); }
-    .modal-btn-danger {
-      background: var(--danger);
-      color: white;
-      border: 1px solid var(--danger-depth);
-      border-top: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 6px 0 var(--danger-depth), 0 10px 15px rgba(239, 68, 68, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.3);
-    }
-    .modal-btn-danger:active { transform: translateY(6px); box-shadow: 0 0 0 var(--danger-depth), 0 2px 4px rgba(239, 68, 68, 0.3); }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 0.75rem; color: #cbd5e1; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Centered Brand Header Card with Corner Animated Shubh Labh -->
-    <div class="card-3d brand-header-card">
-      <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
-      <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
-      <div class="brand-info">
-        <h1 class="brand-title">📘 Kabir Emporium</h1>
-        <span class="brand-subtitle">Customer & Sales Directory System</span>
+    <header>
+      <div class="brand">
+        <div class="brand-icon"><i class="fas fa-store"></i></div>
+        <div>
+          <h1>Kabir Emporium</h1>
+          <p>Customer Directory & Sales Record System</p>
+        </div>
       </div>
-      <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token">
-        <div id="status-dot" class="status-dot"></div>
-        <span id="status-text">Connecting...</span>
+      <div>
+        <button class="btn btn-secondary" style="width:auto;" onclick="exportToCSV()"><i class="fas fa-download"></i> Export CSV</button>
       </div>
-      <div id="bank-holiday-pill" class="bank-status-pill">
-        <span id="bank-status-icon">🏦</span>
-        <span id="bank-status-text">Checking Bank Status...</span>
+    </header>
+
+    <!-- Metrics Dashboard -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Total Revenue <i class="fas fa-indian-rupee-sign"></i></div>
+        <div class="value" id="stat-total-revenue">₹0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Records <i class="fas fa-receipt"></i></div>
+        <div class="value" id="stat-total-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Cash Transactions <i class="fas fa-money-bill-wave"></i></div>
+        <div class="value" id="stat-cash-total">₹0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">UPI Transactions <i class="fas fa-mobile-alt"></i></div>
+        <div class="value" id="stat-upi-total">₹0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Credit Transactions <i class="fas fa-hand-holding-usd"></i></div>
+        <div class="value" id="stat-credit-total">₹0.00</div>
       </div>
     </div>
 
-    <!-- GitHub Settings -->
-    <div id="settings-panel" class="card-3d card settings-panel form-card-static" style="display: none;">
-      <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 800;">☁️ GitHub Cloud Connection</h3>
-      <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
-      <div class="form-group" style="margin-bottom: 20px;">
-        <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
-      </div>
-      <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect to GitHub</button>
-    </div>
-
-    <!-- Dashboard -->
-    <div class="dashboard">
-      <div class="card-3d stat-item">
-        <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
-        <span class="stat-value" id="stat-day-sale">₹0.00</span>
-      </div>
-      <div class="card-3d stat-item">
-        <span class="stat-label">📋 Records</span>
-        <span class="stat-value" id="stat-records">0</span>
-      </div>
-      <div class="card-3d stat-item">
-        <span class="stat-label">📦 Items</span>
-        <span class="stat-value" id="stat-items">0</span>
-      </div>
-      <div class="card-3d stat-item">
-        <span class="stat-label">📍 Cities/Villages</span>
-        <span class="stat-value" id="stat-cities">0</span>
-      </div>
-    </div>
-
-    <!-- Current Year Banner Above Form Box -->
-    <div class="year-banner">
-      <span>📅 Active Fiscal Year / Period</span>
-      <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
-    </div>
-
-    <!-- Add / Edit Record Form -->
-    <div class="card-3d card form-card-static">
-      <form id="record-form">
-        <input type="hidden" id="edit-record-id" value="">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="cust-name">👤 Customer Name</label>
-            <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
-            <datalist id="customer-datalist"></datalist>
-          </div>
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="cust-city">🏙️ City/Village</label>
-            <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
-          </div>
+    <div class="main-grid">
+      <!-- Record Entry Form -->
+      <div class="card">
+        <div class="card-title" id="form-card-title"><i class="fas fa-plus-circle"></i> Add Transaction Record</div>
+        <form id="record-form" onsubmit="saveCustomerRecord(event)">
+          <input type="hidden" id="edit-record-id" value="">
+          
           <div class="form-group">
-            <label for="cust-items">🔢 Item Count</label>
-            <input type="number" id="cust-items" class="form-control" value="1" min="1" required>
+            <label for="cust-name"><i class="fas fa-user"></i> Customer Name</label>
+            <input type="text" id="cust-name" class="form-input" placeholder="e.g. Rahul Sharma" required>
           </div>
+
           <div class="form-group">
-            <label for="cust-price">💵 Price (₹)</label>
-            <input type="number" id="cust-price" class="form-control" step="0.01" min="0" required placeholder="e.g. 500.00">
+            <label for="cust-city"><i class="fas fa-location-dot"></i> City / Village</label>
+            <input type="text" id="cust-city" class="form-input" placeholder="e.g. Delhi" required>
           </div>
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="cust-date">📅 Date</label>
-            <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
+
+          <div class="form-group">
+            <label for="cust-items"><i class="fas fa-boxes-stacked"></i> Number of Items</label>
+            <input type="number" id="cust-items" class="form-input" min="1" value="1" required>
           </div>
+
+          <div class="form-group">
+            <label for="cust-price"><i class="fas fa-tag"></i> Total Price (INR)</label>
+            <input type="number" id="cust-price" class="form-input" step="0.01" min="0" placeholder="0.00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cust-date"><i class="fas fa-calendar-alt"></i> Date</label>
+            <input type="date" id="cust-date" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cust-mode"><i class="fas fa-wallet"></i> Payment / Transaction Mode</label>
+            <select id="cust-mode" class="form-input" required>
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Credit">Credit (Udhar)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="save-btn"><i class="fas fa-save"></i> Save Record</button>
+          <button type="button" class="btn btn-secondary" id="cancel-btn" style="margin-top: 0.5rem; display: none;" onclick="cancelEditMode()">Cancel Edit</button>
+        </form>
+      </div>
+
+      <!-- Record List & Filtering -->
+      <div class="card" style="grid-column: span 1;">
+        <div class="card-title"><i class="fas fa-list"></i> Customer Directory & Transactions</div>
+
+        <div class="filter-bar">
+          <input type="text" id="search-input" class="form-input filter-input" placeholder="Search customer, city, mode..." oninput="filterRecords()">
+          <select id="filter-mode" class="form-input filter-select" onchange="filterRecords()">
+            <option value="ALL">All Modes</option>
+            <option value="Cash">Cash Only</option>
+            <option value="UPI">UPI Only</option>
+            <option value="Credit">Credit Only</option>
+          </select>
         </div>
 
-        <div class="live-total-box">
-          <span>🧮 Bill Total Preview</span>
-          <span id="live-bill-total">₹0.00</span>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>City</th>
+                <th>Mode</th>
+                <th>Items</th>
+                <th>Total (₹)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="records-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+          <div id="empty-state-view" class="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <p>No transaction records found matching criteria.</p>
+          </div>
         </div>
-
-        <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 8px;">💾 Save directly to GitHub</button>
-        <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
-      </form>
-    </div>
-
-    <!-- Year-Wise Summary Section -->
-    <div class="records-section-header">
-      <div class="records-title">📊 Year-Wise Totals</div>
-    </div>
-    <div id="year-summary-container" class="year-grid"></div>
-
-    <!-- Quick Action Toolbar -->
-    <div class="action-toolbar">
-      <button type="button" class="btn-secondary-3d" onclick="exportToCSV()">📥 Export CSV / Excel</button>
-      <button type="button" class="btn-secondary-3d" onclick="showTopInsights()">🏆 Top Cities & Buyers</button>
-    </div>
-
-    <!-- Records Section Header -->
-    <div class="records-section-header">
-      <div class="records-title">📋 Sale Records & Items</div>
-    </div>
-
-    <!-- Search & Predictive Autocomplete Bar -->
-    <div class="search-wrapper">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="search-bar" class="form-control" placeholder="Search by name or city..." oninput="handleSearchInput()" autocomplete="off">
-      <div id="search-suggestions" class="suggestions-dropdown"></div>
-    </div>
-
-    <!-- Hovering Cities Bar Below Search Bar -->
-    <div id="hovering-cities" class="hovering-cities-container"></div>
-
-    <!-- Sort & JSON Backup Controls -->
-    <div class="filter-controls">
-      <select id="sort-records" class="filter-select" onchange="renderRecords()">
-        <option value="newest">🕒 Sort: Newest First</option>
-        <option value="oldest">📅 Sort: Oldest First</option>
-        <option value="highest">💰 Sort: Highest Amount</option>
-        <option value="lowest">📉 Sort: Lowest Amount</option>
-      </select>
-      <button type="button" class="btn-secondary-3d" style="flex: 0.75; margin-bottom: 0;" onclick="downloadJsonBackup()">🛡️ JSON Backup</button>
-    </div>
-
-    <div class="showing-text" id="showing-count">📊 0 records</div>
-    <div id="records-container"></div>
-  </div>
-
-  <!-- Toast Notifications -->
-  <div id="toast-container"></div>
-
-  <!-- Confirm Modal -->
-  <div class="modal-overlay" id="confirm-modal">
-    <div class="modal-content">
-      <div class="modal-title">⚠️ Delete Record?</div>
-      <div class="modal-text">This will immediately update and sync to GitHub.</div>
-      <div class="modal-actions">
-        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">❌ Cancel</button>
-        <button type="button" class="modal-btn modal-btn-danger" id="confirm-delete-btn">🗑️ Delete & Sync</button>
       </div>
     </div>
   </div>
 
   <script>
-    const GITHUB_OWNER = 'playtv02';
-    const GITHUB_REPO = 'Customer-directory';
-    const FILE_PATH = 'data.json';
+    const STORAGE_KEY = 'kabir_directory_records';
     let records = [];
-    let fileSha = null;
-    let deleteTargetId = null;
 
     function getLocalTodayDate() {
-      const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      return new Date(now.getTime() - offset).toISOString().split('T')[0];
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const todayStr = getLocalTodayDate();
-      document.getElementById('cust-date').value = todayStr;
-      document.getElementById('banner-year').textContent = new Date().getFullYear();
+    function init() {
+      document.getElementById('cust-date').value = getLocalTodayDate();
+      loadRecords();
+    }
 
-      document.getElementById('cust-items').addEventListener('input', updateLiveTotal);
-      document.getElementById('cust-price').addEventListener('input', updateLiveTotal);
-
-      checkBankHoliday();
-      updateDashboard();
-      checkTokenAndLoad();
-
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-wrapper')) {
-          document.getElementById('search-suggestions').classList.remove('active');
-        }
-      });
-    });
-
-    // Bank Holiday Checker (India Standard: Sundays, 2nd & 4th Saturdays + Fixed Holidays)
-    function checkBankHoliday() {
-      const now = new Date();
-      const dayOfWeek = now.getDay();
-      const dateOfMonth = now.getDate();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(dateOfMonth).padStart(2, '0');
-      const mmdd = `${month}-${day}`;
-
-      const fixedHolidays = {
-        '01-26': 'Republic Day',
-        '08-15': 'Independence Day',
-        '10-02': 'Gandhi Jayanti',
-        '12-25': 'Christmas Day'
-      };
-
-      const pill = document.getElementById('bank-holiday-pill');
-      const icon = document.getElementById('bank-status-icon');
-      const text = document.getElementById('bank-status-text');
-
-      let holidayReason = null;
-
-      if (fixedHolidays[mmdd]) {
-        holidayReason = `Bank Holiday (${fixedHolidays[mmdd]})`;
-      } else if (dayOfWeek === 0) {
-        holidayReason = 'Bank Holiday (Sunday)';
-      } else if (dayOfWeek === 6) {
-        const weekOfMonth = Math.ceil(dateOfMonth / 7);
-        if (weekOfMonth === 2 || weekOfMonth === 4) {
-          holidayReason = `Bank Holiday (${weekOfMonth === 2 ? '2nd' : '4th'} Saturday)`;
-        }
-      }
-
-      if (holidayReason) {
-        pill.className = 'bank-status-pill holiday';
-        icon.textContent = '🏛️';
-        text.textContent = holidayReason;
+    function loadRecords() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try { records = JSON.parse(saved); } catch (e) { records = []; }
       } else {
-        pill.className = 'bank-status-pill open';
-        icon.textContent = '🏦';
-        text.textContent = 'Banks Open Today';
+        records = [
+          { id: '1', name: 'Ramesh Patel', city: 'Ahmedabad', items: 3, price: 1500, date: getLocalTodayDate(), mode: 'Cash' },
+          { id: '2', name: 'Sunita Verma', city: 'Jaipur', items: 1, price: 850, date: getLocalTodayDate(), mode: 'UPI' },
+          { id: '3', name: 'Anil Kumar', city: 'Delhi', items: 5, price: 3200, date: getLocalTodayDate(), mode: 'Credit' }
+        ];
+        saveRecordsToStorage();
       }
+      filterRecords();
     }
 
-    // Live Bill Total Calculator
-    function updateLiveTotal() {
-      const items = parseFloat(document.getElementById('cust-items').value) || 0;
-      const price = parseFloat(document.getElementById('cust-price').value) || 0;
-      const total = items * price;
-      document.getElementById('live-bill-total').textContent =
-        `₹${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    function saveRecordsToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     }
 
-    // Repeat Customer Autofill
-    function populateCustomerDatalist() {
-      const datalist = document.getElementById('customer-datalist');
-      if (!datalist) return;
-      const uniqueNames = [...new Set(records.map(r => r.name).filter(Boolean))];
-      datalist.innerHTML = uniqueNames.map(name => `<option value="${name.replace(/"/g, '&quot;')}">`).join('');
-    }
-
-    function autoFillCustomerCity() {
-      const typedName = document.getElementById('cust-name').value.trim().toLowerCase();
-      if (!typedName) return;
-      const match = records.find(r => r.name && r.name.toLowerCase() === typedName);
-      if (match && match.city) {
-        document.getElementById('cust-city').value = match.city;
-      }
-    }
-
-    // Custom Toast function
-    function showToast(message) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(40px) scale(0.9)';
-        toast.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-        setTimeout(() => toast.remove(), 400);
-      }, 3000);
-    }
-
-    function toggleSettingsPanel() {
-      const panel = document.getElementById('settings-panel');
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    }
-
-    // Custom Modal
-    function openModal(id) {
-      deleteTargetId = id;
-      document.getElementById('confirm-modal').classList.add('active');
-    }
-
-    function closeModal() {
-      deleteTargetId = null;
-      document.getElementById('confirm-modal').classList.remove('active');
-    }
-
-    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-      if (deleteTargetId) {
-        const previousRecords = records.slice();
-        records = records.filter(r => r.id !== deleteTargetId);
-        closeModal();
-        updateDashboard();
-        renderRecords();
-        renderHoveringCities();
-        populateCustomerDatalist();
-        const saved = await pushDataToGitHub();
-        if (!saved) {
-          records = previousRecords;
-          updateDashboard();
-          renderRecords();
-          renderHoveringCities();
-          populateCustomerDatalist();
-          return;
-        }
-        showToast('✅ Record deleted from GitHub');
-      }
-    });
-
-    // UI Status
-    function updateStatus(message, state) {
-      document.getElementById('status-text').textContent = message;
-      document.getElementById('status-dot').className = 'status-dot ' + state;
-    }
-
-    // GitHub Logic (Online Only)
-    function checkTokenAndLoad() {
-      const token = localStorage.getItem('ke_gh_token');
-      if (!token) {
-        document.getElementById('settings-panel').style.display = 'block';
-        updateStatus('Disconnected', 'error');
-      } else {
-        document.getElementById('settings-panel').style.display = 'none';
-        fetchDataFromGitHub();
-      }
-    }
-
-    function saveToken() {
-      const val = document.getElementById('gh-token').value.trim();
-      if (val) {
-        localStorage.setItem('ke_gh_token', val);
-        checkTokenAndLoad();
-        showToast('🔑 Token saved');
-      } else {
-        showToast('⚠️ Please enter a valid GitHub token');
-      }
-    }
-
-    const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
-    const decodeBase64 = str => decodeURIComponent(escape(atob(str)));
-
-    async function fetchDataFromGitHub() {
-      updateStatus('Fetching cloud data...', 'syncing');
-      const token = localStorage.getItem('ke_gh_token');
-      try {
-        const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json'
-          },
-          cache: 'no-store'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          fileSha = data.sha;
-          records = JSON.parse(decodeBase64(data.content));
-          updateDashboard();
-          renderRecords();
-          renderHoveringCities();
-          populateCustomerDatalist();
-          updateStatus('Synced (Online)', 'active');
-        } else if (response.status === 404) {
-          records = [];
-          updateDashboard();
-          renderRecords();
-          renderHoveringCities();
-          populateCustomerDatalist();
-          updateStatus('Ready (New File)', 'active');
-        } else {
-          throw new Error('Auth Error');
-        }
-      } catch (e) {
-        updateStatus('Cloud Error', 'error');
-        document.getElementById('settings-panel').style.display = 'block';
-        showToast('❌ Failed to fetch from GitHub repository');
-      }
-    }
-
-    async function pushDataToGitHub() {
-      const token = localStorage.getItem('ke_gh_token');
-      const saveBtn = document.getElementById('save-btn');
-      if (!token) {
-        const settings = document.getElementById('settings-panel');
-        settings.style.display = 'block';
-        settings.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        showToast('⚠️ GitHub token missing. Add your token above.');
-        return false;
-      }
-      updateStatus('Syncing to GitHub...', 'syncing');
-      if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.textContent = '⏳ Saving...';
-      }
-      try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-        const checkRes = await fetch(apiUrl, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28'
-          },
-          cache: 'no-store'
-        });
-        let latestSha = null;
-        if (checkRes.ok) {
-          latestSha = (await checkRes.json()).sha;
-        } else if (checkRes.status !== 404) {
-          const err = await checkRes.json().catch(() => ({}));
-          throw new Error(err.message || `GitHub read error (${checkRes.status})`);
-        }
-        const body = {
-          message: `Save customer records (${new Date().toLocaleString()})`,
-          content: encodeBase64(JSON.stringify(records, null, 2))
-        };
-        if (latestSha) body.sha = latestSha;
-        const response = await fetch(apiUrl, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.message || `GitHub save error (${response.status})`);
-        fileSha = result.content?.sha || latestSha;
-        updateStatus('Synced (Online)', 'active');
-        showToast('✅ Saved successfully to GitHub');
-        return true;
-      } catch (err) {
-        updateStatus('Sync Failed', 'error');
-        showToast('❌ Save failed: ' + (err.message || 'Check internet and GitHub token'));
-        return false;
-      } finally {
-        if (saveBtn) {
-          saveBtn.disabled = false;
-          const isEditing = Boolean(document.getElementById('edit-record-id')?.value);
-          saveBtn.textContent = isEditing ? '✏️ Update Record on GitHub' : '💾 Save directly to GitHub';
-        }
-      }
-    }
-
-    // Save & Edit Handler
-    window.saveCustomerRecord = async function(event) {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      const form = document.getElementById('record-form');
-      if (!form) return;
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        showToast('⚠️ Please complete all required fields.');
-        return;
-      }
-      const previousRecords = records.slice();
+    function saveCustomerRecord(event) {
+      event.preventDefault();
       const editId = document.getElementById('edit-record-id').value;
-
-      const recordData = {
-        id: editId || Date.now().toString(),
-        name: document.getElementById('cust-name').value.trim(),
-        city: document.getElementById('cust-city').value.trim(),
-        items: parseInt(document.getElementById('cust-items').value, 10) || 1,
-        price: parseFloat(document.getElementById('cust-price').value) || 0,
-        date: document.getElementById('cust-date').value || getLocalTodayDate()
-      };
+      const name = document.getElementById('cust-name').value.trim();
+      const city = document.getElementById('cust-city').value.trim();
+      const items = parseInt(document.getElementById('cust-items').value, 10) || 1;
+      const price = parseFloat(document.getElementById('cust-price').value) || 0;
+      const date = document.getElementById('cust-date').value || getLocalTodayDate();
+      const mode = document.getElementById('cust-mode').value || 'Cash';
 
       if (editId) {
-        records = records.map(r => r.id === editId ? recordData : r);
+        const idx = records.findIndex(r => r.id === editId);
+        if (idx !== -1) {
+          records[idx] = { id: editId, name, city, items, price, date, mode };
+        }
       } else {
-        records = [recordData, ...records];
+        const newRecord = { id: Date.now().toString(), name, city, items, price, date, mode };
+        records.unshift(newRecord);
       }
 
-      const saved = await pushDataToGitHub();
-      if (!saved) {
-        records = previousRecords;
-        return;
-      }
-
+      saveRecordsToStorage();
       cancelEditMode();
-      updateDashboard();
-      renderRecords();
-      renderHoveringCities();
-      populateCustomerDatalist();
-    };
+      filterRecords();
+    }
 
     function startEditRecord(id) {
       const rec = records.find(r => r.id === id);
@@ -1207,308 +287,154 @@
       document.getElementById('cust-items').value = rec.items;
       document.getElementById('cust-price').value = rec.price;
       document.getElementById('cust-date').value = rec.date;
-      updateLiveTotal();
+      document.getElementById('cust-mode').value = rec.mode || 'Cash';
 
-      const saveBtn = document.getElementById('save-btn');
-      saveBtn.textContent = '✏️ Update Record on GitHub';
-      document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-
-      document.getElementById('record-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      showToast(`✏️ Editing ${rec.name}`);
+      document.getElementById('form-card-title').innerHTML = '<i class="fas fa-edit"></i> Edit Transaction Record';
+      document.getElementById('save-btn').innerHTML = '<i class="fas fa-check"></i> Update Record';
+      document.getElementById('cancel-btn').style.display = 'block';
     }
 
     function cancelEditMode() {
-      const form = document.getElementById('record-form');
-      form.reset();
+      document.getElementById('record-form').reset();
       document.getElementById('edit-record-id').value = '';
       document.getElementById('cust-items').value = 1;
       document.getElementById('cust-date').value = getLocalTodayDate();
-      updateLiveTotal();
+      document.getElementById('cust-mode').value = 'Cash';
 
-      const saveBtn = document.getElementById('save-btn');
-      saveBtn.textContent = '💾 Save directly to GitHub';
-      document.getElementById('cancel-edit-btn').style.display = 'none';
-      updateDashboard();
+      document.getElementById('form-card-title').innerHTML = '<i class="fas fa-plus-circle"></i> Add Transaction Record';
+      document.getElementById('save-btn').innerHTML = '<i class="fas fa-save"></i> Save Record';
+      document.getElementById('cancel-btn').style.display = 'none';
     }
 
-    document.getElementById('record-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      window.saveCustomerRecord(event);
-    });
-
-    // Predictive Search Input Handler & Autocomplete
-    function handleSearchInput() {
-      const query = document.getElementById('search-bar').value.trim().toLowerCase();
-      renderRecords();
-      renderHoveringCities();
-      const dropdown = document.getElementById('search-suggestions');
-      if (!query) {
-        dropdown.classList.remove('active');
-        dropdown.innerHTML = '';
-        return;
-      }
-      const seen = new Set();
-      const matchList = [];
-      records.forEach(r => {
-        if (r.name && r.name.toLowerCase().includes(query) && !seen.has('n:' + r.name.toLowerCase())) {
-          seen.add('n:' + r.name.toLowerCase());
-          matchList.push({ type: '👤 Customer', text: r.name });
-        }
-        if (r.city && r.city.toLowerCase().includes(query) && !seen.has('c:' + r.city.toLowerCase())) {
-          seen.add('c:' + r.city.toLowerCase());
-          matchList.push({ type: '🏙️ City', text: r.city });
-        }
-      });
-      const topMatches = matchList.slice(0, 5);
-      if (topMatches.length > 0) {
-        dropdown.innerHTML = topMatches.map(m => `
-          <div class="suggestion-item" onclick="selectSuggestion('${m.text.replace(/'/g, "\\'")}')">
-            <span>${m.text}</span>
-            <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted);">${m.type}</span>
-          </div>
-        `).join('');
-        dropdown.classList.add('active');
-      } else {
-        dropdown.classList.remove('active');
-        dropdown.innerHTML = '';
+    function deleteRecord(id) {
+      if (confirm('Are you sure you want to delete this record?')) {
+        records = records.filter(r => r.id !== id);
+        saveRecordsToStorage();
+        filterRecords();
       }
     }
 
-    function selectSuggestion(val) {
-      document.getElementById('search-bar').value = val;
-      document.getElementById('search-suggestions').classList.remove('active');
-      renderRecords();
-      renderHoveringCities();
-    }
+    function filterRecords() {
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      const modeFilter = document.getElementById('filter-mode').value;
 
-    // Render Hovering City Pills
-    function renderHoveringCities() {
-      const container = document.getElementById('hovering-cities');
-      const currentQuery = document.getElementById('search-bar').value.trim().toLowerCase();
-      const citiesMap = {};
-      records.forEach(r => {
-        if (r.city) {
-          const cityName = r.city.trim();
-          const key = cityName.toLowerCase();
-          if (!citiesMap[key]) citiesMap[key] = { name: cityName, count: 0 };
-          citiesMap[key].count++;
-        }
-      });
-      const uniqueCities = Object.values(citiesMap);
-      if (uniqueCities.length === 0) {
-        container.innerHTML = '';
-        return;
-      }
-      container.innerHTML = `
-        <div class="city-hover-pill ${currentQuery === '' ? 'active' : ''}" onclick="filterByCity('')">
-          🌐 All Cities
-        </div>
-      ` + uniqueCities.map(c => `
-        <div class="city-hover-pill ${currentQuery === c.name.toLowerCase() ? 'active' : ''}" onclick="filterByCity('${c.name.replace(/'/g, "\\'")}')">
-          📍 ${c.name} <span style="opacity: 0.6; font-size: 0.7rem;">(${c.count})</span>
-        </div>
-      `).join('');
-    }
-
-    function filterByCity(cityName) {
-      document.getElementById('search-bar').value = cityName;
-      document.getElementById('search-suggestions').classList.remove('active');
-      renderRecords();
-      renderHoveringCities();
-    }
-
-    function renderRecords() {
-      const query = document.getElementById('search-bar').value.toLowerCase();
-      const container = document.getElementById('records-container');
-      container.innerHTML = '';
-
-      const filtered = records.filter(r =>
-        (r.name && r.name.toLowerCase().includes(query)) ||
-        (r.city && r.city.toLowerCase().includes(query))
-      );
-
-      const sortMode = document.getElementById('sort-records')?.value || 'newest';
-      filtered.sort((a, b) => {
-        if (sortMode === 'oldest') return (a.date || '').localeCompare(b.date || '');
-        if (sortMode === 'highest') return (b.items * b.price) - (a.items * a.price);
-        if (sortMode === 'lowest') return (a.items * a.price) - (b.items * b.price);
-        return (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id);
+      const filtered = records.filter(r => {
+        const modeStr = r.mode || 'Cash';
+        const matchesQuery = !q || 
+          r.name.toLowerCase().includes(q) || 
+          r.city.toLowerCase().includes(q) || 
+          modeStr.toLowerCase().includes(q);
+        const matchesMode = modeFilter === 'ALL' || modeStr === modeFilter;
+        return matchesQuery && matchesMode;
       });
 
-      document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No matching records found</div>`;
+      renderRecords(filtered);
+      updateMetrics();
+    }
+
+    function renderRecords(list) {
+      const tbody = document.getElementById('records-table-body');
+      const emptyState = document.getElementById('empty-state-view');
+
+      if (list.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
         return;
       }
 
-      filtered.forEach(r => {
-        const total = (r.items * r.price).toFixed(2);
-        const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
-        const card = document.createElement('div');
-        card.className = 'card-3d record-card';
-        card.innerHTML = `
-          <div class="record-header">
-            <div>
-              <div class="record-name">👤 ${r.name}</div>
-              <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 4px;">📅 ${d}/${m}/${y}</div>
-            </div>
-            <div class="record-actions">
-              <button type="button" class="btn-icon whatsapp" onclick="shareWhatsApp('${r.id}')" title="Share Receipt on WhatsApp">
-                💬
-              </button>
-              <button type="button" class="btn-icon edit" onclick="startEditRecord('${r.id}')" title="Edit Record">
-                ✏️
-              </button>
-              <button type="button" class="btn-icon" onclick="openModal('${r.id}')" title="Delete">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
-            </div>
-          </div>
-          <span class="badge" style="cursor: pointer;" onclick="filterByCity('${r.city.replace(/'/g, "\\'")}')">📍 ${r.city}</span>
-          <div class="record-details">
-            <div class="record-calc">📦 ${r.items} × ₹${Number(r.price).toFixed(2)}</div>
-            <div class="record-total">₹${Number(total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-          </div>
+      emptyState.style.display = 'none';
+      tbody.innerHTML = list.map(r => {
+        const mode = r.mode || 'Cash';
+        let badgeClass = 'badge-cash';
+        let modeIcon = 'fa-money-bill-wave';
+        if (mode === 'UPI') { badgeClass = 'badge-upi'; modeIcon = 'fa-mobile-alt'; }
+        else if (mode === 'Credit') { badgeClass = 'badge-credit'; modeIcon = 'fa-hand-holding-usd'; }
+
+        return `
+          <tr>
+            <td>${r.date}</td>
+            <td><strong>${escapeHtml(r.name)}</strong></td>
+            <td>${escapeHtml(r.city)}</td>
+            <td><span class="badge ${badgeClass}"><i class="fas ${modeIcon}"></i> ${mode}</span></td>
+            <td>${r.items}</td>
+            <td>₹${Number(r.price).toFixed(2)}</td>
+            <td class="action-btns">
+              <button class="icon-btn" title="Edit" onclick="startEditRecord('${r.id}')"><i class="fas fa-pen"></i></button>
+              <button class="icon-btn whatsapp" title="Share WhatsApp" onclick="shareWhatsApp('${r.id}')"><i class="fab fa-whatsapp"></i></button>
+              <button class="icon-btn delete" title="Delete" onclick="deleteRecord('${r.id}')"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
         `;
-        container.appendChild(card);
-      });
+      }).join('');
     }
 
-    function updateDashboard() {
-      const selectedDate = document.getElementById('cust-date').value;
-      let daySale = 0, totalItems = 0, cities = new Set();
-      const yearMap = {};
+    function updateMetrics() {
+      let totalRev = 0;
+      let cashTotal = 0;
+      let upiTotal = 0;
+      let creditTotal = 0;
+
       records.forEach(r => {
-        if (r.date === selectedDate) {
-          daySale += (r.items * r.price);
-        }
-        totalItems += r.items;
-        if (r.city) cities.add(r.city.toLowerCase());
-        const year = r.date ? r.date.split('-')[0] : 'Unknown';
-        if (!yearMap[year]) {
-          yearMap[year] = { sale: 0, count: 0, items: 0 };
-        }
-        yearMap[year].sale += (r.items * r.price);
-        yearMap[year].count += 1;
-        yearMap[year].items += r.items;
+        const price = Number(r.price) || 0;
+        totalRev += price;
+        const mode = r.mode || 'Cash';
+        if (mode === 'Cash') cashTotal += price;
+        else if (mode === 'UPI') upiTotal += price;
+        else if (mode === 'Credit') creditTotal += price;
       });
-      if (selectedDate) {
-        const [y, m, d] = selectedDate.split('-');
-        document.getElementById('stat-day-label').textContent = `📈 Sale (${d}/${m})`;
-      } else {
-        document.getElementById('stat-day-label').textContent = '📈 Day Sale';
-      }
-      document.getElementById('stat-day-sale').textContent = `₹${daySale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      document.getElementById('stat-records').textContent = records.length;
-      document.getElementById('stat-items').textContent = totalItems;
-      document.getElementById('stat-cities').textContent = cities.size;
-      renderYearSummary(yearMap);
+
+      document.getElementById('stat-total-revenue').innerText = `₹${totalRev.toFixed(2)}`;
+      document.getElementById('stat-total-count').innerText = records.length;
+      document.getElementById('stat-cash-total').innerText = `₹${cashTotal.toFixed(2)}`;
+      document.getElementById('stat-upi-total').innerText = `₹${upiTotal.toFixed(2)}`;
+      document.getElementById('stat-credit-total').innerText = `₹${creditTotal.toFixed(2)}`;
     }
 
-    function renderYearSummary(yearMap) {
-      const container = document.getElementById('year-summary-container');
-      container.innerHTML = '';
-      const sortedYears = Object.keys(yearMap).sort((a, b) => b.localeCompare(a));
-      if (sortedYears.length === 0) {
-        container.innerHTML = `<div class="card-3d year-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-weight: 700;">No year data available</div>`;
-        return;
-      }
-      sortedYears.forEach(year => {
-        const data = yearMap[year];
-        const card = document.createElement('div');
-        card.className = 'card-3d year-card';
-        card.innerHTML = `
-          <div class="year-card-title">
-            <span>📅 ${year}</span>
-            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">${data.count} records</span>
-          </div>
-          <div class="year-card-total">₹${data.sale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-          <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">📦 ${data.items} items sold</div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // Export all records to Excel-compatible CSV
-    function exportToCSV() {
-      if (records.length === 0) {
-        showToast('⚠️ No records to export');
-        return;
-      }
-      const headers = ['Date', 'Customer Name', 'City/Village', 'Items', 'Unit Price (INR)', 'Total (INR)'];
-      const rows = records.map(r => [
-        r.date,
-        `"${(r.name || '').replace(/"/g, '""')}"`,
-        `"${(r.city || '').replace(/"/g, '""')}"`,
-        r.items,
-        Number(r.price).toFixed(2),
-        (r.items * r.price).toFixed(2)
-      ]);
-
-      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Kabir_Emporium_Sales_${getLocalTodayDate()}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-      showToast('📥 CSV exported successfully');
-    }
-
-    // Share Formatted Receipt via WhatsApp
     function shareWhatsApp(id) {
       const r = records.find(rec => rec.id === id);
       if (!r) return;
-      const total = (r.items * r.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
-
-      const text = `*📘 Kabir Emporium - Sale Receipt*\n` +
-                   `📅 Date: ${d}/${m}/${y}\n` +
-                   `👤 Customer: ${r.name} (${r.city})\n` +
-                   `📦 Items: ${r.items} × ₹${Number(r.price).toFixed(2)}\n` +
-                   `💰 *Total Amount: ₹${total}*\n\n` +
-                   `Thank you for shopping with us! 🙏`;
-
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+      const mode = r.mode || 'Cash';
+      const text = `*🛍️ Kabir Emporium - Transaction Receipt*\n` +
+        `📅 Date: ${r.date}\n` +
+        `👤 Customer: ${r.name} (${r.city})\n` +
+        `📦 Items: ${r.items}\n` +
+        `💳 Payment Mode: ${mode}\n` +
+        `💰 *Total Amount: ₹${Number(r.price).toFixed(2)}*\n\n` +
+        `Thank you for shopping with Kabir Emporium! 🙏`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    // Top City & Top Buyer Toast Summary
-    function showTopInsights() {
+    function exportToCSV() {
       if (records.length === 0) {
-        showToast('⚠️ Add records first to see insights');
+        alert('No records available to export.');
         return;
       }
-      const cityTotals = {};
-      const buyerTotals = {};
+      const headers = ['ID', 'Date', 'Customer Name', 'City', 'Payment Mode', 'Items', 'Total Price (INR)'];
+      const rows = records.map(r => [
+        `"${r.id}"`,
+        `"${r.date}"`,
+        `"${r.name.replace(/"/g, '""')}"`,
+        `"${r.city.replace(/"/g, '""')}"`,
+        `"${(r.mode || 'Cash').replace(/"/g, '""')}"`,
+        r.items,
+        r.price
+      ]);
 
-      records.forEach(r => {
-        const amt = r.items * r.price;
-        if (r.city) cityTotals[r.city] = (cityTotals[r.city] || 0) + amt;
-        if (r.name) buyerTotals[r.name] = (buyerTotals[r.name] || 0) + amt;
-      });
-
-      const topCity = Object.entries(cityTotals).sort((a, b) => b[1] - a[1])[0];
-      const topBuyer = Object.entries(buyerTotals).sort((a, b) => b[1] - a[1])[0];
-
-      showToast(`🏆 Top City: ${topCity[0]} (₹${topCity[1].toLocaleString()}) | Top Buyer: ${topBuyer[0]}`);
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `kabir_emporium_directory_${getLocalTodayDate()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
-    // Download Raw JSON Backup
-    function downloadJsonBackup() {
-      if (records.length === 0) {
-        showToast('⚠️ No data to backup');
-        return;
-      }
-      const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `kabir_emporium_backup_${getLocalTodayDate()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('🛡️ JSON backup downloaded');
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
+
+    window.onload = init;
   </script>
 </body>
 </html>
