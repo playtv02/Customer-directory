@@ -124,6 +124,7 @@
             text-shadow: 2px 2px 4px rgba(15, 23, 42, 0.1);
         }
         .brand-subtitle { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+        
         /* 3D Sync Pill */
         .sync-pill {
             display: inline-flex;
@@ -172,7 +173,7 @@
             animation: blink-sync 1.2s infinite ease-in-out; 
         }
 
-        /* Bank Holiday Pill */
+        /* Bank Holiday Pill - Updated */
         .bank-status-pill {
             display: inline-flex;
             align-items: center;
@@ -181,14 +182,23 @@
             padding: 7px 16px;
             border-radius: 99px;
             font-size: 0.72rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--text-muted);
             box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
             border: 1px solid var(--border-highlight);
             transition: var(--transition-smooth);
         }
-        .bank-status-pill.holiday { color: var(--danger); }
-        .bank-status-pill.open { color: var(--text-main); }
+        .bank-status-pill.closed { 
+            color: var(--danger); 
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .bank-status-pill.open { 
+            color: var(--success); 
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
         .card { padding: 32px; margin-bottom: 32px; }
         /* Chunky 3D Year Banner */
         .year-banner {
@@ -739,29 +749,33 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(dateOfMonth).padStart(2, '0');
             const mmdd = `${month}-${day}`;
-            const fixedHolidays = {'01-26': 'Republic Day', '08-15': 'Independence Day', '10-02': 'Gandhi Jayanti', '12-25': 'Christmas Day'};
+            const fixedHolidays = {'01-26': true, '08-15': true, '10-02': true, '12-25': true};
+            
             const pill = document.getElementById('bank-holiday-pill');
             const icon = document.getElementById('bank-status-icon');
             const text = document.getElementById('bank-status-text');
-            let holidayReason = null;
+            
+            let isClosed = false;
+
             if (fixedHolidays[mmdd]) {
-                holidayReason = `Bank Holiday (${fixedHolidays[mmdd]})`;
+                isClosed = true;
             } else if (dayOfWeek === 0) {
-                holidayReason = 'Bank Holiday (Sunday)';
+                isClosed = true;
             } else if (dayOfWeek === 6) {
                 const weekOfMonth = Math.ceil(dateOfMonth / 7);
                 if (weekOfMonth === 2 || weekOfMonth === 4) {
-                    holidayReason = `Bank Holiday (${weekOfMonth === 2 ? '2nd' : '4th'} Saturday)`;
+                    isClosed = true;
                 }
             }
-            if (holidayReason) {
-                pill.className = 'bank-status-pill holiday';
-                icon.textContent = '🏛️';
-                text.textContent = holidayReason;
+            
+            if (isClosed) {
+                pill.className = 'bank-status-pill closed';
+                icon.textContent = '🔴';
+                text.textContent = 'Bank';
             } else {
                 pill.className = 'bank-status-pill open';
-                icon.textContent = '🏦';
-                text.textContent = 'Banks Open Today';
+                icon.textContent = '🟢';
+                text.textContent = 'Bank';
             }
         }
 
@@ -1226,7 +1240,7 @@
                     paymentText = `📒 Credit (Paid: ₹${deposit.toFixed(2)} | Bal: ₹${remaining.toFixed(2)})`;
                 }
 
-                // Generate Itemized HTML Block
+                // Generate Itemized HTML Block[cite: 1]
                 let itemsHtml = '';
                 if (r.itemList && r.itemList.length > 0) {
                     itemsHtml = r.itemList.map(i => `
