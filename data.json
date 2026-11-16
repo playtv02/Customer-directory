@@ -48,8 +48,13 @@
     "id": "1794822316611",
     "name": "Parmar Ramesh bhai Kanjibhai",
     "city": "Mahiyari",
-    "items": 2,
-    "price": 800,
+    "itemList": [
+      {
+        "desc": "KRUSHIPATTO 16X32",
+        "qty": 2,
+        "price": 800
+      }
+    ],
     "payment": "Cash",
     "deposit": 0,
     "date": "2026-11-16"
