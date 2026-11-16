@@ -63,6 +63,8 @@
     "city": "Khakhsar",
     "items": 20,
     "price": 800,
+    "payment": "Credit",
+    "deposit": 1000,
     "date": "2026-11-16"
   },
   {
