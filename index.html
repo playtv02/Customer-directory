@@ -404,7 +404,6 @@
         }
         .btn-icon:hover { color: var(--danger); transform: translateY(-2px); box-shadow: 0 6px 0 #cbd5e1, 0 10px 15px rgba(15, 23, 42, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 1); }
         .btn-icon.edit:hover { color: var(--accent); }
-        .btn-icon.whatsapp:hover { color: var(--success); }
         .settings-panel p { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-bottom: 20px; }
         /* Toast Notifications */
         #toast-container { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 12px; z-index: 9999; pointer-events: none; }
@@ -579,14 +578,14 @@
         <!-- Search Bar -->
         <div class="search-wrapper">
             <span class="search-icon">🔍</span>
-            <input type="text" id="search-bar" class="form-control" placeholder="Search by name or city..." oninput="handleSearchInput()" autocomplete="off">
+            <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
             <div id="search-suggestions" class="suggestions-dropdown"></div>
         </div>
 
         <!-- Hovering Cities Bar -->
         <div id="hovering-cities" class="hovering-cities-container"></div>
 
-        <!-- Sort & Backup Controls -->
+        <!-- Sort, Payment Filter & Backup Controls -->
         <div class="filter-controls">
             <select id="sort-records" class="filter-select" onchange="renderRecords()">
                 <option value="newest">🕒 Sort: Newest First</option>
@@ -594,7 +593,16 @@
                 <option value="highest">💰 Sort: Highest Amount</option>
                 <option value="lowest">📉 Sort: Lowest Amount</option>
             </select>
-            <button type="button" class="btn-secondary-3d" style="flex: 0.75; margin-bottom: 0;" onclick="downloadJsonBackup()">🛡️ JSON Backup</button>
+            <select id="filter-payment" class="filter-select" onchange="renderRecords()">
+                <option value="all">💳 All Transactions</option>
+                <option value="Cash">💵 Cash Only</option>
+                <option value="UPI">📱 UPI Only</option>
+                <option value="Credit">📒 Credit Only</option>
+                <option value="PendingCredit">📌 Pending Credit Balances</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <button type="button" class="btn-secondary-3d" style="width: 100%;" onclick="downloadJsonBackup()">🛡️ JSON Backup</button>
         </div>
         <div class="showing-text" id="showing-count">📊 0 records</div>
         <div id="records-container"></div>
@@ -1068,14 +1076,35 @@
         }
 
         function renderRecords() {
-            const query = document.getElementById('search-bar').value.toLowerCase();
+            const rawQuery = document.getElementById('search-bar').value.trim().toLowerCase();
+            const paymentFilter = document.getElementById('filter-payment')?.value || 'all';
             const container = document.getElementById('records-container');
             container.innerHTML = '';
 
-            const filtered = records.filter(r => 
-                (r.name && r.name.toLowerCase().includes(query)) || 
-                (r.city && r.city.toLowerCase().includes(query))
-            );
+            const filtered = records.filter(r => {
+                const paymentMode = (r.payment || 'Cash').toLowerCase();
+                const deposit = r.deposit || 0;
+                const totalBill = r.items * r.price;
+                const remaining = Math.max(0, totalBill - deposit);
+                
+                // Keyword search matching name, city, or payment mode terms
+                const matchesQuery = !rawQuery || 
+                    (r.name && r.name.toLowerCase().includes(rawQuery)) || 
+                    (r.city && r.city.toLowerCase().includes(rawQuery)) ||
+                    paymentMode.includes(rawQuery) ||
+                    ((rawQuery === 'udhar' || rawQuery === 'credit') && paymentMode === 'credit') ||
+                    ((rawQuery === 'pending' || rawQuery === 'balance') && remaining > 0);
+
+                if (!matchesQuery) return false;
+
+                // Dropdown payment filter check
+                if (paymentFilter === 'Cash' && paymentMode !== 'cash') return false;
+                if (paymentFilter === 'UPI' && paymentMode !== 'upi') return false;
+                if (paymentFilter === 'Credit' && paymentMode !== 'credit') return false;
+                if (paymentFilter === 'PendingCredit' && (paymentMode !== 'credit' || remaining <= 0)) return false;
+
+                return true;
+            });
 
             const sortMode = document.getElementById('sort-records')?.value || 'newest';
             filtered.sort((a, b) => {
@@ -1115,7 +1144,6 @@
                             <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 4px;">📅 ${d}/${m}/${y} | <span style="color: var(--text-main); font-weight: 700;">${paymentText}</span></div>
                         </div>
                         <div class="record-actions">
-                            <button type="button" class="btn-icon whatsapp" onclick="shareWhatsApp('${r.id}')" title="Share Receipt on WhatsApp">💬</button>
                             <button type="button" class="btn-icon edit" onclick="startEditRecord('${r.id}')" title="Edit Record">✏️</button>
                             <button type="button" class="btn-icon" onclick="openModal('${r.id}')" title="Delete">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1221,30 +1249,6 @@
             link.click();
             URL.revokeObjectURL(url);
             showToast('📥 CSV exported successfully');
-        }
-
-        // WhatsApp Share
-        function shareWhatsApp(id) {
-            const r = records.find(rec => rec.id === id);
-            if (!r) return;
-            const total = (r.items * r.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
-            const payment = r.payment || 'Cash';
-            let payDetails = `Payment: ${payment}`;
-            if (payment === 'Credit') {
-                const deposit = r.deposit || 0;
-                const remaining = Math.max(0, (r.items * r.price) - deposit);
-                payDetails = `Payment: Credit (Paid: ₹${deposit.toFixed(2)}, Balance: ₹${remaining.toFixed(2)})`;
-            }
-
-            const text = `*📘 Kabir Emporium - Sale Receipt*\n` +
-                         `📅 Date: ${d}/${m}/${y}\n` +
-                         `👤 Customer: ${r.name} (${r.city})\n` +
-                         `📦 Items: ${r.items} × ₹${Number(r.price).toFixed(2)}\n` +
-                         `💳 ${payDetails}\n` +
-                         `💰 *Total Amount: ₹${total}*\n\n` +
-                         `Thank you for shopping with us! 🙏`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function showTopInsights() {
