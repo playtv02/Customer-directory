@@ -511,7 +511,7 @@
             <div class="form-group" style="margin-bottom: 20px;">
                 <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
             </div>
-            <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect to GitHub</button>
+            <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
         </div>
 
         <!-- Dashboard -->
@@ -598,7 +598,7 @@
                     <span id="live-bill-total">₹0.00</span>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 8px;">💾 Save directly to GitHub</button>
+                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
                 <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
             </form>
         </div>
@@ -708,7 +708,7 @@
             row.style.cssText = 'display: flex; flex-direction: column; gap: 8px; background: #eef2f6; padding: 12px; border-radius: 12px; box-shadow: var(--shadow-pressed);';
             row.innerHTML = `
                 <div style="width: 100%;">
-                    <input type="text" class="form-control item-desc" placeholder="Item Name (e.g. Shirt)" value="${desc}" style="width: 100%; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;">
+                    <input type="text" class="form-control item-desc" placeholder="Item Name" value="${desc}" style="width: 100%; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;">
                 </div>
                 <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
                     <input type="number" class="form-control item-qty" placeholder="Qty" value="${qty}" min="1" required style="flex: 1; min-width: 60px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
