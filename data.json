@@ -246,8 +246,15 @@
     "id": "1794726686149",
     "name": "Chandubhai Rajabhai",
     "city": "Utwada",
-    "items": 1,
-    "price": 700,
+    "itemList": [
+      {
+        "desc": "KHATAR - 35",
+        "qty": 1,
+        "price": 700
+      }
+    ],
+    "payment": "Cash",
+    "deposit": 0,
     "date": "2026-11-14"
   },
   {
