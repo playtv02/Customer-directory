@@ -140,6 +140,12 @@
             cursor: pointer;
         }
         .sync-pill:hover { transform: scale(1.05); box-shadow: 5px 6px 12px rgba(15, 23, 42, 0.1), -3px -3px 8px rgba(255, 255, 255, 0.9); }
+        
+        @keyframes blink-sync {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
         .status-dot {
             width: 10px;
             height: 10px;
@@ -150,7 +156,12 @@
         }
         .status-dot.active { background: var(--success); box-shadow: 0 0 12px var(--success), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
         .status-dot.error { background: var(--danger); box-shadow: 0 0 12px var(--danger), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
-        .status-dot.syncing { background: var(--warning); box-shadow: 0 0 12px var(--warning), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
+        .status-dot.syncing { 
+            background: var(--warning); 
+            box-shadow: 0 0 12px var(--warning), inset 2px 2px 4px rgba(255, 255, 255, 0.6); 
+            animation: blink-sync 1.2s infinite ease-in-out; 
+        }
+
         /* Bank Holiday Pill */
         .bank-status-pill {
             display: inline-flex;
@@ -271,7 +282,7 @@
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 0 var(--accent-depth), 0 20px 25px rgba(37, 99, 235, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3); }
         .btn-primary:active { transform: translateY(8px); box-shadow: 0 0px 0 var(--accent-depth), 0 2px 5px rgba(37, 99, 235, 0.4), inset 0 4px 6px rgba(0, 0, 0, 0.2); border-top: 1px solid transparent; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: translateY(8px); box-shadow: 0 0px 0 var(--accent-depth); }
-        /* Action Toolbar & Sort Bar */
+        
         .btn-secondary-3d {
             flex: 1;
             min-width: 130px;
@@ -294,7 +305,6 @@
         .btn-secondary-3d:hover { transform: translateY(-2px); color: var(--accent); }
         .btn-secondary-3d:active { transform: translateY(5px); box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15, 23, 42, 0.1); }
         
-        /* Updated Filter Controls for perfect responsive containment */
         .filter-controls {
             display: flex;
             gap: 12px;
@@ -397,7 +407,7 @@
             border: 1px solid var(--border-highlight);
             box-shadow: 2px 4px 8px rgba(15, 23, 42, 0.05), inset 1px 1px 2px rgba(255, 255, 255, 1);
         }
-        .record-details { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 16px; border-top: 2px dashed rgba(15, 23, 42, 0.05); }
+        .record-details { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; padding-top: 16px; border-top: 2px dashed rgba(15, 23, 42, 0.05); }
         .record-calc { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
         .record-total { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.02em; color: var(--accent); text-shadow: 1px 1px 0 rgba(255, 255, 255, 1); }
         .record-actions { display: flex; gap: 8px; flex-shrink: 0; }
@@ -521,23 +531,27 @@
             <form id="record-form">
                 <input type="hidden" id="edit-record-id" value="">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
                     <div class="form-group" style="grid-column: span 2;">
                         <label for="cust-name">👤 Customer Name</label>
                         <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
                         <datalist id="customer-datalist"></datalist>
                     </div>
+                    
                     <div class="form-group" style="grid-column: span 2;">
                         <label for="cust-city">🏙️ City/Village</label>
                         <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
                     </div>
-                    <div class="form-group">
-                        <label for="cust-items">🔢 Item Count</label>
-                        <input type="number" id="cust-items" class="form-control" value="1" min="1" required>
+
+                    <!-- Multiple Items Container -->
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>🛒 Bill Items</label>
+                        <div id="bill-items-wrapper" style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
+                            <!-- Dynamic rows injected here -->
+                        </div>
+                        <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
                     </div>
-                    <div class="form-group">
-                        <label for="cust-price">💵 Price (₹)</label>
-                        <input type="number" id="cust-price" class="form-control" step="0.01" min="0" required placeholder="e.g. 500.00">
-                    </div>
+
                     <div class="form-group" style="grid-column: span 2;">
                         <label for="payment-mode">💳 Payment Mode</label>
                         <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
@@ -546,6 +560,7 @@
                             <option value="Credit">📒 Credit (Udhar)</option>
                         </select>
                     </div>
+
                     <!-- Credit Specific Fields (Hidden by default) -->
                     <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
                         <div class="form-group" style="margin-bottom: 12px;">
@@ -557,15 +572,18 @@
                             <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
                         </div>
                     </div>
+                    
                     <div class="form-group" style="grid-column: span 2;">
                         <label for="cust-date">📅 Date</label>
                         <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
                     </div>
                 </div>
+
                 <div class="live-total-box">
                     <span>🧮 Bill Total Preview</span>
                     <span id="live-bill-total">₹0.00</span>
                 </div>
+                
                 <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 8px;">💾 Save directly to GitHub</button>
                 <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
             </form>
@@ -630,6 +648,20 @@
         let fileSha = null;
         let deleteTargetId = null;
 
+        // Helper to handle multiple items calculation robustly 
+        // Ensures old single-item saved data works perfectly alongside the new multi-item records.
+        function getRecordTotals(r) {
+            if (r.itemList && r.itemList.length > 0) {
+                let bill = 0, qty = 0;
+                r.itemList.forEach(i => {
+                    bill += (i.qty * i.price);
+                    qty += i.qty;
+                });
+                return { bill, qty };
+            }
+            return { bill: (r.items || 1) * (Number(r.price) || 0), qty: r.items || 1 };
+        }
+
         function getLocalTodayDate() {
             const now = new Date();
             const offset = now.getTimezoneOffset() * 60000;
@@ -640,17 +672,45 @@
             const todayStr = getLocalTodayDate();
             document.getElementById('cust-date').value = todayStr;
             document.getElementById('banner-year').textContent = new Date().getFullYear();
-            document.getElementById('cust-items').addEventListener('input', updateLiveTotal);
-            document.getElementById('cust-price').addEventListener('input', updateLiveTotal);
+            
+            addBillItemRow(); // Initialize first empty item row
+            
             checkBankHoliday();
             updateDashboard();
             checkTokenAndLoad();
+            
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.search-wrapper')) {
                     document.getElementById('search-suggestions').classList.remove('active');
                 }
             });
         });
+
+        // Dynamic Bill Items Logic
+        function addBillItemRow(desc = '', qty = 1, price = '') {
+            const wrapper = document.getElementById('bill-items-wrapper');
+            const row = document.createElement('div');
+            row.className = 'bill-item-row';
+            row.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #eef2f6; padding: 12px; border-radius: 12px; box-shadow: var(--shadow-pressed);';
+            row.innerHTML = `
+                <input type="text" class="form-control item-desc" placeholder="Item Name (e.g. Shirt)" value="${desc}" style="flex: 1; min-width: 120px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;">
+                <input type="number" class="form-control item-qty" placeholder="Qty" value="${qty}" min="1" required style="width: 70px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
+                <input type="number" class="form-control item-price" placeholder="Price (₹)" step="0.01" min="0" value="${price}" required style="width: 100px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
+                <button type="button" class="btn-icon" style="margin-bottom: 0; padding: 10px; background: #fff; box-shadow: 0 2px 4px rgba(15,23,42,0.05);" onclick="removeBillItemRow(this)" title="Remove">🗑️</button>
+            `;
+            wrapper.appendChild(row);
+            updateLiveTotal();
+        }
+
+        function removeBillItemRow(btn) {
+            const wrapper = document.getElementById('bill-items-wrapper');
+            if (wrapper.children.length > 1) {
+                btn.closest('.bill-item-row').remove();
+                updateLiveTotal();
+            } else {
+                showToast('⚠️ Bill must have at least one item');
+            }
+        }
 
         // Bank Holiday Checker
         function checkBankHoliday() {
@@ -686,7 +746,6 @@
             }
         }
 
-        // Toggle Credit Deposit fields
         function toggleCreditFields() {
             const mode = document.getElementById('payment-mode').value;
             const creditContainer = document.getElementById('credit-container');
@@ -699,11 +758,14 @@
             updateLiveTotal();
         }
 
-        // Live Bill Total & Remaining Balance Calculator
         function updateLiveTotal() {
-            const items = parseFloat(document.getElementById('cust-items').value) || 0;
-            const price = parseFloat(document.getElementById('cust-price').value) || 0;
-            const total = items * price;
+            let total = 0;
+            document.querySelectorAll('.bill-item-row').forEach(row => {
+                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                total += (qty * price);
+            });
+
             document.getElementById('live-bill-total').textContent = `₹${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
             const mode = document.getElementById('payment-mode').value;
@@ -714,7 +776,6 @@
             }
         }
 
-        // Repeat Customer Autofill
         function populateCustomerDatalist() {
             const datalist = document.getElementById('customer-datalist');
             if (!datalist) return;
@@ -903,7 +964,6 @@
             }
         }
 
-        // Save & Edit Handler
         window.saveCustomerRecord = async function(event) {
             if (event) {
                 event.preventDefault();
@@ -921,13 +981,22 @@
             const editId = document.getElementById('edit-record-id').value;
             const paymentMode = document.getElementById('payment-mode').value;
             const depositAmt = paymentMode === 'Credit' ? (parseFloat(document.getElementById('credit-deposit').value) || 0) : 0;
+            
+            // Build the dynamic items list array
+            const itemList = [];
+            document.querySelectorAll('.bill-item-row').forEach(row => {
+                itemList.push({
+                    desc: row.querySelector('.item-desc').value.trim(),
+                    qty: parseInt(row.querySelector('.item-qty').value) || 1,
+                    price: parseFloat(row.querySelector('.item-price').value) || 0
+                });
+            });
 
             const recordData = {
                 id: editId || Date.now().toString(),
                 name: document.getElementById('cust-name').value.trim(),
                 city: document.getElementById('cust-city').value.trim(),
-                items: parseInt(document.getElementById('cust-items').value, 10) || 1,
-                price: parseFloat(document.getElementById('cust-price').value) || 0,
+                itemList: itemList,
                 payment: paymentMode,
                 deposit: depositAmt,
                 date: document.getElementById('cust-date').value || getLocalTodayDate()
@@ -955,14 +1024,23 @@
         function startEditRecord(id) {
             const rec = records.find(r => r.id === id);
             if (!rec) return;
+            
             document.getElementById('edit-record-id').value = rec.id;
             document.getElementById('cust-name').value = rec.name;
             document.getElementById('cust-city').value = rec.city;
-            document.getElementById('cust-items').value = rec.items;
-            document.getElementById('cust-price').value = rec.price;
             document.getElementById('payment-mode').value = rec.payment || 'Cash';
             document.getElementById('credit-deposit').value = rec.deposit || 0;
             document.getElementById('cust-date').value = rec.date;
+            
+            // Populate Items dynamically
+            const wrapper = document.getElementById('bill-items-wrapper');
+            wrapper.innerHTML = ''; // Clear rows
+            if (rec.itemList && rec.itemList.length > 0) {
+                rec.itemList.forEach(item => addBillItemRow(item.desc, item.qty, item.price));
+            } else {
+                // Fallback for legacy single-item records
+                addBillItemRow('', rec.items || 1, rec.price || '');
+            }
             
             toggleCreditFields();
             updateLiveTotal();
@@ -978,11 +1056,15 @@
             const form = document.getElementById('record-form');
             form.reset();
             document.getElementById('edit-record-id').value = '';
-            document.getElementById('cust-items').value = 1;
+            
+            document.getElementById('bill-items-wrapper').innerHTML = '';
+            addBillItemRow(); // Reset back to a single empty row
+            
             document.getElementById('payment-mode').value = 'Cash';
             toggleCreditFields();
             document.getElementById('cust-date').value = getLocalTodayDate();
             updateLiveTotal();
+            
             const saveBtn = document.getElementById('save-btn');
             saveBtn.textContent = '💾 Save directly to GitHub';
             document.getElementById('cancel-edit-btn').style.display = 'none';
@@ -1081,12 +1163,11 @@
             container.innerHTML = '';
 
             const filtered = records.filter(r => {
+                const totals = getRecordTotals(r);
                 const paymentMode = (r.payment || 'Cash').toLowerCase();
                 const deposit = r.deposit || 0;
-                const totalBill = r.items * r.price;
-                const remaining = Math.max(0, totalBill - deposit);
+                const remaining = Math.max(0, totals.bill - deposit);
                 
-                // Keyword search matching name, city, or payment mode terms
                 const matchesQuery = !rawQuery || 
                     (r.name && r.name.toLowerCase().includes(rawQuery)) || 
                     (r.city && r.city.toLowerCase().includes(rawQuery)) ||
@@ -1095,8 +1176,6 @@
                     ((rawQuery === 'pending' || rawQuery === 'balance') && remaining > 0);
 
                 if (!matchesQuery) return false;
-
-                // Dropdown payment filter check
                 if (paymentFilter === 'Cash' && paymentMode !== 'cash') return false;
                 if (paymentFilter === 'UPI' && paymentMode !== 'upi') return false;
                 if (paymentFilter === 'Credit' && paymentMode !== 'credit') return false;
@@ -1105,10 +1184,7 @@
                 return true;
             });
 
-            // Default sort mode implementation without the select element
-            filtered.sort((a, b) => {
-                return (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id); // Sort Newest First
-            });
+            filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id));
 
             document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
 
@@ -1118,10 +1194,10 @@
             }
 
             filtered.forEach(r => {
-                const total = (r.items * r.price).toFixed(2);
+                const totals = getRecordTotals(r);
                 const payment = r.payment || 'Cash';
                 const deposit = r.deposit || 0;
-                const remaining = Math.max(0, r.items * r.price - deposit);
+                const remaining = Math.max(0, totals.bill - deposit);
                 const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
 
                 let paymentText = payment;
@@ -1129,6 +1205,25 @@
                 else if (payment === 'UPI') paymentText = '📱 UPI';
                 else if (payment === 'Credit') {
                     paymentText = `📒 Credit (Paid: ₹${deposit.toFixed(2)} | Bal: ₹${remaining.toFixed(2)})`;
+                }
+
+                // Generate Itemized HTML Block
+                let itemsHtml = '';
+                if (r.itemList && r.itemList.length > 0) {
+                    itemsHtml = r.itemList.map(i => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(15,23,42,0.05);">
+                            <span style="font-weight: 600; color: var(--text-main);">${i.desc || 'Item'} <span style="color: var(--text-muted); font-size: 0.75rem;">(x${i.qty})</span></span>
+                            <span style="font-weight: 700; color: var(--text-main);">₹${(i.qty*i.price).toFixed(2)}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    // Backwards compatibility output
+                    itemsHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(15,23,42,0.05);">
+                            <span style="font-weight: 600; color: var(--text-main);">Legacy Record <span style="color: var(--text-muted); font-size: 0.75rem;">(x${r.items || 1})</span></span>
+                            <span style="font-weight: 700; color: var(--text-main);">₹${(Number(r.price) * (r.items || 1)).toFixed(2)}</span>
+                        </div>
+                    `;
                 }
 
                 const card = document.createElement('div');
@@ -1147,29 +1242,35 @@
                         </div>
                     </div>
                     <span class="badge" style="cursor: pointer;" onclick="filterByCity('${r.city.replace(/'/g, "\\'")}')">📍 ${r.city}</span>
+                    
+                    <div style="background: var(--surface-hover-3d); padding: 12px; border-radius: 12px; margin-top: 16px; border: 1px solid var(--border-highlight);">
+                        <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">🛒 Items List</div>
+                        ${itemsHtml}
+                    </div>
+
                     <div class="record-details">
-                        <div class="record-calc">📦 ${r.items} × ₹${Number(r.price).toFixed(2)}</div>
-                        <div class="record-total">₹${Number(total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        <div class="record-calc">📦 Total Qty: ${totals.qty}</div>
+                        <div class="record-total">₹${Number(totals.bill).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Dashboard Calculation (Excludes unpaid credit balance from total realized sales)
+        // Dashboard Calculation
         function updateDashboard() {
             const selectedDate = document.getElementById('cust-date').value;
             let daySale = 0, totalItems = 0, cities = new Set();
             const yearMap = {};
 
             records.forEach(r => {
-                const totalBill = r.items * r.price;
-                const realizedSale = (r.payment === 'Credit') ? (r.deposit || 0) : totalBill;
+                const totals = getRecordTotals(r);
+                const realizedSale = (r.payment === 'Credit') ? (r.deposit || 0) : totals.bill;
 
                 if (r.date === selectedDate) {
                     daySale += realizedSale;
                 }
-                totalItems += r.items;
+                totalItems += totals.qty;
                 if (r.city) cities.add(r.city.toLowerCase());
 
                 const year = r.date ? r.date.split('-')[0] : 'Unknown';
@@ -1178,7 +1279,7 @@
                 }
                 yearMap[year].sale += realizedSale;
                 yearMap[year].count += 1;
-                yearMap[year].items += r.items;
+                yearMap[year].items += totals.qty;
             });
 
             if (selectedDate) {
