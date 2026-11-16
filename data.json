@@ -98,8 +98,13 @@
     "id": "1794817743977",
     "name": "Lalabhai solanki",
     "city": "Utwada",
-    "items": 1,
-    "price": 1400,
+    "itemList": [
+      {
+        "desc": "UV 16X32",
+        "qty": 1,
+        "price": 1400
+      }
+    ],
     "payment": "Cash",
     "deposit": 0,
     "date": "2026-11-16"
