@@ -39,6 +39,8 @@
     "city": "Budhej",
     "items": 1,
     "price": 1500,
+    "payment": "Credit",
+    "deposit": 0,
     "date": "2026-11-16"
   },
   {
