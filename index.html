@@ -490,14 +490,18 @@
                 <h1 class="brand-title">📘 Kabir Emporium</h1>
                 <span class="brand-subtitle">Customer & Sales Directory System</span>
             </div>
-            <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token">
-                <div id="status-dot" class="status-dot"></div>
-                <span id="status-text">Connecting...</span>
-            </div>
-            <div id="bank-holiday-pill" class="bank-status-pill">
-                <span id="bank-status-icon">🏦</span>
-                <span id="bank-status-text">Checking Bank Status...</span>
-            </div>
+         <!-- Pill Container for same-line layout -->
+    <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
+      <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token">
+        <div id="status-dot" class="status-dot"></div>
+        <span id="status-text">Connecting...</span>
+      </div>
+
+      <div id="bank-holiday-pill" class="bank-status-pill">
+        <span id="bank-status-icon">🏦</span>
+        <span id="bank-status-text">Checking Bank Status...</span>
+      </div>
+    </div>
         </div>
 
         <!-- GitHub Settings Panel -->
