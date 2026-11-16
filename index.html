@@ -490,18 +490,19 @@
                 <h1 class="brand-title">📘 Kabir Emporium</h1>
                 <span class="brand-subtitle">Customer & Sales Directory System</span>
             </div>
-         <!-- Pill Container for same-line layout -->
-    <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
-      <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token">
-        <div id="status-dot" class="status-dot"></div>
-        <span id="status-text">Connecting...</span>
-      </div>
 
-      <div id="bank-holiday-pill" class="bank-status-pill">
-        <span id="bank-status-icon">🏦</span>
-        <span id="bank-status-text">Checking Bank Status...</span>
-      </div>
-    </div>
+            <!-- Pill Container for forced same-line layout -->
+            <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
+              <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap;">
+                <div id="status-dot" class="status-dot"></div>
+                <span id="status-text">Connecting...</span>
+              </div>
+
+              <div id="bank-holiday-pill" class="bank-status-pill" style="white-space: nowrap;">
+                <span id="bank-status-icon">🏦</span>
+                <span id="bank-status-text">Checking Bank Status...</span>
+              </div>
+            </div>
         </div>
 
         <!-- GitHub Settings Panel -->
@@ -598,7 +599,7 @@
                     <span id="live-bill-total">₹0.00</span>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
+                <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
                 <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
             </form>
         </div>
@@ -1230,7 +1231,7 @@
                 if (r.itemList && r.itemList.length > 0) {
                     itemsHtml = r.itemList.map(i => `
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(15,23,42,0.05);">
-                            <span style="font-weight: 600; color: var(--text-main);">${i.desc || 'Item'} <span style="color: var(--text-muted); font-size: 0.75rem;">(x${i.qty})</span></span>
+                            <span style="font-weight: 600; color: var(--text-main);">${i.desc || 'Item'} <span style="color: var(--text-muted); font-size: 0.75rem;">(x${i.qty} @ ₹${Number(i.price).toFixed(2)})</span></span>
                             <span style="font-weight: 700; color: var(--text-main);">₹${(i.qty*i.price).toFixed(2)}</span>
                         </div>
                     `).join('');
@@ -1238,7 +1239,7 @@
                     // Backwards compatibility output
                     itemsHtml = `
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(15,23,42,0.05);">
-                            <span style="font-weight: 600; color: var(--text-main);">Legacy Record <span style="color: var(--text-muted); font-size: 0.75rem;">(x${r.items || 1})</span></span>
+                            <span style="font-weight: 600; color: var(--text-main);">Legacy Record <span style="color: var(--text-muted); font-size: 0.75rem;">(x${r.items || 1} @ ₹${Number(r.price || 0).toFixed(2)})</span></span>
                             <span style="font-weight: 700; color: var(--text-main);">₹${(Number(r.price) * (r.items || 1)).toFixed(2)}</span>
                         </div>
                     `;
