@@ -123,8 +123,20 @@
     "id": "1794815732264",
     "name": "Navghan bhai Gandhubhai Bharvad",
     "city": "Malpur",
-    "items": 1,
-    "price": 2000,
+    "itemList": [
+      {
+        "desc": "",
+        "qty": 1,
+        "price": 2000
+      },
+      {
+        "desc": "",
+        "qty": 2,
+        "price": 800
+      }
+    ],
+    "payment": "Cash",
+    "deposit": 0,
     "date": "2026-11-16"
   },
   {
