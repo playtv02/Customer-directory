@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Customer directory for Kabir Emporium">
     <title>Kabir Emporium Directory</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,200 +13,204 @@
 </head>
 <body>
     <div class="container">
-        <!-- Brand & Sync Header -->
-        <header class="brand-header-card">
-            <div class="brand-left">
-                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">🌙</button>
-                <div class="brand-titles">
-                    <h1 class="brand-title">KABIR EMPORIUM</h1>
-                    <p class="brand-subtitle">Customer Directory &amp; Ledger System</p>
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <div class="logo-text">
+                    <h2>Kabir Emporium</h2>
+                    <span class="logo-subtitle">Directory System</span>
                 </div>
             </div>
-            <div class="sync-pill" id="sync-pill" onclick="toggleSettingsPanel()" role="button" tabindex="0" aria-label="Sync status and settings" aria-expanded="false">
-                <span class="sync-dot yellow" id="sync-dot"></span>
-                <span id="sync-text">Checking Token...</span>
-            </div>
-        </header>
 
-        <!-- GitHub Settings Panel (Hidden by default) -->
-        <div id="settings-panel" class="settings-panel" style="display: none;">
-            <div class="settings-header">
-                <h3>GitHub Data Synchronization</h3>
-                <span class="close-settings" onclick="toggleSettingsPanel()">&times;</span>
-            </div>
-            <p class="settings-desc">Enter a GitHub Personal Access Token (PAT) with repo write permissions to enable cloud sync. Leave blank to operate in local-only mode.</p>
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label for="gh-token-input">GitHub Personal Access Token:</label>
-                <input type="password" id="gh-token-input" class="form-control" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" aria-label="GitHub Personal Access Token">
-            </div>
-            <div class="settings-actions">
-                <button class="btn btn-primary" onclick="saveToken()" aria-label="Save Token">Save Token</button>
-                <button class="btn btn-secondary" onclick="fetchDataFromGitHub()" aria-label="Pull Data from GitHub">Pull Data from GitHub</button>
-                <button class="btn btn-secondary" onclick="pushDataToGitHub()" aria-label="Push Data to GitHub">Push Data to GitHub</button>
-            </div>
-        </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-tab="customers">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="analytics">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </a>
+            </nav>
 
-        <!-- Dashboard Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card blue">
-                <div class="stat-label">Total Customers</div>
-                <div class="stat-value" id="stat-total-cust">0</div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-label">Total Revenue</div>
-                <div class="stat-value" id="stat-total-rev">₹0.00</div>
-            </div>
-            <div class="stat-card yellow">
-                <div class="stat-label">Pending Collection</div>
-                <div class="stat-value" id="stat-pending">₹0.00</div>
-            </div>
-            <div class="stat-card purple">
-                <div class="stat-label">Today's Sales</div>
-                <div class="stat-value" id="stat-today">₹0.00</div>
-            </div>
-        </div>
-
-        <!-- Main Workspace Grid -->
-        <div class="workspace-grid">
-            <!-- Form Section -->
-            <div class="form-card">
-                <h2 class="card-title" id="form-card-title">New Customer Record</h2>
-                <form id="customer-form" onsubmit="saveCustomerRecord(event)">
-                    <div class="form-group">
-                        <label for="cust-name">Customer Name *</label>
-                        <input type="text" id="cust-name" class="form-control" placeholder="Search or type name..." list="customer-list" required autocomplete="off" oninput="autoFillCustomerCity()" aria-label="Customer Name">
-                        <datalist id="customer-list"></datalist>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-details">
+                        <span class="user-name">Admin</span>
+                        <span class="user-role">System Administrator</span>
                     </div>
+                </div>
+            </div>
+        </aside>
 
-                    <div class="form-group">
-                        <label for="cust-phone">Phone Number</label>
-                        <input type="tel" id="cust-phone" class="form-control" placeholder="10-digit number" aria-label="Phone Number">
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header Bar -->
+            <header class="header">
+                <div class="header-search">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search customers by name, email, or company...">
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" id="exportBtn">
+                        <span>📥</span> Export CSV
+                    </button>
+                    <button class="btn btn-primary" id="addCustomerBtn">
+                        <span>➕</span> Add Customer
+                    </button>
+                </div>
+            </header>
+
+            <!-- Tab Content: Customers -->
+            <div class="tab-content active" id="customersTab">
+                <!-- Stats Bar -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">👥</div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="totalCustomersCount">0</span>
+                            <span class="stat-label">Total Customers</span>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="cust-city">City / Town</label>
-                        <input type="text" id="cust-city" class="form-control" placeholder="City name" aria-label="City Name">
+                    <div class="stat-card">
+                        <div class="stat-icon green">✅</div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="activeCustomersCount">0</span>
+                            <span class="stat-label">Active Status</span>
+                        </div>
                     </div>
-
-                    <!-- Items Purchased Table -->
-                    <div class="form-group">
-                        <label>Items Purchased</label>
-                        <table class="items-table" id="items-table">
-                            <thead>
-                                <tr>
-                                    <th>Item Description</th>
-                                    <th style="width: 70px;">Qty</th>
-                                    <th style="width: 100px;">Rate ₹</th>
-                                    <th style="width: 30px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="items-tbody">
-                                <tr>
-                                    <td><input type="text" class="form-control bill-desc" placeholder="Description (e.g. Kurti)" required aria-label="Item Description"></td>
-                                    <td><input type="number" class="form-control bill-qty" placeholder="Qty" value="1" min="1" oninput="updateLiveTotal()" required aria-label="Item Quantity"></td>
-                                    <td><input type="number" class="form-control bill-rate" placeholder="Rate ₹" step="0.01" min="0" oninput="updateLiveTotal()" required aria-label="Item Price"></td>
-                                    <td><button type="button" class="btn-remove-row" onclick="removeBillItemRow(this)" aria-label="Remove item">&times;</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <button type="button" class="btn-secondary-3d" style="width: 100%; margin-top: 6px; background: transparent;" onclick="addBillItemRow()" aria-label="Add Another Item">+ Add Another Item</button>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">💎</div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="vipCustomersCount">0</span>
+                            <span class="stat-label">VIP Tier</span>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Total Bill Amount</label>
-                        <div class="bill-total-display" id="live-total-display">₹0.00</div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">💰</div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="totalRevenueCount">$0</span>
+                            <span class="stat-label">Total Revenue</span>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="payment-mode">Payment Mode *</label>
-                        <select id="payment-mode" class="form-control" onchange="toggleCreditFields()" aria-label="Payment Mode">
-                            <option value="Paid Cash">Paid Cash</option>
-                            <option value="Paid Online/UPI">Paid Online/UPI</option>
-                            <option value="Paid Card">Paid Card</option>
-                            <option value="Credit / Udhaar">Credit / Udhaar (Pending)</option>
-                            <option value="Partially Paid">Partially Paid</option>
+                <!-- Filter & Control Bar -->
+                <div class="controls-bar">
+                    <div class="filter-group">
+                        <select id="statusFilter" class="select-input">
+                            <option value="all">All Statuses</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                        <select id="tierFilter" class="select-input">
+                            <option value="all">All Tiers</option>
+                            <option value="VIP">VIP</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Standard">Standard</option>
+                            <option value="Basic">Basic</option>
+                        </select>
+                        <select id="sortBy" class="select-input">
+                            <option value="name">Sort by Name</option>
+                            <option value="company">Sort by Company</option>
+                            <option value="spent">Sort by Total Spent</option>
+                            <option value="date">Sort by Join Date</option>
                         </select>
                     </div>
-
-                    <div class="form-group" id="deposit-group" style="display: none;">
-                        <label for="credit-deposit">Deposit / Advance Paid (₹)</label>
-                        <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()" aria-label="Customer Deposit Amount">
-                        <small class="form-help" id="due-amount-help" style="color: #e74c3c; font-weight: 600;"></small>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="table" title="Table View">📋</button>
+                        <button class="toggle-btn" data-view="grid" title="Grid View">🔲</button>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="cust-date">Date *</label>
-                        <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()" aria-label="Date">
-                    </div>
-
-                    <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;" aria-label="Save Customer Record">Save Record</button>
-                    <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()" aria-label="Cancel Editing">Cancel Edit</button>
-                </form>
+                <!-- Directory Container (Table & Grid views rendered by JS) -->
+                <div id="directoryView" class="directory-container view-table">
+                    <!-- Dynamic Content -->
+                </div>
             </div>
 
-            <!-- Table & Filter Section -->
-            <div class="records-card">
-                <div class="records-header">
-                    <div class="search-filter-box">
-                        <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off" aria-label="Search records">
-                        <select id="filter-payment" class="filter-select" onchange="renderRecords()" aria-label="Filter by Payment Mode">
-                            <option value="ALL">All Payment Statuses</option>
-                            <option value="Paid">All Paid</option>
-                            <option value="Paid Cash">Paid Cash</option>
-                            <option value="Paid Online/UPI">Paid Online/UPI</option>
-                            <option value="Paid Card">Paid Card</option>
-                            <option value="Credit / Udhaar">Credit / Pending</option>
-                            <option value="Partially Paid">Partially Paid</option>
+            <!-- Tab Content: Analytics -->
+            <div class="tab-content" id="analyticsTab">
+                <div class="analytics-header">
+                    <h2>Directory Analytics & Insights</h2>
+                </div>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Tier Distribution</h3>
+                        <div class="chart-placeholder" id="tierChart"></div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Status Breakdown</h3>
+                        <div class="chart-placeholder" id="statusChart"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Customer Modal -->
+    <div class="modal" id="customerModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Customer</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="customerForm">
+                <input type="hidden" id="customerId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custName">Full Name *</label>
+                        <input type="text" id="custName" required placeholder="e.g. Jane Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="custEmail">Email Address *</label>
+                        <input type="email" id="custEmail" required placeholder="e.g. jane@example.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custPhone">Phone Number</label>
+                        <input type="tel" id="custPhone" placeholder="e.g. +1 555-0199">
+                    </div>
+                    <div class="form-group">
+                        <label for="custCompany">Company</label>
+                        <input type="text" id="custCompany" placeholder="e.g. Acme Corp">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custStatus">Status</label>
+                        <select id="custStatus">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="custTier">Tier</label>
+                        <select id="custTier">
+                            <option value="Standard">Standard</option>
+                            <option value="VIP">VIP</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Basic">Basic</option>
                         </select>
                     </div>
                 </div>
-
-                <!-- Hovering City Pills -->
-                <div class="city-pills-container" id="city-pills-container"></div>
-
-                <div class="table-container">
-                    <table class="records-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Customer Name</th>
-                                <th>Phone / City</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Paid</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="records-tbody">
-                            <!-- Dynamic rows rendered via JS -->
-                        </tbody>
-                    </table>
+                <div class="form-group">
+                    <label for="custSpent">Total Spent ($)</label>
+                    <input type="number" id="custSpent" min="0" step="0.01" placeholder="0.00">
                 </div>
-            </div>
-        </div>
-
-        <!-- Yearly Financial Summary -->
-        <div class="year-summary-card">
-            <h3 class="card-title">Yearly Financial Summary</h3>
-            <div class="year-grid" id="year-summary-grid"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveCustomerBtn">Save Customer</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <!-- Confirm Modal -->
-    <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirm-modal-title">
-        <div class="modal-box">
-            <h3 id="confirm-modal-title">Confirm Action</h3>
-            <p id="confirm-modal-text">Are you sure you want to proceed?</p>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('confirm-modal')" aria-label="Cancel delete">Cancel</button>
-                <button class="btn btn-danger" id="confirm-delete-btn" aria-label="Confirm delete">Delete</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
 
     <script src="script.js"></script>
 </body>
