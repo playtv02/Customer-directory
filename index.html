@@ -44,19 +44,6 @@
       <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
     </div>
 
-    <!-- 3D Pill-Shaped Main Panel Toggle -->
-    <div class="mode-toggle-wrapper">
-      <div class="mode-toggle-pill" id="panel-toggle-pill">
-        <div class="mode-toggle-slider"></div>
-        <button type="button" class="mode-toggle-btn active" id="btn-mode-customer" onclick="switchPanel('customer')">
-          🛍️ Customer Panel
-        </button>
-        <button type="button" class="mode-toggle-btn" id="btn-mode-employee" onclick="switchPanel('employee')">
-          👔 Add Employee
-        </button>
-      </div>
-    </div>
-
     <!-- ==================== CUSTOMER PANEL ==================== -->
     <div id="customer-panel">
       <!-- Dashboard -->
@@ -173,81 +160,6 @@
       </div>
       <div class="showing-text" id="showing-count">📊 0 records</div>
       <div id="records-container"></div>
-    </div>
-
-    <!-- ==================== EMPLOYEE PANEL ==================== -->
-    <div id="employee-panel" style="display: none;">
-      <!-- Employee Dashboard -->
-      <div class="dashboard" style="grid-template-columns: repeat(3, 1fr);">
-        <div class="card-3d stat-item">
-          <span class="stat-label">👥 Total Staff</span>
-          <span class="stat-value" id="emp-stat-total">0</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">✅ Active</span>
-          <span class="stat-value" id="emp-stat-active" style="color: var(--success);">0</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">💰 Monthly Payroll</span>
-          <span class="stat-value" id="emp-stat-salary">₹0</span>
-        </div>
-      </div>
-
-      <!-- Add / Edit Employee Form -->
-      <div class="card-3d card form-card-static">
-        <form id="employee-form">
-          <input type="hidden" id="edit-emp-id" value="">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="emp-name">👔 Employee Full Name</label>
-              <input type="text" id="emp-name" class="form-control" required placeholder="e.g. Rajesh Patel">
-            </div>
-
-            <div class="form-group">
-              <label for="emp-role">💼 Role / Designation</label>
-              <input type="text" id="emp-role" class="form-control" required placeholder="e.g. Sales Executive">
-            </div>
-
-            <div class="form-group">
-              <label for="emp-phone">📞 Mobile Number</label>
-              <input type="tel" id="emp-phone" class="form-control" required placeholder="e.g. 9876543210">
-            </div>
-
-            <div class="form-group">
-              <label for="emp-salary">💵 Monthly Salary (₹)</label>
-              <input type="number" id="emp-salary" class="form-control" step="0.01" min="0" required placeholder="e.g. 15000">
-            </div>
-
-            <div class="form-group">
-              <label for="emp-status">📌 Status</label>
-              <select id="emp-status" class="form-control">
-                <option value="Active">🟢 Active</option>
-                <option value="On Leave">🟡 On Leave</option>
-                <option value="Inactive">🔴 Inactive</option>
-              </select>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="emp-join-date">📅 Joining Date</label>
-              <input type="date" id="emp-join-date" class="form-control" required>
-            </div>
-          </div>
-
-          <button type="submit" class="btn-primary btn" id="save-emp-btn" style="margin-top: 8px;">💾 Save Employee to GitHub</button>
-          <button type="button" class="btn-secondary-3d" id="cancel-emp-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEmpEditMode()">❌ Cancel Editing</button>
-        </form>
-      </div>
-
-      <!-- Employee Directory List -->
-      <div class="records-section-header">
-        <div class="records-title">📋 Staff Directory</div>
-      </div>
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="emp-search-bar" class="form-control" placeholder="Search employee by name, role, or phone..." oninput="renderEmployees()">
-      </div>
-      <div class="showing-text" id="emp-showing-count">👥 0 employees</div>
-      <div id="employees-container"></div>
     </div>
   </div>
 
