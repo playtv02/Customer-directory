@@ -1,14 +1,10 @@
 const GITHUB_OWNER = 'playtv02';
 const GITHUB_REPO = 'Customer-directory';
 const FILE_PATH = 'data.json';
-const EMP_FILE_PATH = 'employees.json';
 
 let records = [];
 let fileSha = null;
 let deleteTargetId = null;
-
-let employees = [];
-let empFileSha = null;
 
 // Helpers
 const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
@@ -32,7 +28,6 @@ function getLocalTodayDate() {
 document.addEventListener('DOMContentLoaded', () => {
   const todayStr = getLocalTodayDate();
   document.getElementById('cust-date').value = todayStr;
-  document.getElementById('emp-join-date').value = todayStr;
   document.getElementById('banner-year').textContent = new Date().getFullYear();
   addBillItemRow();
   checkBankHoliday();
@@ -50,35 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.saveCustomerRecord(event);
   });
 });
-
-// Panel Switcher (Customer / Employee)
-function switchPanel(mode) {
-  const pill = document.getElementById('panel-toggle-pill');
-  const custBtn = document.getElementById('btn-mode-customer');
-  const empBtn = document.getElementById('btn-mode-employee');
-  const custPanel = document.getElementById('customer-panel');
-  const empPanel = document.getElementById('employee-panel');
-
-  if (mode === 'employee') {
-    pill.classList.add('employee-active');
-    empBtn.classList.add('active');
-    custBtn.classList.remove('active');
-    custPanel.style.display = 'none';
-    empPanel.style.display = 'block';
-    if (!document.getElementById('emp-join-date').value) {
-      document.getElementById('emp-join-date').value = getLocalTodayDate();
-    }
-    if (employees.length === 0 && localStorage.getItem('ke_gh_token')) {
-      fetchEmployeesFromGitHub();
-    }
-  } else {
-    pill.classList.remove('employee-active');
-    custBtn.classList.add('active');
-    empBtn.classList.remove('active');
-    empPanel.style.display = 'none';
-    custPanel.style.display = 'block';
-  }
-}
 
 // Bill Items Logic
 function addBillItemRow(desc = '', qty = 1, price = '') {
@@ -688,203 +654,6 @@ function renderYearSummary(yearMap) {
       </div>
       <div class="year-card-total">₹${data.sale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
       <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">📦 ${data.items} items sold</div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// Employee Panel Logic
-async function fetchEmployeesFromGitHub() {
-  const token = localStorage.getItem('ke_gh_token');
-  if (!token) return;
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${EMP_FILE_PATH}`, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
-      cache: 'no-store'
-    });
-    if (res.ok) {
-      const data = await res.json();
-      empFileSha = data.sha;
-      employees = JSON.parse(decodeBase64(data.content));
-    } else if (res.status === 404) {
-      employees = [];
-    }
-    updateEmployeeDashboard();
-    renderEmployees();
-  } catch (e) {
-    showToast('❌ Failed to load employee records');
-  }
-}
-
-async function pushEmployeesToGitHub() {
-  const token = localStorage.getItem('ke_gh_token');
-  const saveBtn = document.getElementById('save-emp-btn');
-  if (!token) {
-    toggleSettingsPanel();
-    showToast('⚠️ GitHub token missing.');
-    return false;
-  }
-
-  updateStatus('Syncing Staff...', 'syncing');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving...'; }
-
-  try {
-    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${EMP_FILE_PATH}`;
-    const checkRes = await fetch(apiUrl, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
-      cache: 'no-store'
-    });
-    let latestSha = checkRes.ok ? (await checkRes.json()).sha : null;
-
-    const body = {
-      message: `Update employee records (${new Date().toLocaleString()})`,
-      content: encodeBase64(JSON.stringify(employees, null, 2))
-    };
-    if (latestSha) body.sha = latestSha;
-
-    const res = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok) throw new Error(`GitHub save error (${res.status})`);
-    const result = await res.json();
-    empFileSha = result.content?.sha || latestSha;
-    updateStatus('Synced', 'active');
-    showToast('✅ Employee saved to GitHub');
-    return true;
-  } catch (err) {
-    updateStatus('Sync Failed', 'error');
-    showToast('❌ Save failed: ' + err.message);
-    return false;
-  } finally {
-    if (saveBtn) {
-      saveBtn.disabled = false;
-      const isEditing = Boolean(document.getElementById('edit-emp-id').value);
-      saveBtn.textContent = isEditing ? '✏️ Update Employee on GitHub' : '💾 Save Employee to GitHub';
-    }
-  }
-}
-
-document.getElementById('employee-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const prevEmployees = employees.slice();
-  const editId = document.getElementById('edit-emp-id').value;
-
-  const empData = {
-    id: editId || Date.now().toString(),
-    name: document.getElementById('emp-name').value.trim(),
-    role: document.getElementById('emp-role').value.trim(),
-    phone: document.getElementById('emp-phone').value.trim(),
-    salary: parseFloat(document.getElementById('emp-salary').value) || 0,
-    status: document.getElementById('emp-status').value,
-    joinDate: document.getElementById('emp-join-date').value || getLocalTodayDate()
-  };
-
-  if (editId) {
-    employees = employees.map(emp => emp.id === editId ? empData : emp);
-  } else {
-    employees = [empData, ...employees];
-  }
-
-  const saved = await pushEmployeesToGitHub();
-  if (!saved) { employees = prevEmployees; return; }
-
-  cancelEmpEditMode();
-  updateEmployeeDashboard();
-  renderEmployees();
-});
-
-function startEditEmployee(id) {
-  const emp = employees.find(e => e.id === id);
-  if (!emp) return;
-  document.getElementById('edit-emp-id').value = emp.id;
-  document.getElementById('emp-name').value = emp.name;
-  document.getElementById('emp-role').value = emp.role;
-  document.getElementById('emp-phone').value = emp.phone;
-  document.getElementById('emp-salary').value = emp.salary;
-  document.getElementById('emp-status').value = emp.status || 'Active';
-  document.getElementById('emp-join-date').value = emp.joinDate;
-
-  document.getElementById('save-emp-btn').textContent = '✏️ Update Employee on GitHub';
-  document.getElementById('cancel-emp-edit-btn').style.display = 'inline-flex';
-  document.getElementById('employee-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  showToast(`✏️ Editing ${emp.name}`);
-}
-
-function cancelEmpEditMode() {
-  document.getElementById('employee-form').reset();
-  document.getElementById('edit-emp-id').value = '';
-  document.getElementById('emp-join-date').value = getLocalTodayDate();
-  document.getElementById('save-emp-btn').textContent = '💾 Save Employee to GitHub';
-  document.getElementById('cancel-emp-edit-btn').style.display = 'none';
-}
-
-async function deleteEmployee(id) {
-  if (!confirm('Delete this employee record from GitHub?')) return;
-  const prev = employees.slice();
-  employees = employees.filter(e => e.id !== id);
-  updateEmployeeDashboard();
-  renderEmployees();
-  const saved = await pushEmployeesToGitHub();
-  if (!saved) {
-    employees = prev;
-    updateEmployeeDashboard();
-    renderEmployees();
-  }
-}
-
-function updateEmployeeDashboard() {
-  const activeStaff = employees.filter(e => e.status === 'Active');
-  const monthlyPayroll = activeStaff.reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
-
-  document.getElementById('emp-stat-total').textContent = employees.length;
-  document.getElementById('emp-stat-active').textContent = activeStaff.length;
-  document.getElementById('emp-stat-salary').textContent = `₹${monthlyPayroll.toLocaleString()}`;
-}
-
-function renderEmployees() {
-  const query = document.getElementById('emp-search-bar').value.trim().toLowerCase();
-  const container = document.getElementById('employees-container');
-  container.innerHTML = '';
-
-  const filtered = employees.filter(e =>
-    !query ||
-    e.name.toLowerCase().includes(query) ||
-    e.role.toLowerCase().includes(query) ||
-    e.phone.includes(query)
-  );
-
-  document.getElementById('emp-showing-count').textContent = `👥 ${filtered.length} employees`;
-
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No employee records found</div>`;
-    return;
-  }
-
-  filtered.forEach(emp => {
-    const [y, m, d] = emp.joinDate ? emp.joinDate.split('-') : ['--', '--', '--'];
-    const statusClass = emp.status === 'Active' ? 'active' : 'inactive';
-    const card = document.createElement('div');
-    card.className = 'card-3d record-card';
-    card.innerHTML = `
-      <div class="record-header">
-        <span class="record-date">📅 Joined ${d}/${m}/${y}</span>
-        <div class="record-header-meta">
-          <span class="badge">💼 ${emp.role}</span>
-          <span class="emp-status-badge ${statusClass}">${emp.status}</span>
-        </div>
-        <div class="record-actions">
-          <button type="button" class="btn-icon edit" onclick="startEditEmployee('${emp.id}')" title="Edit">✏️</button>
-          <button type="button" class="btn-icon" onclick="deleteEmployee('${emp.id}')" title="Delete">🗑️</button>
-        </div>
-      </div>
-      <div class="record-name">👔 ${emp.name}</div>
-      <div class="record-details">
-        <div class="record-calc">📞 ${emp.phone}</div>
-        <div class="record-total">₹${Number(emp.salary).toLocaleString(undefined, { minimumFractionDigits: 2 })}<span style="font-size:0.75rem; color:var(--text-muted);">/mo</span></div>
-      </div>
     `;
     container.appendChild(card);
   });
