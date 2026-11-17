@@ -1,173 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kabir Emporium - Customer Directory</title>
-    <!-- Connect your CSS file -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Customer directory for Kabir Emporium">
+  <title>Kabir Emporium Directory</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="app-header">
-        <div class="header-content">
-            <h1>Kabir Emporium Customer Directory</h1>
-            <p>Manage customer sales transactions, pricing, and records.</p>
-        </div>
-    </header>
 
-    <main class="main-container">
-        <!-- Holiday Banner -->
-        <div id="holiday-banner" class="holiday-banner" style="display: none;"></div>
+  <div class="container">
+    <!-- Brand Header Card -->
+    <div class="card-3d brand-header-card">
+      <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
+      <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
 
-        <!-- Dashboard Stats -->
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <h3>Total Customers</h3>
-                <p id="totalCustomersCount">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Active</h3>
-                <p id="activeCustomersCount">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>VIP Tier</h3>
-                <p id="vipCustomersCount">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Revenue</h3>
-                <p id="totalRevenueCount">$0.00</p>
-            </div>
+      <div class="brand-info">
+        <h1 class="brand-title">📘 Kabir Emporium</h1>
+        <span class="brand-subtitle">Customer & Sales Directory System</span>
+      </div>
+
+      <!-- Pill Container for forced same-line layout -->
+      <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
+        <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap;">
+          <div id="status-dot" class="status-dot"></div>
+          <span id="status-text">Connecting...</span>
         </div>
 
-        <!-- Controls Toolbar -->
-        <div class="toolbar">
-            <div class="search-filter-group">
-                <input type="text" id="searchInput" placeholder="Search by name, email, or company..." class="search-input">
-                
-                <select id="statusFilter" class="filter-select">
-                    <option value="all">All Statuses</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                </select>
-
-                <select id="tierFilter" class="filter-select">
-                    <option value="all">All Tiers</option>
-                    <option value="Standard">Standard</option>
-                    <option value="VIP">VIP</option>
-                </select>
-
-                <select id="sortBy" class="filter-select">
-                    <option value="name">Sort by Name</option>
-                    <option value="company">Sort by Company</option>
-                    <option value="spent">Sort by Total Spent</option>
-                    <option value="date">Sort by Date</option>
-                </select>
-            </div>
-
-            <div class="action-buttons">
-                <button id="addCustomerBtn" class="btn btn-primary">+ Add Customer</button>
-                <button id="exportBtn" class="btn btn-secondary">Export CSV</button>
-            </div>
+        <div id="bank-holiday-pill" class="bank-status-pill" style="white-space: nowrap;">
+          <span id="bank-status-icon">🏦</span>
+          <span id="bank-status-text">Checking Bank Status...</span>
         </div>
-
-        <!-- View Toggles -->
-        <div class="view-toggles">
-            <button class="toggle-btn active" data-view="table">Table View</button>
-            <button class="toggle-btn" data-view="grid">Card View</button>
-        </div>
-
-        <!-- Directory Container -->
-        <div id="directoryView" class="directory-container view-table">
-            <!-- Dynamically populated by script.js -->
-        </div>
-
-        <!-- Analytics Section -->
-        <div class="analytics-section">
-            <div class="analytics-card">
-                <h3>Tier Breakdown</h3>
-                <div id="tierChart"></div>
-            </div>
-            <div class="analytics-card">
-                <h3>Status Breakdown</h3>
-                <div id="statusChart"></div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Customer Modal -->
-    <div id="customerModal" class="modal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Add New Customer</h2>
-                <button id="closeModalBtn" class="close-btn">&times;</button>
-            </div>
-            <form id="customerForm">
-                <input type="hidden" id="customerId">
-                
-                <div class="form-group">
-                    <label for="custName">Full Name *</label>
-                    <input type="text" id="custName" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="custEmail">Email *</label>
-                    <input type="email" id="custEmail" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="custPhone">Phone Number</label>
-                    <input type="tel" id="custPhone">
-                </div>
-
-                <div class="form-group">
-                    <label for="custCompany">Company</label>
-                    <input type="text" id="custCompany">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="custStatus">Status</label>
-                        <select id="custStatus">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="custTier">Tier</label>
-                        <select id="custTier">
-                            <option value="Standard">Standard</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="custSpent">Total Spent ($)</label>
-                        <input type="number" step="0.01" id="custSpent" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cust-date">Date</label>
-                        <input type="date" id="cust-date">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" id="cancelModalBtn" class="btn btn-outline">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Customer</button>
-                </div>
-            </form>
-        </div>
+      </div>
     </div>
 
-    <footer class="app-footer">
-        <p>&copy; <span id="banner-year">2026</span> Kabir Emporium. All rights reserved.</p>
-    </footer>
+    <!-- GitHub Settings Panel -->
+    <div id="settings-panel" class="card-3d card settings-panel form-card-static" style="display: none;">
+      <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 800;">☁️ GitHub Cloud Connection</h3>
+      <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
+      <div class="form-group" style="margin-bottom: 20px;">
+        <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
+      </div>
+      <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
+    </div>
 
-    <!-- Connect your JavaScript file -->
-    <script src="script.js"></script>
+    <!-- Dashboard -->
+    <div class="dashboard">
+      <div class="card-3d stat-item">
+        <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
+        <span class="stat-value" id="stat-day-sale">₹0.00</span>
+      </div>
+      <div class="card-3d stat-item">
+        <span class="stat-label">📋 Records</span>
+        <span class="stat-value" id="stat-records">0</span>
+      </div>
+      <div class="card-3d stat-item">
+        <span class="stat-label">📦 Items</span>
+        <span class="stat-value" id="stat-items">0</span>
+      </div>
+      <div class="card-3d stat-item">
+        <span class="stat-label">📍 Cities/Villages</span>
+        <span class="stat-value" id="stat-cities">0</span>
+      </div>
+    </div>
+
+    <!-- Current Year Banner -->
+    <div class="year-banner">
+      <span>📅 Active Fiscal Year / Period</span>
+      <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
+    </div>
+
+    <!-- Add / Edit Record Form -->
+    <div class="card-3d card form-card-static">
+      <form id="record-form">
+        <input type="hidden" id="edit-record-id" value="">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="cust-name">👤 Customer Name</label>
+            <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
+            <datalist id="customer-datalist"></datalist>
+          </div>
+
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="cust-city">🏙️ City/Village</label>
+            <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
+          </div>
+
+          <!-- Multiple Items Container -->
+          <div class="form-group" style="grid-column: span 2;">
+            <label>🛒 Bill Items</label>
+            <div id="bill-items-wrapper" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+              <!-- Dynamic rows injected here -->
+            </div>
+            <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
+          </div>
+
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="payment-mode">💳 Payment Mode</label>
+            <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
+              <option value="Cash">💵 Cash</option>
+              <option value="UPI">📱 UPI</option>
+              <option value="Credit">📒 Credit (Udhar)</option>
+            </select>
+          </div>
+
+          <!-- Credit Specific Fields (Hidden by default) -->
+          <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
+              <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
+            </div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between;">
+              <span>📌 Remaining Credit Balance:</span>
+              <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="cust-date">📅 Date</label>
+            <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
+          </div>
+        </div>
+
+        <div class="live-total-box">
+          <span>🧮 Bill Total Preview</span>
+          <span id="live-bill-total">₹0.00</span>
+        </div>
+
+        <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
+        <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
+      </form>
+    </div>
+
+    <!-- Year-Wise Summary Section -->
+    <div class="records-section-header">
+      <div class="records-title">📊 Year-Wise Totals</div>
+    </div>
+    <div id="year-summary-container" class="year-grid"></div>
+
+    <!-- Records Section Header -->
+    <div class="records-section-header">
+      <div class="records-title">📋 Sale Records & Items</div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
+      <div id="search-suggestions" class="suggestions-dropdown"></div>
+    </div>
+
+    <!-- Hovering Cities Bar -->
+    <div id="hovering-cities" class="hovering-cities-container"></div>
+
+    <!-- Payment Filter Controls -->
+    <div class="filter-controls">
+      <select id="filter-payment" class="filter-select" onchange="renderRecords()">
+        <option value="all">💳 All Transactions</option>
+        <option value="Cash">💵 Cash Only</option>
+        <option value="UPI">📱 UPI Only</option>
+        <option value="Credit">📒 Credit Only</option>
+        <option value="PendingCredit">📌 Pending Credit Balances</option>
+      </select>
+    </div>
+
+    <div class="showing-text" id="showing-count">📊 0 records</div>
+    <div id="records-container"></div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal-content">
+      <div class="modal-title">⚠️ Delete Record?</div>
+      <div class="modal-text">This will immediately update and sync to GitHub.</div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">❌ Cancel</button>
+        <button type="button" class="modal-btn modal-btn-danger" id="confirm-delete-btn">🗑️ Delete & Sync</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
