@@ -78,8 +78,18 @@
     "id": "1794818682731",
     "name": "Rameshbhai Dharamsinhbhai",
     "city": "Rampara",
-    "items": 1,
-    "price": 1400,
+    "itemList": [
+      {
+        "desc": "UV 16X32",
+        "qty": 1,
+        "price": 1400
+      },
+      {
+        "desc": "KHATAR - 40",
+        "qty": 1,
+        "price": 800
+      }
+    ],
     "payment": "Cash",
     "deposit": 0,
     "date": "2026-11-16"
