@@ -22,7 +22,6 @@
         <span class="brand-subtitle">Customer & Sales Directory System</span>
       </div>
       
-      <!-- Pill Container for forced same-line layout -->
       <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
         <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap;">
           <div id="status-dot" class="status-dot"></div>
@@ -45,7 +44,7 @@
       <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
     </div>
 
-    <!-- 3D Pill-Shaped Panel Toggle -->
+    <!-- ==================== TOGGLE 1: CUSTOMER / EMPLOYEE ==================== -->
     <div class="mode-toggle-wrapper">
       <div class="mode-toggle-pill" id="panel-toggle-pill">
         <div class="mode-toggle-slider"></div>
@@ -60,125 +59,200 @@
 
     <!-- ==================== CUSTOMER PANEL ==================== -->
     <div id="customer-panel">
-      <!-- Dashboard -->
-      <div class="dashboard">
-        <div class="card-3d stat-item">
-          <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
-          <span class="stat-value" id="stat-day-sale">₹0.00</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">📋 Records</span>
-          <span class="stat-value" id="stat-records">0</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">📦 Items</span>
-          <span class="stat-value" id="stat-items">0</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">📍 Cities/Villages</span>
-          <span class="stat-value" id="stat-cities">0</span>
+      <!-- ==================== TOGGLE 2: PURCHASE / EXPENSES ==================== -->
+      <div class="mode-toggle-wrapper" style="margin-top: -10px; margin-bottom: 24px;">
+        <div class="mode-toggle-pill" id="sub-toggle-pill">
+          <div class="mode-toggle-slider"></div>
+          <button type="button" class="mode-toggle-btn active" id="btn-sub-purchase" onclick="switchSubTab('purchase')">
+            🛒 Purchase (Sales)
+          </button>
+          <button type="button" class="mode-toggle-btn" id="btn-sub-expenses" onclick="switchSubTab('expenses')">
+            💸 Expenses
+          </button>
         </div>
       </div>
 
-      <!-- Current Year Banner -->
-      <div class="year-banner">
-        <span>📅 Active Fiscal Year / Period</span>
-        <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
-      </div>
-
-      <!-- Add / Edit Record Form -->
-      <div class="card-3d card form-card-static">
-        <form id="record-form">
-          <input type="hidden" id="edit-record-id" value="">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="cust-name">👤 Customer Name</label>
-              <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
-              <datalist id="customer-datalist"></datalist>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="cust-city">🏙️ City/Village</label>
-              <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
-            </div>
-
-            <!-- Multiple Items Container -->
-            <div class="form-group" style="grid-column: span 2;">
-              <label>🛒 Bill Items</label>
-              <div id="bill-items-wrapper" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
-              <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="payment-mode">💳 Payment Mode</label>
-              <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
-                <option value="Cash">💵 Cash</option>
-                <option value="UPI">📱 UPI</option>
-                <option value="Credit">📒 Credit (Udhar)</option>
-              </select>
-            </div>
-
-            <!-- Credit Specific Fields -->
-            <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
-                <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
-              </div>
-              <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between;">
-                <span>📌 Remaining Credit Balance:</span>
-                <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
-              </div>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="cust-date">📅 Date</label>
-              <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
-            </div>
+      <!-- ==================== PURCHASE TAB (Existing Sales View) ==================== -->
+      <div id="purchase-tab-content">
+        <!-- Dashboard -->
+        <div class="dashboard">
+          <div class="card-3d stat-item">
+            <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
+            <span class="stat-value" id="stat-day-sale">₹0.00</span>
           </div>
-
-          <div class="live-total-box">
-            <span>🧮 Bill Total Preview</span>
-            <span id="live-bill-total">₹0.00</span>
+          <div class="card-3d stat-item">
+            <span class="stat-label">📋 Records</span>
+            <span class="stat-value" id="stat-records">0</span>
           </div>
+          <div class="card-3d stat-item">
+            <span class="stat-label">📦 Items</span>
+            <span class="stat-value" id="stat-items">0</span>
+          </div>
+          <div class="card-3d stat-item">
+            <span class="stat-label">📍 Cities/Villages</span>
+            <span class="stat-value" id="stat-cities">0</span>
+          </div>
+        </div>
 
-          <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
-          <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
-        </form>
+        <!-- Current Year Banner -->
+        <div class="year-banner">
+          <span>📅 Active Fiscal Year / Period</span>
+          <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
+        </div>
+
+        <!-- Add / Edit Record Form -->
+        <div class="card-3d card form-card-static">
+          <form id="record-form">
+            <input type="hidden" id="edit-record-id" value="">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="cust-name">👤 Customer Name</label>
+                <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
+                <datalist id="customer-datalist"></datalist>
+              </div>
+
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="cust-city">🏙️ City/Village</label>
+                <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
+              </div>
+
+              <div class="form-group" style="grid-column: span 2;">
+                <label>🛒 Bill Items</label>
+                <div id="bill-items-wrapper" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
+                <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
+              </div>
+
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="payment-mode">💳 Payment Mode</label>
+                <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
+                  <option value="Cash">💵 Cash</option>
+                  <option value="UPI">📱 UPI</option>
+                  <option value="Credit">📒 Credit (Udhar)</option>
+                </select>
+              </div>
+
+              <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
+                  <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
+                </div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between;">
+                  <span>📌 Remaining Credit Balance:</span>
+                  <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
+                </div>
+              </div>
+
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="cust-date">📅 Date</label>
+                <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
+              </div>
+            </div>
+
+            <div class="live-total-box">
+              <span>🧮 Bill Total Preview</span>
+              <span id="live-bill-total">₹0.00</span>
+            </div>
+
+            <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
+            <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
+          </form>
+        </div>
+
+        <!-- Year-Wise Summary Section -->
+        <div class="records-section-header">
+          <div class="records-title">📊 Year-Wise Totals</div>
+        </div>
+        <div id="year-summary-container" class="year-grid"></div>
+
+        <!-- Records Section Header -->
+        <div class="records-section-header">
+          <div class="records-title">📋 Sale Records & Items</div>
+        </div>
+
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
+          <div id="search-suggestions" class="suggestions-dropdown"></div>
+        </div>
+
+        <div id="hovering-cities" class="hovering-cities-container"></div>
+
+        <div class="filter-controls">
+          <select id="filter-payment" class="filter-select" onchange="renderRecords()">
+            <option value="all">💳 All Transactions</option>
+            <option value="Cash">💵 Cash Only</option>
+            <option value="UPI">📱 UPI Only</option>
+            <option value="Credit">📒 Credit Only</option>
+            <option value="PendingCredit">📌 Pending Credit Balances</option>
+          </select>
+        </div>
+        <div class="showing-text" id="showing-count">📊 0 records</div>
+        <div id="records-container"></div>
       </div>
 
-      <!-- Year-Wise Summary Section -->
-      <div class="records-section-header">
-        <div class="records-title">📊 Year-Wise Totals</div>
-      </div>
-      <div id="year-summary-container" class="year-grid"></div>
+      <!-- ==================== EXPENSES TAB ==================== -->
+      <div id="expenses-tab-content" style="display: none;">
+        <!-- Expenses Dashboard -->
+        <div class="dashboard" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="card-3d stat-item">
+            <span class="stat-label">💸 Total Expenses</span>
+            <span class="stat-value" id="exp-stat-total" style="color: var(--danger);">₹0.00</span>
+          </div>
+          <div class="card-3d stat-item">
+            <span class="stat-label">📋 Expense Logs</span>
+            <span class="stat-value" id="exp-stat-count">0</span>
+          </div>
+        </div>
 
-      <!-- Records Section Header -->
-      <div class="records-section-header">
-        <div class="records-title">📋 Sale Records & Items</div>
-      </div>
+        <!-- Add / Edit Expense Form -->
+        <div class="card-3d card form-card-static">
+          <form id="expense-form">
+            <input type="hidden" id="edit-exp-id" value="">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="exp-title">📝 Expense Title / Description</label>
+                <input type="text" id="exp-title" class="form-control" required placeholder="e.g. Shop Rent / Electricity Bill / Stock Purchase">
+              </div>
 
-      <!-- Search Bar -->
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
-        <div id="search-suggestions" class="suggestions-dropdown"></div>
-      </div>
+              <div class="form-group">
+                <label for="exp-category">🏷️ Category</label>
+                <select id="exp-category" class="form-control">
+                  <option value="Stock/Inventory">📦 Stock / Inventory</option>
+                  <option value="Rent & Utilities">💡 Rent & Utilities</option>
+                  <option value="Transport">🚚 Transport & Logistics</option>
+                  <option value="Maintenance">🔧 Maintenance</option>
+                  <option value="Salary/Staff">👥 Staff / Misc</option>
+                  <option value="Other">📌 Other Expense</option>
+                </select>
+              </div>
 
-      <!-- Hovering Cities Bar -->
-      <div id="hovering-cities" class="hovering-cities-container"></div>
+              <div class="form-group">
+                <label for="exp-amount">💵 Amount (₹)</label>
+                <input type="number" id="exp-amount" class="form-control" step="0.01" min="0" required placeholder="e.g. 5000">
+              </div>
 
-      <!-- Payment Filter Controls -->
-      <div class="filter-controls">
-        <select id="filter-payment" class="filter-select" onchange="renderRecords()">
-          <option value="all">💳 All Transactions</option>
-          <option value="Cash">💵 Cash Only</option>
-          <option value="UPI">📱 UPI Only</option>
-          <option value="Credit">📒 Credit Only</option>
-          <option value="PendingCredit">📌 Pending Credit Balances</option>
-        </select>
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="exp-date">📅 Date</label>
+                <input type="date" id="exp-date" class="form-control" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn" id="save-exp-btn" style="margin-top: 8px;">💾 Save Expense to GitHub</button>
+            <button type="button" class="btn-secondary-3d" id="cancel-exp-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelExpEditMode()">❌ Cancel Editing</button>
+          </form>
+        </div>
+
+        <!-- Expenses List -->
+        <div class="records-section-header">
+          <div class="records-title">📋 Expense Records</div>
+        </div>
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="exp-search-bar" class="form-control" placeholder="Search expense by title or category..." oninput="renderExpenses()">
+        </div>
+        <div class="showing-text" id="exp-showing-count">💸 0 expenses</div>
+        <div id="expenses-container"></div>
       </div>
-      <div class="showing-text" id="showing-count">📊 0 records</div>
-      <div id="records-container"></div>
     </div>
 
     <!-- ==================== EMPLOYEE PANEL ==================== -->
