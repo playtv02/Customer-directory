@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Customer directory for Kabir Emporium">
+  <meta name="description" content="Customer and Sales Directory for Kabir Emporium">
   <title>Kabir Emporium Directory</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,7 @@
 
       <!-- Pill Container for forced same-line layout -->
       <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
-        <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap;">
+        <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap; cursor: pointer;">
           <div id="status-dot" class="status-dot"></div>
           <span id="status-text">Connecting...</span>
         </div>
@@ -109,7 +109,7 @@
             </select>
           </div>
 
-          <!-- Credit Specific Fields (Hidden by default) -->
+          <!-- Credit Specific Fields -->
           <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
             <div class="form-group" style="margin-bottom: 12px;">
               <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
@@ -173,7 +173,7 @@
     <div id="records-container"></div>
   </div>
 
-  <!-- Toast Notifications -->
+  <!-- Toast Notifications Container -->
   <div id="toast-container"></div>
 
   <!-- Confirm Modal -->
@@ -188,6 +188,7 @@
     </div>
   </div>
 
+  <!-- Connect JavaScript file -->
   <script src="script.js"></script>
 </body>
 </html>
