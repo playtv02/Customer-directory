@@ -128,8 +128,13 @@
     "id": "1794816237547",
     "name": "Chhattarsinh rana",
     "city": "Padra",
-    "items": 2,
-    "price": 800,
+    "itemList": [
+      {
+        "desc": "Amul 16X32",
+        "qty": 2,
+        "price": 800
+      }
+    ],
     "payment": "Cash",
     "deposit": 0,
     "date": "2026-11-16"
