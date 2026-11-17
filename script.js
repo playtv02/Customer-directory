@@ -2,6 +2,7 @@ const GITHUB_OWNER = 'playtv02';
 const GITHUB_REPO = 'Customer-directory';
 const FILE_PATH = 'data.json';
 const EMP_FILE_PATH = 'employees.json';
+const EXP_FILE_PATH = 'expenses.json';
 
 let records = [];
 let fileSha = null;
@@ -9,6 +10,9 @@ let deleteTargetId = null;
 
 let employees = [];
 let empFileSha = null;
+
+let expenses = [];
+let expFileSha = null;
 
 // Helpers
 const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
@@ -33,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const todayStr = getLocalTodayDate();
   document.getElementById('cust-date').value = todayStr;
   document.getElementById('emp-join-date').value = todayStr;
+  document.getElementById('exp-date').value = todayStr;
   document.getElementById('banner-year').textContent = new Date().getFullYear();
   addBillItemRow();
   checkBankHoliday();
@@ -51,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Panel Switcher
+// Panel Switcher (Customer / Employee)
 function switchPanel(mode) {
   const pill = document.getElementById('panel-toggle-pill');
   const custBtn = document.getElementById('btn-mode-customer');
@@ -77,6 +82,35 @@ function switchPanel(mode) {
     empBtn.classList.remove('active');
     empPanel.style.display = 'none';
     custPanel.style.display = 'block';
+  }
+}
+
+// Sub-Tab Switcher (Purchase / Expenses)
+function switchSubTab(tab) {
+  const pill = document.getElementById('sub-toggle-pill');
+  const purBtn = document.getElementById('btn-sub-purchase');
+  const expBtn = document.getElementById('btn-sub-expenses');
+  const purContent = document.getElementById('purchase-tab-content');
+  const expContent = document.getElementById('expenses-tab-content');
+
+  if (tab === 'expenses') {
+    pill.classList.add('employee-active');
+    expBtn.classList.add('active');
+    purBtn.classList.remove('active');
+    purContent.style.display = 'none';
+    expContent.style.display = 'block';
+    if (!document.getElementById('exp-date').value) {
+      document.getElementById('exp-date').value = getLocalTodayDate();
+    }
+    if (expenses.length === 0 && localStorage.getItem('ke_gh_token')) {
+      fetchExpensesFromGitHub();
+    }
+  } else {
+    pill.classList.remove('employee-active');
+    purBtn.classList.add('active');
+    expBtn.classList.remove('active');
+    expContent.style.display = 'none';
+    purContent.style.display = 'block';
   }
 }
 
@@ -693,7 +727,7 @@ function renderYearSummary(yearMap) {
   });
 }
 
-// Employee Panel Logic & GitHub Sync (`employees.json`)
+// Employee Panel Logic
 async function fetchEmployeesFromGitHub() {
   const token = localStorage.getItem('ke_gh_token');
   if (!token) return;
@@ -721,7 +755,7 @@ async function pushEmployeesToGitHub() {
   const saveBtn = document.getElementById('save-emp-btn');
   if (!token) {
     toggleSettingsPanel();
-    showToast('⚠️ GitHub token missing. Add your token above.');
+    showToast('⚠️ GitHub token missing.');
     return false;
   }
 
@@ -744,11 +778,7 @@ async function pushEmployeesToGitHub() {
 
     const res = await fetch(apiUrl, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
 
@@ -888,6 +918,194 @@ function renderEmployees() {
       <div class="record-details">
         <div class="record-calc">📞 ${emp.phone}</div>
         <div class="record-total">₹${Number(emp.salary).toLocaleString(undefined, { minimumFractionDigits: 2 })}<span style="font-size:0.75rem; color:var(--text-muted);">/mo</span></div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ==================== EXPENSES PANEL LOGIC (`expenses.json`) ====================
+async function fetchExpensesFromGitHub() {
+  const token = localStorage.getItem('ke_gh_token');
+  if (!token) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${EXP_FILE_PATH}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const data = await res.json();
+      expFileSha = data.sha;
+      expenses = JSON.parse(decodeBase64(data.content));
+    } else if (res.status === 404) {
+      expenses = [];
+    }
+    updateExpenseDashboard();
+    renderExpenses();
+  } catch (e) {
+    showToast('❌ Failed to load expense records');
+  }
+}
+
+async function pushExpensesToGitHub() {
+  const token = localStorage.getItem('ke_gh_token');
+  const saveBtn = document.getElementById('save-exp-btn');
+  if (!token) {
+    toggleSettingsPanel();
+    showToast('⚠️ GitHub token missing.');
+    return false;
+  }
+
+  updateStatus('Syncing Expenses...', 'syncing');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving...'; }
+
+  try {
+    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${EXP_FILE_PATH}`;
+    const checkRes = await fetch(apiUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
+      cache: 'no-store'
+    });
+    let latestSha = checkRes.ok ? (await checkRes.json()).sha : null;
+
+    const body = {
+      message: `Update expense records (${new Date().toLocaleString()})`,
+      content: encodeBase64(JSON.stringify(expenses, null, 2))
+    };
+    if (latestSha) body.sha = latestSha;
+
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error(`GitHub save error (${res.status})`);
+    const result = await res.json();
+    expFileSha = result.content?.sha || latestSha;
+    updateStatus('Synced', 'active');
+    showToast('✅ Expense saved to GitHub');
+    return true;
+  } catch (err) {
+    updateStatus('Sync Failed', 'error');
+    showToast('❌ Save failed: ' + err.message);
+    return false;
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      const isEditing = Boolean(document.getElementById('edit-exp-id').value);
+      saveBtn.textContent = isEditing ? '✏️ Update Expense on GitHub' : '💾 Save Expense to GitHub';
+    }
+  }
+}
+
+document.getElementById('expense-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const prevExpenses = expenses.slice();
+  const editId = document.getElementById('edit-exp-id').value;
+
+  const expData = {
+    id: editId || Date.now().toString(),
+    title: document.getElementById('exp-title').value.trim(),
+    category: document.getElementById('exp-category').value,
+    amount: parseFloat(document.getElementById('exp-amount').value) || 0,
+    date: document.getElementById('exp-date').value || getLocalTodayDate()
+  };
+
+  if (editId) {
+    expenses = expenses.map(ex => ex.id === editId ? expData : ex);
+  } else {
+    expenses = [expData, ...expenses];
+  }
+
+  const saved = await pushExpensesToGitHub();
+  if (!saved) { expenses = prevExpenses; return; }
+
+  cancelExpEditMode();
+  updateExpenseDashboard();
+  renderExpenses();
+});
+
+function startEditExpense(id) {
+  const exp = expenses.find(e => e.id === id);
+  if (!exp) return;
+  document.getElementById('edit-exp-id').value = exp.id;
+  document.getElementById('exp-title').value = exp.title;
+  document.getElementById('exp-category').value = exp.category || 'Other';
+  document.getElementById('exp-amount').value = exp.amount;
+  document.getElementById('exp-date').value = exp.date;
+
+  document.getElementById('save-exp-btn').textContent = '✏️ Update Expense on GitHub';
+  document.getElementById('cancel-exp-edit-btn').style.display = 'inline-flex';
+  document.getElementById('expense-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  showToast(`✏️ Editing expense`);
+}
+
+function cancelExpEditMode() {
+  document.getElementById('expense-form').reset();
+  document.getElementById('edit-exp-id').value = '';
+  document.getElementById('exp-date').value = getLocalTodayDate();
+  document.getElementById('save-exp-btn').textContent = '💾 Save Expense to GitHub';
+  document.getElementById('cancel-exp-edit-btn').style.display = 'none';
+}
+
+async function deleteExpense(id) {
+  if (!confirm('Delete this expense record from GitHub?')) return;
+  const prev = expenses.slice();
+  expenses = expenses.filter(e => e.id !== id);
+  updateExpenseDashboard();
+  renderExpenses();
+  const saved = await pushExpensesToGitHub();
+  if (!saved) {
+    expenses = prev;
+    updateExpenseDashboard();
+    renderExpenses();
+  }
+}
+
+function updateExpenseDashboard() {
+  const totalAmount = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  document.getElementById('exp-stat-total').textContent = `₹${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  document.getElementById('exp-stat-count').textContent = expenses.length;
+}
+
+function renderExpenses() {
+  const query = document.getElementById('exp-search-bar').value.trim().toLowerCase();
+  const container = document.getElementById('expenses-container');
+  container.innerHTML = '';
+
+  const filtered = expenses.filter(e =>
+    !query ||
+    e.title.toLowerCase().includes(query) ||
+    e.category.toLowerCase().includes(query)
+  );
+
+  filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  document.getElementById('exp-showing-count').textContent = `💸 ${filtered.length} expenses`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No expense records found</div>`;
+    return;
+  }
+
+  filtered.forEach(exp => {
+    const [y, m, d] = exp.date ? exp.date.split('-') : ['--', '--', '--'];
+    const card = document.createElement('div');
+    card.className = 'card-3d record-card';
+    card.innerHTML = `
+      <div class="record-header">
+        <span class="record-date">📅 ${d}/${m}/${y}</span>
+        <div class="record-header-meta">
+          <span class="badge">🏷️ ${exp.category}</span>
+        </div>
+        <div class="record-actions">
+          <button type="button" class="btn-icon edit" onclick="startEditExpense('${exp.id}')" title="Edit">✏️</button>
+          <button type="button" class="btn-icon" onclick="deleteExpense('${exp.id}')" title="Delete">🗑️</button>
+        </div>
+      </div>
+      <div class="record-name">📝 ${exp.title}</div>
+      <div class="record-details">
+        <div class="record-calc">💸 Expense Outflow</div>
+        <div class="record-total" style="color: var(--danger);">₹${Number(exp.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
       </div>
     `;
     container.appendChild(card);
