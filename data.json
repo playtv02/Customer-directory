@@ -267,8 +267,15 @@
     "id": "1794726741374",
     "name": "Raajubhai m patel",
     "city": "Utwada",
-    "items": 2,
-    "price": 2600,
+    "itemList": [
+      {
+        "desc": "Reliance",
+        "qty": 2,
+        "price": 2600
+      }
+    ],
+    "payment": "Cash",
+    "deposit": 0,
     "date": "2026-11-14"
   },
   {
