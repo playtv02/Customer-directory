@@ -1,183 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Customer directory for Kabir Emporium">
-  <title>Kabir Emporium Directory</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Customer directory for Kabir Emporium">
+    <title>Kabir Emporium Directory</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Brand Header Card -->
-    <div class="card-3d brand-header-card">
-      <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
-      <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
-      <div class="brand-info">
-        <h1 class="brand-title">📘 Kabir Emporium</h1>
-        <span class="brand-subtitle">Customer & Sales Directory System</span>
-      </div>
-      
-      <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
-        <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap;">
-          <div id="status-dot" class="status-dot"></div>
-          <span id="status-text">Connecting...</span>
+    <div class="container">
+        <!-- Brand & Sync Header -->
+        <header class="brand-header-card">
+            <div class="brand-left">
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">🌙</button>
+                <div class="brand-titles">
+                    <h1 class="brand-title">KABIR EMPORIUM</h1>
+                    <p class="brand-subtitle">Customer Directory &amp; Ledger System</p>
+                </div>
+            </div>
+            <div class="sync-pill" id="sync-pill" onclick="toggleSettingsPanel()" role="button" tabindex="0" aria-label="Sync status and settings" aria-expanded="false">
+                <span class="sync-dot yellow" id="sync-dot"></span>
+                <span id="sync-text">Checking Token...</span>
+            </div>
+        </header>
+
+        <!-- GitHub Settings Panel (Hidden by default) -->
+        <div id="settings-panel" class="settings-panel" style="display: none;">
+            <div class="settings-header">
+                <h3>GitHub Data Synchronization</h3>
+                <span class="close-settings" onclick="toggleSettingsPanel()">&times;</span>
+            </div>
+            <p class="settings-desc">Enter a GitHub Personal Access Token (PAT) with repo write permissions to enable cloud sync. Leave blank to operate in local-only mode.</p>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label for="gh-token-input">GitHub Personal Access Token:</label>
+                <input type="password" id="gh-token-input" class="form-control" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" aria-label="GitHub Personal Access Token">
+            </div>
+            <div class="settings-actions">
+                <button class="btn btn-primary" onclick="saveToken()" aria-label="Save Token">Save Token</button>
+                <button class="btn btn-secondary" onclick="fetchDataFromGitHub()" aria-label="Pull Data from GitHub">Pull Data from GitHub</button>
+                <button class="btn btn-secondary" onclick="pushDataToGitHub()" aria-label="Push Data to GitHub">Push Data to GitHub</button>
+            </div>
         </div>
-        <div id="bank-holiday-pill" class="bank-status-pill" style="white-space: nowrap;">
-          <span id="bank-status-icon">🏦</span>
-          <span id="bank-status-text">Checking Bank Status...</span>
+
+        <!-- Dashboard Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-value" id="stat-total-cust">0</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="stat-total-rev">₹0.00</div>
+            </div>
+            <div class="stat-card yellow">
+                <div class="stat-label">Pending Collection</div>
+                <div class="stat-value" id="stat-pending">₹0.00</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-label">Today's Sales</div>
+                <div class="stat-value" id="stat-today">₹0.00</div>
+            </div>
         </div>
-      </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="workspace-grid">
+            <!-- Form Section -->
+            <div class="form-card">
+                <h2 class="card-title" id="form-card-title">New Customer Record</h2>
+                <form id="customer-form" onsubmit="saveCustomerRecord(event)">
+                    <div class="form-group">
+                        <label for="cust-name">Customer Name *</label>
+                        <input type="text" id="cust-name" class="form-control" placeholder="Search or type name..." list="customer-list" required autocomplete="off" oninput="autoFillCustomerCity()" aria-label="Customer Name">
+                        <datalist id="customer-list"></datalist>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cust-phone">Phone Number</label>
+                        <input type="tel" id="cust-phone" class="form-control" placeholder="10-digit number" aria-label="Phone Number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cust-city">City / Town</label>
+                        <input type="text" id="cust-city" class="form-control" placeholder="City name" aria-label="City Name">
+                    </div>
+
+                    <!-- Items Purchased Table -->
+                    <div class="form-group">
+                        <label>Items Purchased</label>
+                        <table class="items-table" id="items-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Description</th>
+                                    <th style="width: 70px;">Qty</th>
+                                    <th style="width: 100px;">Rate ₹</th>
+                                    <th style="width: 30px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-tbody">
+                                <tr>
+                                    <td><input type="text" class="form-control bill-desc" placeholder="Description (e.g. Kurti)" required aria-label="Item Description"></td>
+                                    <td><input type="number" class="form-control bill-qty" placeholder="Qty" value="1" min="1" oninput="updateLiveTotal()" required aria-label="Item Quantity"></td>
+                                    <td><input type="number" class="form-control bill-rate" placeholder="Rate ₹" step="0.01" min="0" oninput="updateLiveTotal()" required aria-label="Item Price"></td>
+                                    <td><button type="button" class="btn-remove-row" onclick="removeBillItemRow(this)" aria-label="Remove item">&times;</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn-secondary-3d" style="width: 100%; margin-top: 6px; background: transparent;" onclick="addBillItemRow()" aria-label="Add Another Item">+ Add Another Item</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Total Bill Amount</label>
+                        <div class="bill-total-display" id="live-total-display">₹0.00</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment-mode">Payment Mode *</label>
+                        <select id="payment-mode" class="form-control" onchange="toggleCreditFields()" aria-label="Payment Mode">
+                            <option value="Paid Cash">Paid Cash</option>
+                            <option value="Paid Online/UPI">Paid Online/UPI</option>
+                            <option value="Paid Card">Paid Card</option>
+                            <option value="Credit / Udhaar">Credit / Udhaar (Pending)</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="deposit-group" style="display: none;">
+                        <label for="credit-deposit">Deposit / Advance Paid (₹)</label>
+                        <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()" aria-label="Customer Deposit Amount">
+                        <small class="form-help" id="due-amount-help" style="color: #e74c3c; font-weight: 600;"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cust-date">Date *</label>
+                        <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()" aria-label="Date">
+                    </div>
+
+                    <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;" aria-label="Save Customer Record">Save Record</button>
+                    <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()" aria-label="Cancel Editing">Cancel Edit</button>
+                </form>
+            </div>
+
+            <!-- Table & Filter Section -->
+            <div class="records-card">
+                <div class="records-header">
+                    <div class="search-filter-box">
+                        <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off" aria-label="Search records">
+                        <select id="filter-payment" class="filter-select" onchange="renderRecords()" aria-label="Filter by Payment Mode">
+                            <option value="ALL">All Payment Statuses</option>
+                            <option value="Paid">All Paid</option>
+                            <option value="Paid Cash">Paid Cash</option>
+                            <option value="Paid Online/UPI">Paid Online/UPI</option>
+                            <option value="Paid Card">Paid Card</option>
+                            <option value="Credit / Udhaar">Credit / Pending</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Hovering City Pills -->
+                <div class="city-pills-container" id="city-pills-container"></div>
+
+                <div class="table-container">
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer Name</th>
+                                <th>Phone / City</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-tbody">
+                            <!-- Dynamic rows rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yearly Financial Summary -->
+        <div class="year-summary-card">
+            <h3 class="card-title">Yearly Financial Summary</h3>
+            <div class="year-grid" id="year-summary-grid"></div>
+        </div>
     </div>
 
-    <!-- GitHub Settings Panel -->
-    <div id="settings-panel" class="card-3d card settings-panel form-card-static" style="display: none;">
-      <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 800;">☁️ GitHub Cloud Connection</h3>
-      <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
-      <div class="form-group" style="margin-bottom: 20px;">
-        <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
-      </div>
-      <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirm-modal-title">
+        <div class="modal-box">
+            <h3 id="confirm-modal-title">Confirm Action</h3>
+            <p id="confirm-modal-text">Are you sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('confirm-modal')" aria-label="Cancel delete">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete-btn" aria-label="Confirm delete">Delete</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ==================== CUSTOMER PANEL ==================== -->
-    <div id="customer-panel">
-      <!-- Dashboard -->
-      <div class="dashboard">
-        <div class="card-3d stat-item">
-          <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
-          <span class="stat-value" id="stat-day-sale">₹0.00</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">📋 Records</span>
-          <span class="stat-value" id="stat-records">0</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">📦 Items</span>
-          <span class="stat-value" id="stat-items">0</span>
-        </div>
-        <div class="card-3d stat-item">
-          <span class="stat-label">📍 Cities/Villages</span>
-          <span class="stat-value" id="stat-cities">0</span>
-        </div>
-      </div>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
-      <!-- Current Year Banner -->
-      <div class="year-banner">
-        <span>📅 Active Fiscal Year / Period</span>
-        <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
-      </div>
-
-      <!-- Add / Edit Record Form -->
-      <div class="card-3d card form-card-static">
-        <form id="record-form">
-          <input type="hidden" id="edit-record-id" value="">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="cust-name">👤 Customer Name</label>
-              <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
-              <datalist id="customer-datalist"></datalist>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="cust-city">🏙️ City/Village</label>
-              <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label>🛒 Bill Items</label>
-              <div id="bill-items-wrapper" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
-              <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="payment-mode">💳 Payment Mode</label>
-              <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
-                <option value="Cash">💵 Cash</option>
-                <option value="UPI">📱 UPI</option>
-                <option value="Credit">📒 Credit (Udhar)</option>
-              </select>
-            </div>
-
-            <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
-                <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
-              </div>
-              <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between;">
-                <span>📌 Remaining Credit Balance:</span>
-                <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
-              </div>
-            </div>
-
-            <div class="form-group" style="grid-column: span 2;">
-              <label for="cust-date">📅 Date</label>
-              <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
-            </div>
-          </div>
-
-          <div class="live-total-box">
-            <span>🧮 Bill Total Preview</span>
-            <span id="live-bill-total">₹0.00</span>
-          </div>
-
-          <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
-          <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
-        </form>
-      </div>
-
-      <!-- Year-Wise Summary Section -->
-      <div class="records-section-header">
-        <div class="records-title">📊 Year-Wise Totals</div>
-      </div>
-      <div id="year-summary-container" class="year-grid"></div>
-
-      <!-- Records Section Header -->
-      <div class="records-section-header">
-        <div class="records-title">📋 Sale Records & Items</div>
-      </div>
-
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
-        <div id="search-suggestions" class="suggestions-dropdown"></div>
-      </div>
-
-      <div id="hovering-cities" class="hovering-cities-container"></div>
-
-      <div class="filter-controls">
-        <select id="filter-payment" class="filter-select" onchange="renderRecords()">
-          <option value="all">💳 All Transactions</option>
-          <option value="Cash">💵 Cash Only</option>
-          <option value="UPI">📱 UPI Only</option>
-          <option value="Credit">📒 Credit Only</option>
-          <option value="PendingCredit">📌 Pending Credit Balances</option>
-        </select>
-      </div>
-      <div class="showing-text" id="showing-count">📊 0 records</div>
-      <div id="records-container"></div>
-    </div>
-  </div>
-
-  <!-- Toast Notifications -->
-  <div id="toast-container"></div>
-
-  <!-- Confirm Modal -->
-  <div class="modal-overlay" id="confirm-modal">
-    <div class="modal-content">
-      <div class="modal-title">⚠️ Delete Record?</div>
-      <div class="modal-text">This will immediately update and sync to GitHub.</div>
-      <div class="modal-actions">
-        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">❌ Cancel</button>
-        <button type="button" class="modal-btn modal-btn-danger" id="confirm-delete-btn">🗑️ Delete & Sync</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
