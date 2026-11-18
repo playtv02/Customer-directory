@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#f8fafc" stop-opacity="0.85" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f172a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)" />
+
+  <!-- Outer Glow Ring -->
+  <rect x="24" y="24" width="464" height="464" rx="95" fill="none" stroke="#60a5fa" stroke-opacity="0.25" stroke-width="4" />
+
+  <!-- Directory Card Base -->
+  <rect x="96" y="96" width="320" height="320" rx="40" fill="url(#cardGrad)" filter="url(#shadow)" />
+
+  <!-- Header Accent Line on Card -->
+  <rect x="136" y="136" width="240" height="12" rx="6" fill="url(#accentGrad)" />
+
+  <!-- User Avatar Circle -->
+  <circle cx="256" cy="226" r="48" fill="#2563eb" />
+  <circle cx="256" cy="214" r="22" fill="#ffffff" />
+  <path d="M216 256C216 236 234 234 256 234C278 234 296 236 296 256" fill="#ffffff" />
+
+  <!-- Directory Info Lines -->
+  <rect x="166" y="300" width="180" height="14" rx="7" fill="#1e293b" opacity="0.85" />
+  <rect x="196" y="328" width="120" height="10" rx="5" fill="#64748b" opacity="0.75" />
+
+  <!-- Status / Verification Badge -->
+  <circle cx="340" cy="202" r="16" fill="#10b981" />
+  <path d="M333 202L338 207L347 197" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>
