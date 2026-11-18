@@ -1,27 +1,22 @@
-const CACHE_NAME = 'kabir-directory-v3';
-const APP_SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
+const CACHE_NAME = 'customer-dir-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './style.css',
+  './data.json',
+  './employees.json'
+];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-    ))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
   event.respondWith(
-    fetch(event.request.url, { cache: 'no-store' }).catch(() => caches.match(event.request))
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
   );
 });
