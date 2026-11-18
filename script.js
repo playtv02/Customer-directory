@@ -13,7 +13,7 @@ function initApp() {
   checkBankHoliday();
   setupEventListeners();
   addBillItemRow(); // Start with at least one bill item row
-  checkTokenAndLoad();
+  loadData();
   startLiveSync();
 }
 
@@ -39,9 +39,7 @@ function checkBankHoliday() {
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
   const dateNum = today.getDate();
-  const month = today.getMonth();
 
-  // Simple heuristic for 2nd & 4th Saturdays or Sundays
   const isSunday = dayOfWeek === 0;
   const isSecondOrFourthSaturday = dayOfWeek === 6 && ((dateNum > 7 && dateNum <= 14) || (dateNum > 21 && dateNum <= 28));
   
@@ -64,36 +62,33 @@ function checkBankHoliday() {
   }
 }
 
-// --- GitHub Token & Data Loading ---
-function checkTokenAndLoad() {
-  const token = localStorage.getItem("github_pat");
-  loadData();
-}
-
+// --- Data Loading with Robust Local Fallback ---
 async function loadData() {
   updateStatus("Connecting...", "connecting");
   try {
     const res = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to load data.json");
+    if (!res.ok) {
+      throw new Error("data.json not found or inaccessible");
+    }
     const data = await res.json();
     records = Array.isArray(data) ? data : (data.records || []);
+    localStorage.setItem("kabir_records", JSON.stringify(records));
     updateDashboard();
     renderRecords();
     updateStatus("Connected", "online");
   } catch (err) {
-    console.error("Load error:", err);
-    // Fallback to local storage if available
+    console.warn("Falling back to local storage:", err);
     const local = localStorage.getItem("kabir_records");
     if (local) {
       records = JSON.parse(local);
       updateDashboard();
       renderRecords();
-      updateStatus("Connected (Local Cache)", "online");
+      updateStatus("Connected (Local)", "online");
     } else {
       records = [];
       updateDashboard();
       renderRecords();
-      updateStatus("Offline", "offline");
+      updateStatus("Ready (New)", "online");
     }
   }
 }
@@ -107,15 +102,15 @@ function startLiveSync() {
       if (res.ok) {
         const data = await res.json();
         const remoteRecords = Array.isArray(data) ? data : (data.records || []);
-        // Only update if record count or content changed to avoid disrupting user input
         if (JSON.stringify(remoteRecords) !== JSON.stringify(records)) {
           records = remoteRecords;
+          localStorage.setItem("kabir_records", JSON.stringify(records));
           updateDashboard();
           renderRecords();
         }
       }
     } catch (e) {
-      // Silent fail on background poll
+      // Silent background poll fail
     }
   }, 5000);
 }
@@ -145,19 +140,16 @@ function updateDashboard() {
   records.forEach(r => {
     if (r.city) cities.add(r.city.trim().toLowerCase());
     
-    // Calculate items
     if (Array.isArray(r.items)) {
       r.items.forEach(item => {
         totalItemsCount += Number(item.qty || 1);
       });
     }
 
-    // Day sale
     if (r.date === todayStr) {
       daySale += Number(r.total || 0);
     }
 
-    // Year totals
     const yr = (r.date || "").split("-")[0] || currentFiscalYear;
     yearTotals[yr] = (yearTotals[yr] || 0) + Number(r.total || 0);
   });
@@ -221,7 +213,7 @@ function toggleCreditFields() {
   }
 }
 
-// --- Form Submit & Record Saving ---
+// --- Form Submit & Saving ---
 async function handleFormSubmit(e) {
   e.preventDefault();
   const name = document.getElementById("customer-name").value.trim();
@@ -265,10 +257,15 @@ async function handleFormSubmit(e) {
 function resetForm() {
   const form = document.getElementById("customer-form");
   if (form) form.reset();
-  document.getElementById("bill-items-container").innerHTML = "";
-  addBillItemRow();
-  document.getElementById("record-date").value = new Date().toISOString().split("T")[0];
-  document.getElementById("bill-total-preview").textContent = "₹0.00";
+  const container = document.getElementById("bill-items-container");
+  if (container) {
+    container.innerHTML = "";
+    addBillItemRow();
+  }
+  const dateInput = document.getElementById("record-date");
+  if (dateInput) dateInput.value = new Date().toISOString().split("T")[0];
+  const preview = document.getElementById("bill-total-preview");
+  if (preview) preview.textContent = "₹0.00";
   editIndex = null;
   const submitBtn = document.getElementById("submit-btn");
   if (submitBtn) submitBtn.textContent = "💾 SUBMIT";
@@ -367,7 +364,6 @@ function saveRecordsToGitHub() {
   renderRecords();
   updateStatus("Saved locally", "online");
 
-  // Attempt to sync via GitHub API if PAT is stored
   const token = localStorage.getItem("github_pat");
   if (token) {
     pushDataToGitHub(token);
@@ -381,7 +377,6 @@ async function pushDataToGitHub(token) {
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
   try {
-    // Get current file sha first
     const getRes = await fetch(url, {
       headers: { Authorization: `token ${token}` }
     });
