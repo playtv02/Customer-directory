@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kabir-directory-v2';
+const CACHE_NAME = 'kabir-directory-v3';
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -16,16 +16,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  if (url.pathname.endsWith('.json') || url.hostname.includes('githubusercontent.com') || url.hostname.includes('github.com')) {
-    event.respondWith(
-      fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request))
-    );
+  if (event.request.method !== 'GET') {
+    event.respondWith(fetch(event.request));
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => response || fetch(event.request))
+    fetch(event.request.url, { cache: 'no-store' }).catch(() => caches.match(event.request))
   );
 });
