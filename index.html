@@ -1,194 +1,358 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Customer and Sales Directory for Kabir Emporium">
-  <title>Kabir Emporium Directory</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+// Kabir Emporium Customer & Sales Directory System - script.js
 
-  <div class="container">
-    <!-- Brand Header Card -->
-    <div class="card-3d brand-header-card">
-      <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
-      <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
+let records = [];
+let editIndex = null;
+let currentFiscalYear = "2026";
+let syncInterval = null;
 
-      <div class="brand-info">
-        <h1 class="brand-title">📘 Kabir Emporium</h1>
-        <span class="brand-subtitle">Customer & Sales Directory System</span>
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+});
+
+function initApp() {
+  checkBankHoliday();
+  setupEventListeners();
+  addBillItemRow();
+  loadData();
+  startLiveSync();
+}
+
+function setupEventListeners() {
+  const searchInput = document.getElementById("search-input");
+  if (searchInput) searchInput.addEventListener("input", handleSearchInput);
+
+  const paymentModeSelect = document.getElementById("payment-mode");
+  if (paymentModeSelect) paymentModeSelect.addEventListener("change", toggleCreditFields);
+
+  const form = document.getElementById("customer-form");
+  if (form) form.addEventListener("submit", handleFormSubmit);
+}
+
+// --- Bank Holiday / Status Check (Non-blocking) ---
+function checkBankHoliday() {
+  try {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const dateNum = today.getDate();
+
+    const isSunday = dayOfWeek === 0;
+    const isSecondOrFourthSaturday = dayOfWeek === 6 && ((dateNum > 7 && dateNum <= 14) || (dateNum > 21 && dateNum <= 28));
+    
+    const pill = document.getElementById("bank-holiday-pill");
+    const icon = document.getElementById("bank-status-icon");
+    const text = document.getElementById("bank-status-text");
+
+    if (pill && icon && text) {
+      if (isSunday || isSecondOrFourthSaturday) {
+        icon.textContent = "🔴";
+        text.textContent = "Bank Holiday / Weekend";
+        pill.style.background = "#fee2e2";
+        pill.style.color = "#991b1b";
+      } else {
+        icon.textContent = "🟢";
+        text.textContent = "Working Day";
+        pill.style.background = "#dcfce7";
+        pill.style.color = "#166534";
+      }
+    }
+  } catch (e) {
+    console.error("Bank holiday check error:", e);
+  }
+}
+
+// --- Data Loading (Guaranteed Non-Blocking Fallback) ---
+async function loadData() {
+  updateStatus("Connecting...", "connecting");
+  try {
+    const res = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("data.json not found");
+    const data = await res.json();
+    records = Array.isArray(data) ? data : (data.records || []);
+    localStorage.setItem("kabir_records", JSON.stringify(records));
+    updateDashboard();
+    renderRecords();
+    updateStatus("Connected", "online");
+  } catch (err) {
+    console.warn("Using local cache fallback:", err);
+    const local = localStorage.getItem("kabir_records");
+    if (local) {
+      records = JSON.parse(local);
+    } else {
+      records = [];
+    }
+    updateDashboard();
+    renderRecords();
+    updateStatus("Connected (Local)", "online");
+  }
+}
+
+// --- Live Sync Polling ---
+function startLiveSync() {
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(async () => {
+    try {
+      const res = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const remoteRecords = Array.isArray(data) ? data : (data.records || []);
+        if (JSON.stringify(remoteRecords) !== JSON.stringify(records)) {
+          records = remoteRecords;
+          localStorage.setItem("kabir_records", JSON.stringify(records));
+          updateDashboard();
+          renderRecords();
+        }
+      }
+    } catch (e) {
+      // Silent poll fail
+    }
+  }, 5000);
+}
+
+function updateStatus(text, statusClass) {
+  const badge = document.getElementById("connection-status");
+  if (badge) {
+    badge.textContent = text;
+    badge.className = `status-badge ${statusClass}`;
+  }
+}
+
+// --- Dashboard & Metrics ---
+function updateDashboard() {
+  const totalRecordsEl = document.getElementById("total-records");
+  const totalItemsEl = document.getElementById("total-items");
+  const totalCitiesEl = document.getElementById("total-cities");
+  const daySaleEl = document.getElementById("day-sale");
+  const yearTotalsEl = document.getElementById("year-totals");
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  let totalItemsCount = 0;
+  let daySale = 0;
+  const cities = new Set();
+  const yearTotals = {};
+
+  records.forEach(r => {
+    if (r.city) cities.add(r.city.trim().toLowerCase());
+    
+    if (Array.isArray(r.items)) {
+      r.items.forEach(item => {
+        totalItemsCount += Number(item.qty || 1);
+      });
+    }
+
+    if (r.date === todayStr) {
+      daySale += Number(r.total || 0);
+    }
+
+    const yr = (r.date || "").split("-")[0] || currentFiscalYear;
+    yearTotals[yr] = (yearTotals[yr] || 0) + Number(r.total || 0);
+  });
+
+  if (totalRecordsEl) totalRecordsEl.textContent = records.length;
+  if (totalItemsEl) totalItemsEl.textContent = totalItemsCount;
+  if (totalCitiesEl) totalCitiesEl.textContent = cities.size;
+  if (daySaleEl) daySaleEl.textContent = `₹${daySale.toFixed(2)}`;
+
+  if (yearTotalsEl) {
+    yearTotalsEl.innerHTML = Object.entries(yearTotals)
+      .map(([yr, amt]) => `<span class="year-pill"><b>${yr}</b>: ₹${amt.toFixed(2)}</span>`)
+      .join(" ");
+  }
+}
+
+// --- Bill Items & Calculations ---
+function addBillItemRow(name = "", qty = 1, price = 0) {
+  const container = document.getElementById("bill-items-container");
+  if (!container) return;
+
+  const row = document.createElement("div");
+  row.className = "bill-item-row";
+  row.innerHTML = `
+    <input type="text" placeholder="Item name" class="item-name" value="${name}" required oninput="updateLiveTotal()">
+    <input type="number" placeholder="Qty" class="item-qty" value="${qty}" min="1" required oninput="updateLiveTotal()">
+    <input type="number" placeholder="Price (₹)" class="item-price" value="${price}" min="0" step="0.01" required oninput="updateLiveTotal()">
+    <button type="button" class="btn-remove-item" onclick="removeBillItemRow(this)">✕</button>
+  `;
+  container.appendChild(row);
+  updateLiveTotal();
+}
+
+function removeBillItemRow(btn) {
+  const container = document.getElementById("bill-items-container");
+  if (container && container.children.length > 1) {
+    btn.closest(".bill-item-row").remove();
+    updateLiveTotal();
+  }
+}
+
+function updateLiveTotal() {
+  let total = 0;
+  document.querySelectorAll(".bill-item-row").forEach(row => {
+    const qty = parseFloat(row.querySelector(".item-qty").value) || 0;
+    const price = parseFloat(row.querySelector(".item-price").value) || 0;
+    total += qty * price;
+  });
+
+  const preview = document.getElementById("bill-total-preview");
+  if (preview) {
+    preview.textContent = `₹${total.toFixed(2)}`;
+  }
+}
+
+function toggleCreditFields() {
+  const mode = document.getElementById("payment-mode").value;
+  const creditBox = document.getElementById("credit-due-box");
+  if (creditBox) {
+    creditBox.style.display = mode === "Credit" ? "block" : "none";
+  }
+}
+
+// --- Form Submit & Saving ---
+async function handleFormSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById("customer-name").value.trim();
+  const city = document.getElementById("customer-city").value.trim();
+  const paymentMode = document.getElementById("payment-mode").value;
+  const date = document.getElementById("record-date").value || new Date().toISOString().split("T")[0];
+
+  const items = [];
+  document.querySelectorAll(".bill-item-row").forEach(row => {
+    items.push({
+      name: row.querySelector(".item-name").value.trim(),
+      qty: parseFloat(row.querySelector(".item-qty").value) || 1,
+      price: parseFloat(row.querySelector(".item-price").value) || 0
+    });
+  });
+
+  const total = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
+
+  const newRecord = {
+    id: editIndex !== null && records[editIndex] ? records[editIndex].id : Date.now(),
+    name,
+    city,
+    items,
+    paymentMode,
+    total,
+    date,
+    createdAt: new Date().toISOString()
+  };
+
+  if (editIndex !== null) {
+    records[editIndex] = newRecord;
+    editIndex = null;
+  } else {
+    records.unshift(newRecord);
+  }
+
+  saveRecordsToGitHub();
+  resetForm();
+}
+
+function resetForm() {
+  const form = document.getElementById("customer-form");
+  if (form) form.reset();
+  const container = document.getElementById("bill-items-container");
+  if (container) {
+    container.innerHTML = "";
+    addBillItemRow();
+  }
+  const dateInput = document.getElementById("record-date");
+  if (dateInput) dateInput.value = new Date().toISOString().split("T")[0];
+  const preview = document.getElementById("bill-total-preview");
+  if (preview) preview.textContent = "₹0.00";
+  editIndex = null;
+  const submitBtn = document.getElementById("submit-btn");
+  if (submitBtn) submitBtn.textContent = "💾 SUBMIT";
+}
+
+// --- Record Rendering & Search ---
+function renderRecords(filterRecords = records) {
+  const listEl = document.getElementById("records-list");
+  const countEl = document.getElementById("record-count");
+  if (!listEl) return;
+
+  if (countEl) countEl.textContent = `${filterRecords.length} records`;
+
+  if (filterRecords.length === 0) {
+    listEl.innerHTML = `<p class="no-records">No transaction records found.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = filterRecords.map((r, idx) => `
+    <div class="record-card">
+      <div class="record-header">
+        <strong>${r.name}</strong>
+        <span class="pill ${r.paymentMode === 'Credit' ? 'pill-credit' : 'pill-cash'}">${r.paymentMode}</span>
       </div>
-
-      <!-- Pill Container for forced same-line layout -->
-      <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
-        <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap; cursor: pointer;">
-          <div id="status-dot" class="status-dot"></div>
-          <span id="status-text">Connecting...</span>
+      <div class="record-details">
+        <span>📍 ${r.city}</span>
+        <span>📅 ${r.date}</span>
+      </div>
+      <div class="record-items">
+        ${(r.items || []).map(i => `<div>• ${i.name} (${i.qty} x ₹${i.price})</div>`).join("")}
+      </div>
+      <div class="record-footer">
+        <span class="record-total">Total: ₹${Number(r.total).toFixed(2)}</span>
+        <div class="record-actions">
+          <button onclick="editRecord(${idx})" class="btn-sm">✏️ Edit</button>
+          <button onclick="deleteRecord(${idx})" class="btn-sm btn-danger">🗑️ Delete</button>
         </div>
-
-        <div id="bank-holiday-pill" class="bank-status-pill" style="white-space: nowrap;">
-          <span id="bank-status-icon">🏦</span>
-          <span id="bank-status-text">Checking Bank Status...</span>
-        </div>
       </div>
     </div>
+  `).join("");
+}
 
-    <!-- GitHub Settings Panel -->
-    <div id="settings-panel" class="card-3d card settings-panel form-card-static" style="display: none;">
-      <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 800;">☁️ GitHub Cloud Connection</h3>
-      <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
-      <div class="form-group" style="margin-bottom: 20px;">
-        <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
-      </div>
-      <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
-    </div>
+function handleSearchInput(e) {
+  const query = e.target.value.toLowerCase();
+  const filtered = records.filter(r => 
+    r.name.toLowerCase().includes(query) ||
+    r.city.toLowerCase().includes(query) ||
+    r.paymentMode.toLowerCase().includes(query)
+  );
+  renderRecords(filtered);
+}
 
-    <!-- Dashboard -->
-    <div class="dashboard">
-      <div class="card-3d stat-item">
-        <span class="stat-label" id="stat-day-label">📈 Day Sale</span>
-        <span class="stat-value" id="stat-day-sale">₹0.00</span>
-      </div>
-      <div class="card-3d stat-item">
-        <span class="stat-label">📋 Records</span>
-        <span class="stat-value" id="stat-records">0</span>
-      </div>
-      <div class="card-3d stat-item">
-        <span class="stat-label">📦 Items</span>
-        <span class="stat-value" id="stat-items">0</span>
-      </div>
-      <div class="card-3d stat-item">
-        <span class="stat-label">📍 Cities/Villages</span>
-        <span class="stat-value" id="stat-cities">0</span>
-      </div>
-    </div>
+function editRecord(index) {
+  const r = records[index];
+  if (!r) return;
+  document.getElementById("customer-name").value = r.name;
+  document.getElementById("customer-city").value = r.city;
+  document.getElementById("payment-mode").value = r.paymentMode;
+  document.getElementById("record-date").value = r.date;
 
-    <!-- Current Year Banner -->
-    <div class="year-banner">
-      <span>📅 Active Fiscal Year / Period</span>
-      <span style="font-size: 1.1rem; font-weight: 800;" id="banner-year">2026</span>
-    </div>
+  const container = document.getElementById("bill-items-container");
+  container.innerHTML = "";
+  if (r.items && r.items.length > 0) {
+    r.items.forEach(i => addBillItemRow(i.name, i.qty, i.price));
+  } else {
+    addBillItemRow();
+  }
 
-    <!-- Add / Edit Record Form -->
-    <div class="card-3d card form-card-static">
-      <form id="record-form">
-        <input type="hidden" id="edit-record-id" value="">
+  updateLiveTotal();
+  editIndex = index;
+  const submitBtn = document.getElementById("submit-btn");
+  if (submitBtn) submitBtn.textContent = "💾 UPDATE RECORD";
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="cust-name">👤 Customer Name</label>
-            <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
-            <datalist id="customer-datalist"></datalist>
-          </div>
+function deleteRecord(index) {
+  if (confirm("Are you sure you want to delete this record?")) {
+    records.splice(index, 1);
+    saveRecordsToGitHub();
+  }
+}
 
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="cust-city">🏙️ City/Village</label>
-            <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
-          </div>
+// --- Sync to Local Storage & GitHub ---
+function saveRecordsToGitHub() {
+  localStorage.setItem("kabir_records", JSON.stringify(records));
+  updateDashboard();
+  renderRecords();
+  updateStatus("Saved locally", "online");
 
-          <!-- Multiple Items Container -->
-          <div class="form-group" style="grid-column: span 2;">
-            <label>🛒 Bill Items</label>
-            <div id="bill-items-wrapper" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
-              <!-- Dynamic rows injected here -->
-            </div>
-            <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
-          </div>
+  const token = localStorage.getItem("github_pat");
+  if (token) {
+    pushDataToGitHub(token);
+  }
+}
 
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="payment-mode">💳 Payment Mode</label>
-            <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
-              <option value="Cash">💵 Cash</option>
-              <option value="UPI">📱 UPI</option>
-              <option value="Credit">📒 Credit (Udhar)</option>
-            </select>
-          </div>
-
-          <!-- Credit Specific Fields -->
-          <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
-              <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
-            </div>
-            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between;">
-              <span>📌 Remaining Credit Balance:</span>
-              <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
-            </div>
-          </div>
-
-          <div class="form-group" style="grid-column: span 2;">
-            <label for="cust-date">📅 Date</label>
-            <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
-          </div>
-        </div>
-
-        <div class="live-total-box">
-          <span>🧮 Bill Total Preview</span>
-          <span id="live-bill-total">₹0.00</span>
-        </div>
-
-        <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
-        <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
-      </form>
-    </div>
-
-    <!-- Year-Wise Summary Section -->
-    <div class="records-section-header">
-      <div class="records-title">📊 Year-Wise Totals</div>
-    </div>
-    <div id="year-summary-container" class="year-grid"></div>
-
-    <!-- Records Section Header -->
-    <div class="records-section-header">
-      <div class="records-title">📋 Sale Records & Items</div>
-    </div>
-
-    <!-- Search Bar -->
-    <div class="search-wrapper">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
-      <div id="search-suggestions" class="suggestions-dropdown"></div>
-    </div>
-
-    <!-- Hovering Cities Bar -->
-    <div id="hovering-cities" class="hovering-cities-container"></div>
-
-    <!-- Payment Filter Controls -->
-    <div class="filter-controls">
-      <select id="filter-payment" class="filter-select" onchange="renderRecords()">
-        <option value="all">💳 All Transactions</option>
-        <option value="Cash">💵 Cash Only</option>
-        <option value="UPI">📱 UPI Only</option>
-        <option value="Credit">📒 Credit Only</option>
-        <option value="PendingCredit">📌 Pending Credit Balances</option>
-      </select>
-    </div>
-
-    <div class="showing-text" id="showing-count">📊 0 records</div>
-    <div id="records-container"></div>
-  </div>
-
-  <!-- Toast Notifications Container -->
-  <div id="toast-container"></div>
-
-  <!-- Confirm Modal -->
-  <div class="modal-overlay" id="confirm-modal">
-    <div class="modal-content">
-      <div class="modal-title">⚠️ Delete Record?</div>
-      <div class="modal-text">This will immediately update and sync to GitHub.</div>
-      <div class="modal-actions">
-        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">❌ Cancel</button>
-        <button type="button" class="modal-btn modal-btn-danger" id="confirm-delete-btn">🗑️ Delete & Sync</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Connect JavaScript file -->
-  <script src="script.js"></script>
-</body>
-</html>
+async function pushDataToGitHub(token) {
+  const owner = "playtv02";
