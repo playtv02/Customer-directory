@@ -44,7 +44,7 @@
       <h3 style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 800;">☁️ GitHub Cloud Connection</h3>
       <p>Enter your GitHub Token to load and save records directly from your cloud repository.</p>
       <div class="form-group" style="margin-bottom: 20px;">
-        <input type="password" id="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx">
+        <input type="password" id="gh-token" name="gh-token" class="form-control" placeholder="🔑 e.g. ghp_xxxxxxxxxxxx" autocomplete="current-password">
       </div>
       <button type="button" class="btn btn-primary" onclick="saveToken()">🔗 Connect</button>
     </div>
@@ -78,18 +78,18 @@
     <!-- Add / Edit Record Form -->
     <div class="card-3d card form-card-static">
       <form id="record-form">
-        <input type="hidden" id="edit-record-id" value="">
+        <input type="hidden" id="edit-record-id" name="edit-record-id" value="">
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group" style="grid-column: span 2;">
             <label for="cust-name">👤 Customer Name</label>
-            <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
+            <input type="text" id="cust-name" name="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()" autocomplete="name">
             <datalist id="customer-datalist"></datalist>
           </div>
 
           <div class="form-group" style="grid-column: span 2;">
             <label for="cust-city">🏙️ City/Village</label>
-            <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
+            <input type="text" id="cust-city" name="cust-city" class="form-control" required placeholder="e.g. Tarapur" autocomplete="address-level2">
           </div>
 
           <!-- Multiple Items Container -->
@@ -103,7 +103,7 @@
 
           <div class="form-group" style="grid-column: span 2;">
             <label for="payment-mode">💳 Payment Mode</label>
-            <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
+            <select id="payment-mode" name="payment-mode" class="form-control" onchange="toggleCreditFields()">
               <option value="Cash">💵 Cash</option>
               <option value="UPI">📱 UPI</option>
               <option value="Credit">📒 Credit (Udhar)</option>
@@ -114,7 +114,7 @@
           <div id="credit-container" class="credit-box" style="grid-column: span 2; display: none;">
             <div class="form-group" style="margin-bottom: 12px;">
               <label for="credit-deposit">💰 Customer Deposit Amount (₹)</label>
-              <input type="number" id="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
+              <input type="number" id="credit-deposit" name="credit-deposit" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 200.00" oninput="updateLiveTotal()">
             </div>
             <div class="credit-balance-row">
               <span>📌 Remaining Credit Balance:</span>
@@ -124,7 +124,7 @@
 
           <div class="form-group" style="grid-column: span 2;">
             <label for="cust-date">📅 Date</label>
-            <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
+            <input type="date" id="cust-date" name="cust-date" class="form-control" required onchange="updateDashboard()">
           </div>
         </div>
 
@@ -152,7 +152,7 @@
     <!-- Search Bar -->
     <div class="search-wrapper">
       <span class="search-icon">🔍</span>
-      <input type="text" id="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
+      <input type="text" id="search-bar" name="search-bar" class="form-control" placeholder="Search by name, city, or payment mode..." oninput="handleSearchInput()" autocomplete="off">
       <div id="search-suggestions" class="suggestions-dropdown"></div>
     </div>
 
@@ -161,7 +161,7 @@
 
     <!-- Payment Filter Controls -->
     <div class="filter-controls">
-      <select id="filter-payment" class="filter-select" onchange="renderRecords()">
+      <select id="filter-payment" name="filter-payment" class="filter-select" onchange="renderRecords()">
         <option value="all">💳 All Transactions</option>
         <option value="Cash">💵 Cash Only</option>
         <option value="UPI">📱 UPI Only</option>
