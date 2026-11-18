@@ -22,8 +22,5 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (::webView.isInitialized) {
-            webView.reload()
-        }
     }
 }
