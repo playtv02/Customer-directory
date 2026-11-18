@@ -1,0 +1,21 @@
+{
+  "name": "Kabir Emporium Directory",
+  "short_name": "Kabir Emporium",
+  "start_url": "/Customer-directory/",
+  "scope": "/Customer-directory/",
+  "display": "standalone",
+  "background_color": "#f0f4f8",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
