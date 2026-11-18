@@ -7,6 +7,7 @@ let fileSha = null;
 let deleteTargetId = null;
 let liveSyncInterval = null;
 
+// Helper to handle multiple items calculation robustly
 function getRecordTotals(r) {
     if (r.itemList && r.itemList.length > 0) {
         let bill = 0, qty = 0;
@@ -30,8 +31,9 @@ function addBillItemRow(item = {}) {
     if (!container) return;
     const div = document.createElement('div');
     div.className = 'bill-item-row flex gap-2 items-center mb-2';
+    const nameVal = item.desc || item.name || '';
     div.innerHTML = `
-        <input type="text" class="item-name form-input flex-1 p-2 border rounded" placeholder="Item Name" value="${item.name || ''}" required>
+        <input type="text" class="item-name form-input flex-1 p-2 border rounded" placeholder="Item Name" value="${nameVal}" required>
         <input type="number" class="item-qty form-input w-20 p-2 border rounded" placeholder="Qty" value="${item.qty !== undefined ? item.qty : 1}" min="1" oninput="updateLiveTotal()" required>
         <input type="number" class="item-price form-input w-24 p-2 border rounded" placeholder="Price" value="${item.price !== undefined ? item.price : ''}" step="0.01" min="0" oninput="updateLiveTotal()" required>
         <button type="button" onclick="removeBillItemRow(this)" class="text-red-500 hover:text-red-700 px-2 font-bold">✕</button>
@@ -134,13 +136,9 @@ function updateStatus(text, type) {
 function toggleSettingsPanel() {
     const panel = document.getElementById('settings-panel');
     if (panel) {
-        if (panel.style.display === 'none' || !panel.style.display) {
-            panel.style.display = 'block';
-            const input = document.getElementById('gh-token');
-            if (input) input.value = localStorage.getItem('gh_token') || '';
-        } else {
-            panel.style.display = 'none';
-        }
+        panel.classList.toggle('active');
+        const input = document.getElementById('gh-token');
+        if (input) input.value = localStorage.getItem('gh_token') || '';
     }
 }
 
@@ -156,7 +154,7 @@ function saveToken() {
         showToast('Token cleared.', 'info');
     }
     const panel = document.getElementById('settings-panel');
-    if (panel) panel.style.display = 'none';
+    if (panel) panel.classList.remove('active');
     checkTokenAndLoad();
 }
 
@@ -306,13 +304,14 @@ async function handleFormSubmit(e) {
         items: totalQty,
         price: totalBill > 0 ? (totalBill / totalQty) : 0,
         itemList,
-        paymentMode,
+        payment: paymentMode,
+        paymentMode: paymentMode,
         deposit: paymentMode === 'Credit' ? deposit : 0
     };
 
     let updatedRecords = [...records];
     if (editId) {
-        const idx = updatedRecords.findIndex(r => r.id === Number(editId));
+        const idx = updatedRecords.findIndex(r => String(r.id) === String(editId));
         if (idx !== -1) updatedRecords[idx] = newRecord;
     } else {
         updatedRecords.unshift(newRecord);
@@ -341,17 +340,17 @@ function cancelEditMode() {
 }
 
 function editRecord(id) {
-    const r = records.find(rec => rec.id === id);
+    const r = records.find(rec => String(rec.id) === String(id));
     if (!r) return;
 
     document.getElementById('edit-record-id').value = r.id;
     document.getElementById('cust-name').value = r.name || '';
     document.getElementById('cust-city').value = r.city || '';
     document.getElementById('cust-date').value = r.date || getLocalTodayDate();
-    document.getElementById('payment-mode').value = r.paymentMode || 'Cash';
+    document.getElementById('payment-mode').value = r.paymentMode || r.payment || 'Cash';
 
     toggleCreditFields();
-    if (r.paymentMode === 'Credit') {
+    if ((r.paymentMode || r.payment) === 'Credit') {
         document.getElementById('credit-deposit').value = r.deposit || 0;
     }
 
@@ -383,7 +382,7 @@ function closeModal() {
 
 async function executeDelete() {
     if (!deleteTargetId) return;
-    const updatedRecords = records.filter(r => r.id !== deleteTargetId);
+    const updatedRecords = records.filter(r => String(r.id) !== String(deleteTargetId));
     closeModal();
     await pushDataToGitHub(updatedRecords, `Delete record #${deleteTargetId}`);
 }
@@ -434,7 +433,7 @@ function handleSearchInput() {
     const matches = records.filter(r => 
         (r.name && r.name.toLowerCase().includes(query)) ||
         (r.city && r.city.toLowerCase().includes(query)) ||
-        (r.itemList && r.itemList.some(i => i.name.toLowerCase().includes(query)))
+        (r.itemList && r.itemList.some(i => (i.desc || i.name || '').toLowerCase().includes(query)))
     );
 
     if (matches.length > 0) {
@@ -470,9 +469,19 @@ function renderRecords() {
         const matchesQuery = !query || 
             (r.name && r.name.toLowerCase().includes(query)) ||
             (r.city && r.city.toLowerCase().includes(query)) ||
-            (r.itemList && r.itemList.some(i => i.name.toLowerCase().includes(query)));
+            (r.itemList && r.itemList.some(i => (i.desc || i.name || '').toLowerCase().includes(query)));
         
-        const matchesPay = filterPay === 'ALL' || (r.paymentMode || 'Cash') === filterPay;
+        const payMode = r.paymentMode || r.payment || 'Cash';
+        let matchesPay = true;
+        if (filterPay && filterPay !== 'ALL') {
+            if (filterPay === 'Pending') {
+                const totals = getRecordTotals(r);
+                const remaining = totals.bill - (r.deposit || 0);
+                matchesPay = (payMode === 'Credit' && remaining > 0);
+            } else {
+                matchesPay = (payMode === filterPay);
+            }
+        }
         return matchesQuery && matchesPay;
     });
 
@@ -487,7 +496,7 @@ function renderRecords() {
 
     container.innerHTML = filtered.map(r => {
         const totals = getRecordTotals(r);
-        const payMode = r.paymentMode || 'Cash';
+        const payMode = r.paymentMode || r.payment || 'Cash';
         let payBadge = `<span class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">${payMode}</span>`;
         if (payMode === 'Credit') {
             const deposit = r.deposit || 0;
@@ -499,7 +508,7 @@ function renderRecords() {
 
         let itemsHtml = '';
         if (r.itemList && r.itemList.length > 0) {
-            itemsHtml = r.itemList.map(i => `${i.name} (x${i.qty} @ ₹${i.price})`).join(', ');
+            itemsHtml = r.itemList.map(i => `${i.desc || i.name || 'Item'} (x${i.qty} @ ₹${i.price})`).join(', ');
         } else {
             itemsHtml = `Items: ${r.items || 1} @ ₹${r.price || 0}`;
         }
@@ -513,8 +522,8 @@ function renderRecords() {
                     </div>
                     <div class="flex items-center gap-2">
                         ${payBadge}
-                        <button onclick="editRecord(${r.id})" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
-                        <button onclick="openDeleteModal(${r.id})" class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
+                        <button onclick="editRecord('${r.id}')" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
+                        <button onclick="openDeleteModal('${r.id}')" class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
                     </div>
                 </div>
                 <div class="text-sm text-gray-700 mb-2">${itemsHtml}</div>
