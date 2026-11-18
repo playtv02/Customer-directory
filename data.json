@@ -220,9 +220,14 @@
     "city": "Jichka",
     "itemList": [
       {
-        "desc": "",
-        "qty": 2,
+        "desc": "Amul 16X32",
+        "qty": 4,
         "price": 800
+      },
+      {
+        "desc": "KHATAR 48",
+        "qty": 2,
+        "price": 1000
       }
     ],
     "payment": "Cash",
