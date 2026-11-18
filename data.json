@@ -872,8 +872,15 @@
     "id": "1794724760640",
     "name": "Vajubhai narsinh bhai",
     "city": "Dehda",
-    "items": 2,
-    "price": 500,
+    "itemList": [
+      {
+        "desc": "KHATAR 24",
+        "qty": 2,
+        "price": 500
+      }
+    ],
+    "payment": "Cash",
+    "deposit": 0,
     "date": "2026-11-15"
   },
   {
