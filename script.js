@@ -1,37 +1,702 @@
-/* Customer Directory app - GitHub Contents API sync */
-"use strict";
-const CFG={owner:"playtv02",repo:"Customer-directory",branch:"main",path:"data.json"};
-const RAW=`https://raw.githubusercontent.com/${CFG.owner}/${CFG.repo}/${CFG.branch}/${CFG.path}`;
-let records=[],editId=null,syncTimer=null,saving=false;
-document.addEventListener("DOMContentLoaded",init);
-function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function init(){
-  $("record-date").value=localDate();$("today-label").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});$("footer-year").textContent=new Date().getFullYear();
-  checkDay();$("customer-form").addEventListener("submit",submitForm);$("search-input").addEventListener("input",searchRecords);$("payment-mode").addEventListener("change",toggleCredit);$("add-item-btn").addEventListener("click",()=>addItem());$("reset-btn").addEventListener("click",resetForm);$("token-settings-btn").addEventListener("click",openSettings);$("save-token-btn").addEventListener("click",saveToken);$("remove-token-btn").addEventListener("click",removeToken);
-  addItem();loadData();startLiveSync();
+const GITHUB_OWNER = 'playtv02';
+const GITHUB_REPO = 'Customer-directory';
+const FILE_PATH = 'data.json';
+
+let records = [];
+let fileSha = null;
+let deleteTargetId = null;
+
+// Helper to handle multiple items calculation robustly
+function getRecordTotals(r) {
+  if (r.itemList && r.itemList.length > 0) {
+    let bill = 0, qty = 0;
+    r.itemList.forEach(i => {
+      bill += (i.qty * i.price);
+      qty += i.qty;
+    });
+    return { bill, qty };
+  }
+  return { bill: (r.items || 1) * (Number(r.price) || 0), qty: r.items || 1 };
 }
-function $(id){return document.getElementById(id)}
-function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function money(n){return "₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
-function checkDay(){let d=new Date(),n=d.getDate(),weekend=d.getDay()===0||(d.getDay()===6&&((n>7&&n<=14)||(n>21&&n<=28)));$("bank-status-icon").textContent=weekend?"🔴":"🟢";$("bank-status-text").textContent=weekend?"Bank Holiday / Weekend":"Working Day";$("bank-holiday-pill").style.background=weekend?"#fee2e2":"#dcfce7";$("bank-holiday-pill").style.color=weekend?"#991b1b":"#166534"}
-function status(t,c="connecting"){$("connection-status").textContent=t;$("connection-status").className="status-badge "+c}
-function normalize(data){let a=Array.isArray(data)?data:(Array.isArray(data?.records)?data.records:[]);return a.map((r,i)=>({...r,id:r.id??`old-${i}`,name:String(r.name||""),city:String(r.city||""),paymentMode:String(r.paymentMode||"Cash"),date:String(r.date||""),items:Array.isArray(r.items)?r.items:[],total:Number(r.total||0)}))}
-function cache(){try{localStorage.setItem("kabir_records",JSON.stringify(records))}catch(e){console.error(e)}}
-async function loadData(){status("Connecting...");try{let res=await fetch(RAW+"?t="+Date.now(),{cache:"no-store"});if(!res.ok)throw Error("Remote data unavailable: "+res.status);records=normalize(await res.json());cache();refresh();status("Connected","online")}catch(e){console.warn(e);try{records=normalize(JSON.parse(localStorage.getItem("kabir_records")||"[]"))}catch{records=[]}refresh();status("Local mode","error")}}
-function startLiveSync(){clearInterval(syncTimer);syncTimer=setInterval(async()=>{if(saving||document.hidden)return;try{let r=await fetch(RAW+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;let fresh=normalize(await r.json());if(JSON.stringify(fresh)!==JSON.stringify(records)){records=fresh;cache();refresh();status("Synced","online")}}catch(e){console.debug(e)}},15000)}
-function refresh(){dashboard();render()}
-function dashboard(){let count=0,sale=0,cities=new Set(),years={};records.forEach(r=>{if(r.city.trim())cities.add(r.city.trim().toLowerCase());r.items.forEach(i=>count+=Number(i.qty||1));if(r.date===localDate())sale+=Number(r.total||0);let y=(r.date||"").slice(0,4)||new Date().getFullYear();years[y]=(years[y]||0)+Number(r.total||0)});$("total-records").textContent=records.length;$("total-items").textContent=count;$("total-cities").textContent=cities.size;$("day-sale").textContent=money(sale);$("year-totals").innerHTML=Object.entries(years).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,v])=>`<span class="year-pill"><b>${escapeHTML(y)}</b>: ${money(v)}</span>`).join("")||'<span class="muted">No sales yet</span>'}
-function addItem(name="",qty=1,price=0){let row=document.createElement("div");row.className="bill-item-row";let a=document.createElement("input");a.className="item-name";a.placeholder="Item name";a.required=true;a.value=name;let b=document.createElement("input");b.className="item-qty";b.type="number";b.min="1";b.step="1";b.value=qty;b.required=true;b.setAttribute("aria-label","Quantity");let c=document.createElement("input");c.className="item-price";c.type="number";c.min="0";c.step="0.01";c.value=price;c.required=true;c.placeholder="₹";c.setAttribute("aria-label","Price");[a,b,c].forEach(x=>x.addEventListener("input",liveTotal));let x=document.createElement("button");x.type="button";x.className="btn-remove-item";x.textContent="×";x.title="Remove item";x.onclick=()=>{if(document.querySelectorAll(".bill-item-row").length>1){row.remove();liveTotal()}};row.append(a,b,c,x);$("bill-items-container").append(row);liveTotal()}
-function liveTotal(){let t=0;document.querySelectorAll(".bill-item-row").forEach(r=>t+=(Number(r.querySelector(".item-qty").value)||0)*(Number(r.querySelector(".item-price").value)||0));$("bill-total-preview").textContent=money(t)}
-function toggleCredit(){$("credit-due-box").hidden=$("payment-mode").value!=="Credit"}
-async function submitForm(e){e.preventDefault();let name=$("customer-name").value.trim(),city=$("customer-city").value.trim();let items=[...document.querySelectorAll(".bill-item-row")].map(r=>({name:r.querySelector(".item-name").value.trim(),qty:Math.max(1,Number(r.querySelector(".item-qty").value)||1),price:Math.max(0,Number(r.querySelector(".item-price").value)||0)}));if(!name||!city||items.some(i=>!i.name)){alert("Please complete customer, city and item details.");return}let old=editId!==null?records.find(r=>String(r.id)===String(editId)):null;let record={id:old?old.id:Date.now(),name,city,items,paymentMode:$("payment-mode").value,date:$("record-date").value||localDate(),total:items.reduce((s,i)=>s+i.qty*i.price,0),createdAt:old?.createdAt||new Date().toISOString()};records=old?records.map(r=>String(r.id)===String(editId)?record:r):[record,...records];cache();refresh();resetForm();await saveToGitHub()}
-function resetForm(){$("customer-form").reset();$("record-date").value=localDate();$("bill-items-container").replaceChildren();addItem();$("credit-due-box").hidden=true;editId=null;$("submit-btn").textContent="💾 Save record"}
-function render(list=records){let el=$("records-list");$("record-count").textContent=list.length+" records";if(!list.length){el.innerHTML='<p class="no-records">No transaction records found.</p>';return}el.innerHTML=list.map(r=>`<article class="record-card"><div class="record-header"><strong>${escapeHTML(r.name)}</strong><span class="pill ${r.paymentMode==="Credit"?"pill-credit":""}">${escapeHTML(r.paymentMode)}</span></div><div class="record-details"><span>📍 ${escapeHTML(r.city)}</span><span>📅 ${escapeHTML(r.date)}</span></div><div class="record-items">${r.items.map(i=>`<div>• ${escapeHTML(i.name)} (${Number(i.qty)} × ${money(i.price)})</div>`).join("")}</div><div class="record-footer"><span class="record-total">Total: ${money(r.total)}</span><div class="record-actions"><button class="btn-sm" data-act="edit" data-id="${encodeURIComponent(r.id)}">✏️ Edit</button><button class="btn-sm btn-danger" data-act="delete" data-id="${encodeURIComponent(r.id)}">🗑️ Delete</button></div></div></article>`).join("");el.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click",()=>{let id=decodeURIComponent(b.dataset.id);b.dataset.act==="edit"?editRecord(id):deleteRecord(id)}))}
-function searchRecords(e){let q=e.target.value.toLowerCase().trim();render(records.filter(r=>[r.name,r.city,r.paymentMode,...r.items.map(i=>i.name)].some(v=>String(v).toLowerCase().includes(q))))}
-function editRecord(id){let r=records.find(x=>String(x.id)===String(id));if(!r)return;$("customer-name").value=r.name;$("customer-city").value=r.city;$("payment-mode").value=r.paymentMode;$("record-date").value=r.date;$("bill-items-container").replaceChildren();(r.items.length?r.items:[{name:"",qty:1,price:0}]).forEach(i=>addItem(i.name,i.qty,i.price));editId=r.id;$("submit-btn").textContent="💾 Update record";toggleCredit();window.scrollTo({top:0,behavior:"smooth"})}
-async function deleteRecord(id){let r=records.find(x=>String(x.id)===String(id));if(!r||!confirm("Delete record for "+r.name+"?"))return;records=records.filter(x=>String(x.id)!==String(id));cache();refresh();await saveToGitHub()}
-async function saveToGitHub(){cache();refresh();let token=localStorage.getItem("github_pat");if(!token){status("Saved locally · token needed","connecting");openSettings();return false}if(saving)return false;saving=true;status("Syncing to GitHub...");try{let url=`https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${CFG.path}`,headers={"Accept":"application/vnd.github+json","Authorization":"Bearer "+token,"X-GitHub-Api-Version":"2022-11-28"};let current=await fetch(url+"?ref="+CFG.branch,{headers});let sha=null;if(current.ok)sha=(await current.json()).sha;else if(current.status!==404)throw Error(await apiError(current));let content=btoa(unescape(encodeURIComponent(JSON.stringify(records,null,2))));let response=await fetch(url,{method:"PUT",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({message:"Update customer records",content,branch:CFG.branch,...(sha?{sha}:{})})});if(!response.ok)throw Error(await apiError(response));status("GitHub sync successful","online");return true}catch(e){console.error(e);status("Sync failed","error");alert("GitHub sync failed: "+e.message+"\\nYour changes remain saved in this browser. Check your token permissions and repository settings.");return false}finally{saving=false}}
-async function apiError(r){try{let d=await r.json();return `GitHub API ${r.status}: ${d.message||"Request failed"}`}catch{return "GitHub API "+r.status}}
-function openSettings(){$("github-token-input").value=localStorage.getItem("github_pat")||"";if(!$("token-dialog").open)$("token-dialog").showModal()}
-async function saveToken(){let t=$("github-token-input").value.trim();if(!t){alert("Enter your GitHub token.");return}localStorage.setItem("github_pat",t);$("token-dialog").close();await saveToGitHub()}
-function removeToken(){localStorage.removeItem("github_pat");$("github-token-input").value="";$("token-dialog").close();status("Local mode · token removed","error")}
+
+function getLocalTodayDate() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().split('T')[0];
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const todayStr = getLocalTodayDate();
+  document.getElementById('cust-date').value = todayStr;
+  document.getElementById('banner-year').textContent = new Date().getFullYear();
+
+  addBillItemRow();
+  checkBankHoliday();
+  updateDashboard();
+  checkTokenAndLoad();
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrapper')) {
+      document.getElementById('search-suggestions').classList.remove('active');
+    }
+  });
+});
+
+// Dynamic Bill Items Logic
+function addBillItemRow(desc = '', qty = 1, price = '') {
+  const wrapper = document.getElementById('bill-items-wrapper');
+  const row = document.createElement('div');
+  row.className = 'bill-item-row';
+  row.style.cssText = 'display: flex; flex-direction: column; gap: 8px; background: #eef2f6; padding: 12px; border-radius: 12px; box-shadow: var(--shadow-pressed);';
+
+  row.innerHTML = `
+    <div style="width: 100%;">
+      <input type="text" class="form-control item-desc" placeholder="Item Name" value="${desc}" style="width: 100%; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;">
+    </div>
+    <div style="display: flex; gap: 6px; width: 100%; align-items: center;">
+      <input type="number" class="form-control item-qty" placeholder="Qty" value="${qty}" min="1" required style="flex: 1; min-width: 60px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
+      <input type="number" class="form-control item-price" placeholder="Price (₹)" step="0.01" min="0" value="${price}" required style="flex: 2; min-width: 90px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
+      <button type="button" class="btn-icon" style="margin-bottom: 0; padding: 10px; background: #fff; box-shadow: 0 2px 4px rgba(15,23,42,0.05); flex-shrink: 0;" onclick="removeBillItemRow(this)" title="Remove">🗑️</button>
+    </div>
+  `;
+  wrapper.appendChild(row);
+  updateLiveTotal();
+}
+
+function removeBillItemRow(btn) {
+  const wrapper = document.getElementById('bill-items-wrapper');
+  if (wrapper.children.length > 1) {
+    btn.closest('.bill-item-row').remove();
+    updateLiveTotal();
+  } else {
+    showToast('⚠️ Bill must have at least one item');
+  }
+}
+
+// Bank Holiday Checker
+function checkBankHoliday() {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const dateOfMonth = now.getDate();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(dateOfMonth).padStart(2, '0');
+  const mmdd = `${month}-${day}`;
+
+  const fixedHolidays = { '01-26': true, '08-15': true, '10-02': true, '12-25': true };
+  const pill = document.getElementById('bank-holiday-pill');
+  const icon = document.getElementById('bank-status-icon');
+  const text = document.getElementById('bank-status-text');
+
+  let isClosed = false;
+  if (fixedHolidays[mmdd]) {
+    isClosed = true;
+  } else if (dayOfWeek === 0) {
+    isClosed = true;
+  } else if (dayOfWeek === 6) {
+    const weekOfMonth = Math.ceil(dateOfMonth / 7);
+    if (weekOfMonth === 2 || weekOfMonth === 4) {
+      isClosed = true;
+    }
+  }
+
+  if (isClosed) {
+    pill.className = 'bank-status-pill closed';
+    icon.textContent = '🔴';
+    text.textContent = 'Bank';
+  } else {
+    pill.className = 'bank-status-pill open';
+    icon.textContent = '🟢';
+    text.textContent = 'Bank';
+  }
+}
+
+function toggleCreditFields() {
+  const mode = document.getElementById('payment-mode').value;
+  const creditContainer = document.getElementById('credit-container');
+  if (mode === 'Credit') {
+    creditContainer.style.display = 'block';
+  } else {
+    creditContainer.style.display = 'none';
+    document.getElementById('credit-deposit').value = 0;
+  }
+  updateLiveTotal();
+}
+
+function updateLiveTotal() {
+  let total = 0;
+  document.querySelectorAll('.bill-item-row').forEach(row => {
+    const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+    const price = parseFloat(row.querySelector('.item-price').value) || 0;
+    total += (qty * price);
+  });
+  document.getElementById('live-bill-total').textContent = `₹${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const mode = document.getElementById('payment-mode').value;
+  if (mode === 'Credit') {
+    const deposit = parseFloat(document.getElementById('credit-deposit').value) || 0;
+    const remaining = Math.max(0, total - deposit);
+    document.getElementById('remaining-credit-balance').textContent = `₹${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+}
+
+function populateCustomerDatalist() {
+  const datalist = document.getElementById('customer-datalist');
+  if (!datalist) return;
+  const uniqueNames = [...new Set(records.map(r => r.name).filter(Boolean))];
+  datalist.innerHTML = uniqueNames.map(name => `<option value="${name.replace(/"/g, '&quot;')}">`).join('');
+}
+
+function autoFillCustomerCity() {
+  const typedName = document.getElementById('cust-name').value.trim().toLowerCase();
+  if (!typedName) return;
+  const match = records.find(r => r.name && r.name.toLowerCase() === typedName);
+  if (match && match.city) {
+    document.getElementById('cust-city').value = match.city;
+  }
+}
+
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(40px) scale(0.9)';
+    toast.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settings-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function openModal(id) {
+  deleteTargetId = id;
+  document.getElementById('confirm-modal').classList.add('active');
+}
+
+function closeModal() {
+  deleteTargetId = null;
+  document.getElementById('confirm-modal').classList.remove('active');
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+  if (deleteTargetId) {
+    const previousRecords = records.slice();
+    records = records.filter(r => r.id !== deleteTargetId);
+    closeModal();
+    updateDashboard();
+    renderRecords();
+    renderHoveringCities();
+    populateCustomerDatalist();
+    const saved = await pushDataToGitHub();
+    if (!saved) {
+      records = previousRecords;
+      updateDashboard();
+      renderRecords();
+      renderHoveringCities();
+      populateCustomerDatalist();
+      return;
+    }
+    showToast('✅ Record deleted from GitHub');
+  }
+});
+
+function updateStatus(message, state) {
+  document.getElementById('status-text').textContent = message;
+  document.getElementById('status-dot').className = 'status-dot ' + state;
+}
+
+function checkTokenAndLoad() {
+  const token = localStorage.getItem('ke_gh_token');
+  if (!token) {
+    document.getElementById('settings-panel').style.display = 'block';
+    updateStatus('Disconnected', 'error');
+  } else {
+    document.getElementById('settings-panel').style.display = 'none';
+    fetchDataFromGitHub();
+  }
+}
+
+function saveToken() {
+  const val = document.getElementById('gh-token').value.trim();
+  if (val) {
+    localStorage.setItem('ke_gh_token', val);
+    checkTokenAndLoad();
+    showToast('🔑 Token saved');
+  } else {
+    showToast('⚠️ Please enter a valid GitHub token');
+  }
+}
+
+const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
+const decodeBase64 = str => decodeURIComponent(escape(atob(str)));
+
+async function fetchDataFromGitHub() {
+  updateStatus('Fetching', 'syncing');
+  const token = localStorage.getItem('ke_gh_token');
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
+      cache: 'no-store'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      fileSha = data.sha;
+      records = JSON.parse(decodeBase64(data.content));
+      updateDashboard();
+      renderRecords();
+      renderHoveringCities();
+      populateCustomerDatalist();
+      updateStatus('Synced', 'active');
+    } else if (response.status === 404) {
+      records = [];
+      updateDashboard();
+      renderRecords();
+      renderHoveringCities();
+      populateCustomerDatalist();
+      updateStatus('Ready (New File)', 'active');
+    } else {
+      throw new Error('Auth Error');
+    }
+  } catch (e) {
+    updateStatus('Cloud Error', 'error');
+    document.getElementById('settings-panel').style.display = 'block';
+    showToast('❌ Failed to fetch from GitHub repository');
+  }
+}
+
+async function pushDataToGitHub() {
+  const token = localStorage.getItem('ke_gh_token');
+  const saveBtn = document.getElementById('save-btn');
+  if (!token) {
+    const settings = document.getElementById('settings-panel');
+    settings.style.display = 'block';
+    settings.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('⚠️ GitHub token missing. Add your token above.');
+    return false;
+  }
+
+  updateStatus('Syncing to GitHub...', 'syncing');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ Saving...';
+  }
+
+  try {
+    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+    const checkRes = await fetch(apiUrl, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+      cache: 'no-store'
+    });
+
+    let latestSha = null;
+    if (checkRes.ok) {
+      latestSha = (await checkRes.json()).sha;
+    } else if (checkRes.status !== 404) {
+      const err = await checkRes.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub read error (${checkRes.status})`);
+    }
+
+    const body = {
+      message: `Save customer records (${new Date().toLocaleString()})`,
+      content: encodeBase64(JSON.stringify(records, null, 2))
+    };
+    if (latestSha) body.sha = latestSha;
+
+    const response = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || `GitHub save error (${response.status})`);
+
+    fileSha = result.content?.sha || latestSha;
+    updateStatus('Synced', 'active');
+    showToast('✅ Saved successfully to GitHub');
+    return true;
+  } catch (err) {
+    updateStatus('Sync Failed', 'error');
+    showToast('❌ Save failed: ' + (err.message || 'Check internet and GitHub token'));
+    return false;
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      const isEditing = Boolean(document.getElementById('edit-record-id')?.value);
+      saveBtn.textContent = isEditing ? '✏️ Update Record on GitHub' : '💾 Save directly to GitHub';
+    }
+  }
+}
+
+window.saveCustomerRecord = async function(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  const form = document.getElementById('record-form');
+  if (!form) return;
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    showToast('⚠️ Please complete all required fields.');
+    return;
+  }
+
+  const previousRecords = records.slice();
+  const editId = document.getElementById('edit-record-id').value;
+  const paymentMode = document.getElementById('payment-mode').value;
+  const depositAmt = paymentMode === 'Credit' ? (parseFloat(document.getElementById('credit-deposit').value) || 0) : 0;
+
+  const itemList = [];
+  document.querySelectorAll('.bill-item-row').forEach(row => {
+    itemList.push({
+      desc: row.querySelector('.item-desc').value.trim(),
+      qty: parseInt(row.querySelector('.item-qty').value) || 1,
+      price: parseFloat(row.querySelector('.item-price').value) || 0
+    });
+  });
+
+  const recordData = {
+    id: editId || Date.now().toString(),
+    name: document.getElementById('cust-name').value.trim(),
+    city: document.getElementById('cust-city').value.trim(),
+    itemList: itemList,
+    payment: paymentMode,
+    deposit: depositAmt,
+    date: document.getElementById('cust-date').value || getLocalTodayDate()
+  };
+
+  if (editId) {
+    records = records.map(r => r.id === editId ? recordData : r);
+  } else {
+    records = [recordData, ...records];
+  }
+
+  const saved = await pushDataToGitHub();
+  if (!saved) {
+    records = previousRecords;
+    return;
+  }
+
+  cancelEditMode();
+  updateDashboard();
+  renderRecords();
+  renderHoveringCities();
+  populateCustomerDatalist();
+};
+
+function startEditRecord(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+
+  document.getElementById('edit-record-id').value = rec.id;
+  document.getElementById('cust-name').value = rec.name;
+  document.getElementById('cust-city').value = rec.city;
+  document.getElementById('payment-mode').value = rec.payment || 'Cash';
+  document.getElementById('credit-deposit').value = rec.deposit || 0;
+  document.getElementById('cust-date').value = rec.date;
+
+  const wrapper = document.getElementById('bill-items-wrapper');
+  wrapper.innerHTML = '';
+  if (rec.itemList && rec.itemList.length > 0) {
+    rec.itemList.forEach(item => addBillItemRow(item.desc, item.qty, item.price));
+  } else {
+    addBillItemRow('', rec.items || 1, rec.price || '');
+  }
+
+  toggleCreditFields();
+  updateLiveTotal();
+
+  const saveBtn = document.getElementById('save-btn');
+  saveBtn.textContent = '✏️ Update Record on GitHub';
+  document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
+  document.getElementById('record-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  showToast(`✏️ Editing ${rec.name}`);
+}
+
+function cancelEditMode() {
+  const form = document.getElementById('record-form');
+  form.reset();
+  document.getElementById('edit-record-id').value = '';
+  document.getElementById('bill-items-wrapper').innerHTML = '';
+  addBillItemRow();
+  document.getElementById('payment-mode').value = 'Cash';
+  toggleCreditFields();
+  document.getElementById('cust-date').value = getLocalTodayDate();
+  updateLiveTotal();
+
+  const saveBtn = document.getElementById('save-btn');
+  saveBtn.textContent = '💾 Save directly to GitHub';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+  updateDashboard();
+}
+
+document.getElementById('record-form').addEventListener('submit', function(event) {
+  event.preventDefault();
+  window.saveCustomerRecord(event);
+});
+
+// Search & Autocomplete
+function handleSearchInput() {
+  const query = document.getElementById('search-bar').value.trim().toLowerCase();
+  renderRecords();
+  renderHoveringCities();
+
+  const dropdown = document.getElementById('search-suggestions');
+  if (!query) {
+    dropdown.classList.remove('active');
+    dropdown.innerHTML = '';
+    return;
+  }
+
+  const seen = new Set();
+  const matchList = [];
+  records.forEach(r => {
+    if (r.name && r.name.toLowerCase().includes(query) && !seen.has('n:' + r.name.toLowerCase())) {
+      seen.add('n:' + r.name.toLowerCase());
+      matchList.push({ type: '👤 Customer', text: r.name });
+    }
+    if (r.city && r.city.toLowerCase().includes(query) && !seen.has('c:' + r.city.toLowerCase())) {
+      seen.add('c:' + r.city.toLowerCase());
+      matchList.push({ type: '🏙️ City', text: r.city });
+    }
+  });
+
+  const topMatches = matchList.slice(0, 5);
+  if (topMatches.length > 0) {
+    dropdown.innerHTML = topMatches.map(m => `
+      <div class="suggestion-item" onclick="selectSuggestion('${m.text.replace(/'/g, "\\'")}')">
+        <span>${m.text}</span>
+        <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted);">${m.type}</span>
+      </div>
+    `).join('');
+    dropdown.classList.add('active');
+  } else {
+    dropdown.classList.remove('active');
+    dropdown.innerHTML = '';
+  }
+}
+
+function selectSuggestion(val) {
+  document.getElementById('search-bar').value = val;
+  document.getElementById('search-suggestions').classList.remove('active');
+  renderRecords();
+  renderHoveringCities();
+}
+
+function renderHoveringCities() {
+  const container = document.getElementById('hovering-cities');
+  const currentQuery = document.getElementById('search-bar').value.trim().toLowerCase();
+  const citiesMap = {};
+
+  records.forEach(r => {
+    if (r.city) {
+      const cityName = r.city.trim();
+      const key = cityName.toLowerCase();
+      if (!citiesMap[key]) citiesMap[key] = { name: cityName, count: 0 };
+      citiesMap[key].count++;
+    }
+  });
+
+  const uniqueCities = Object.values(citiesMap);
+  if (uniqueCities.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="city-hover-pill ${currentQuery === '' ? 'active' : ''}" onclick="filterByCity('')">
+      🌐 All Cities
+    </div>
+  ` + uniqueCities.map(c => `
+    <div class="city-hover-pill ${currentQuery === c.name.toLowerCase() ? 'active' : ''}" onclick="filterByCity('${c.name.replace(/'/g, "\\'")}')">
+      📍 ${c.name} <span style="opacity: 0.6; font-size: 0.7rem;">(${c.count})</span>
+    </div>
+  `).join('');
+}
+
+function filterByCity(cityName) {
+  document.getElementById('search-bar').value = cityName;
+  document.getElementById('search-suggestions').classList.remove('active');
+  renderRecords();
+  renderHoveringCities();
+}
+
+function renderRecords() {
+  const rawQuery = document.getElementById('search-bar').value.trim().toLowerCase();
+  const paymentFilter = document.getElementById('filter-payment')?.value || 'all';
+  const container = document.getElementById('records-container');
+  container.innerHTML = '';
+
+  const filtered = records.filter(r => {
+    const totals = getRecordTotals(r);
+    const paymentMode = (r.payment || 'Cash').toLowerCase();
+    const deposit = r.deposit || 0;
+    const remaining = Math.max(0, totals.bill - deposit);
+
+    const matchesQuery = !rawQuery ||
+      (r.name && r.name.toLowerCase().includes(rawQuery)) ||
+      (r.city && r.city.toLowerCase().includes(rawQuery)) ||
+      paymentMode.includes(rawQuery) ||
+      ((rawQuery === 'udhar' || rawQuery === 'credit') && paymentMode === 'credit') ||
+      ((rawQuery === 'pending' || rawQuery === 'balance') && remaining > 0);
+
+    if (!matchesQuery) return false;
+    if (paymentFilter === 'Cash' && paymentMode !== 'cash') return false;
+    if (paymentFilter === 'UPI' && paymentMode !== 'upi') return false;
+    if (paymentFilter === 'Credit' && paymentMode !== 'credit') return false;
+    if (paymentFilter === 'PendingCredit' && (paymentMode !== 'credit' || remaining <= 0)) return false;
+
+    return true;
+  });
+
+  filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id));
+  document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No matching records found</div>`;
+    return;
+  }
+
+  filtered.forEach(r => {
+    const totals = getRecordTotals(r);
+    const payment = r.payment || 'Cash';
+    const deposit = r.deposit || 0;
+    const remaining = Math.max(0, totals.bill - deposit);
+    const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
+
+    let paymentText = payment;
+    if (payment === 'Cash') paymentText = '💵 Cash';
+    else if (payment === 'UPI') paymentText = '📱 UPI';
+    else if (payment === 'Credit') {
+      paymentText = `📒 Credit (Paid: ₹${deposit.toFixed(2)} | Bal: ₹${remaining.toFixed(2)})`;
+    }
+
+    let itemsHtml = '';
+    if (r.itemList && r.itemList.length > 0) {
+      itemsHtml = r.itemList.map(i => `
+        <div class="record-item-line">
+          <span class="record-item-name">${i.desc || 'Item'} <span class="record-item-qty">(x${i.qty} @ ₹${Number(i.price).toFixed(2)})</span></span>
+          <span class="record-item-price">₹${(i.qty * i.price).toFixed(2)}</span>
+        </div>
+      `).join('');
+    } else {
+      itemsHtml = `
+        <div class="record-item-line">
+          <span class="record-item-name">Legacy Record <span class="record-item-qty">(x${r.items || 1} @ ₹${Number(r.price || 0).toFixed(2)})</span></span>
+          <span class="record-item-price">₹${(Number(r.price) * (r.items || 1)).toFixed(2)}</span>
+        </div>
+      `;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card-3d record-card';
+    card.innerHTML = `
+      <div class="record-header">
+        <span class="record-date">📅 ${d}/${m}/${y}</span>
+        <div class="record-header-meta">
+          <span class="badge record-city" onclick="filterByCity('${r.city.replace(/'/g, "\\'")}')">📍 ${r.city}</span>
+          <span class="record-payment">${paymentText}</span>
+        </div>
+        <div class="record-actions">
+          <button type="button" class="btn-icon edit" onclick="startEditRecord('${r.id}')" title="Edit Record" aria-label="Edit Record">✏️</button>
+          <button type="button" class="btn-icon" onclick="openModal('${r.id}')" title="Delete" aria-label="Delete Record">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div class="record-name">👤 ${r.name}</div>
+
+      <div class="record-items-panel">
+        <div class="record-items-title">🛒 Items List</div>
+        ${itemsHtml}
+      </div>
+
+      <div class="record-details">
+        <div class="record-calc">📦 Total Qty: ${totals.qty}</div>
+        <div class="record-total">₹${Number(totals.bill).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Dashboard Calculation
+function updateDashboard() {
+  const selectedDate = document.getElementById('cust-date').value;
+  let daySale = 0, totalItems = 0, cities = new Set();
+  const yearMap = {};
+
+  records.forEach(r => {
+    const totals = getRecordTotals(r);
+    const realizedSale = (r.payment === 'Credit') ? (r.deposit || 0) : totals.bill;
+
+    if (r.date === selectedDate) {
+      daySale += realizedSale;
+    }
+    totalItems += totals.qty;
+    if (r.city) cities.add(r.city.toLowerCase());
+
+    const year = r.date ? r.date.split('-')[0] : 'Unknown';
+    if (!yearMap[year]) {
+      yearMap[year] = { sale: 0, count: 0, items: 0 };
+    }
+    yearMap[year].sale += realizedSale;
+    yearMap[year].count += 1;
+    yearMap[year].items += totals.qty;
+  });
+
+  if (selectedDate) {
+    const [y, m, d] = selectedDate.split('-');
+    document.getElementById('stat-day-label').textContent = `📈 Sale (${d}/${m})`;
+  } else {
+    document.getElementById('stat-day-label').textContent = '📈 Day Sale';
+  }
+
+  document.getElementById('stat-day-sale').textContent = `₹${daySale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  document.getElementById('stat-records').textContent = records.length;
+  document.getElementById('stat-items').textContent = totalItems;
+  document.getElementById('stat-cities').textContent = cities.size;
+
+  renderYearSummary(yearMap);
+}
+
+function renderYearSummary(yearMap) {
+  const container = document.getElementById('year-summary-container');
+  container.innerHTML = '';
+
+  const sortedYears = Object.keys(yearMap).sort((a, b) => b.localeCompare(a));
+  if (sortedYears.length === 0) {
+    container.innerHTML = `<div class="card-3d year-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-weight: 700;">No year data available</div>`;
+    return;
+  }
+
+  sortedYears.forEach(year => {
+    const data = yearMap[year];
+    const card = document.createElement('div');
+    card.className = 'card-3d year-card';
+    card.innerHTML = `
+      <div class="year-card-title">
+        <span>📅 ${year}</span>
+        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">${data.count} records</span>
+      </div>
+      <div class="year-card-total">₹${data.sale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+      <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">📦 ${data.items} items sold</div>
+    `;
+    container.appendChild(card);
+  });
+}
