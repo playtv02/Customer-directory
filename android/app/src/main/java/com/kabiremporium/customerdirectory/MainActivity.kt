@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
         val webView = WebView(this)
         setContentView(webView)
         webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
         webView.webViewClient = WebViewClient()
         webView.loadUrl("https://playtv02.github.io/Customer-directory/")
     }
