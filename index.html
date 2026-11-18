@@ -12,33 +12,38 @@
 
   <style>
     :root {
-      --bg-grad: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #cbd5e1 100%);
-      --surface-3d: linear-gradient(145deg, #ffffff, #f8fafc);
-      --surface-hover-3d: linear-gradient(145deg, #ffffff, #f1f5f9);
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --border-highlight: rgba(255, 255, 255, 0.9);
-      --border-shadow: rgba(203, 213, 225, 0.5);
+      /* Neumorphic Soft-UI Base Palette */
+      --neu-bg: #e0e5ec;
+      --neu-surface: linear-gradient(145deg, #f0f5fc, #caced4);
+      --neu-concave: linear-gradient(145deg, #caced4, #f0f5fc);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
       --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --accent-depth: #1e3a8a;
+      --accent-grad: linear-gradient(145deg, #3b82f6, #1d4ed8);
       --danger: #ef4444;
-      --danger-depth: #991b1b;
+      --danger-grad: linear-gradient(145deg, #f87171, #dc2626);
       --success: #10b981;
       --warning: #f59e0b;
-      --radius: 20px;
-      --focus-ring: rgba(37, 99, 235, 0.25);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
 
-      /* 3D Shadows */
-      --shadow-3d: 
-        8px 12px 20px rgba(15, 23, 42, 0.08),
-        -4px -4px 12px rgba(255, 255, 255, 0.8),
-        inset 2px 2px 4px rgba(255, 255, 255, 1),
-        inset -2px -2px 4px rgba(203, 213, 225, 0.4);
+      /* Neumorphic 3D Extruded & Carved Shadows */
+      --neu-raised: 
+        9px 9px 18px #a3b1c6,
+        -9px -9px 18px #ffffff;
 
-      --shadow-inset: 
-        inset 4px 4px 8px rgba(15, 23, 42, 0.06),
-        inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+      --neu-raised-sm: 
+        5px 5px 10px #a3b1c6,
+        -5px -5px 10px #ffffff;
+
+      --neu-pressed: 
+        inset 6px 6px 12px #a3b1c6,
+        inset -6px -6px 12px #ffffff;
+
+      --neu-pressed-sm: 
+        inset 3px 3px 7px #a3b1c6,
+        inset -3px -3px 7px #ffffff;
     }
 
     * {
@@ -49,40 +54,48 @@
     }
 
     body {
-      background: var(--bg-grad);
+      background-color: var(--neu-bg);
       color: var(--text-main);
       min-height: 100vh;
-      padding: 20px 16px 60px;
+      padding: 24px 16px 64px;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
-    /* Header & Sync Bar */
+    /* Neumorphic Header */
     .header-card {
-      background: var(--surface-3d);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
-      padding: 20px 24px;
-      margin-bottom: 20px;
+      background: var(--neu-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      padding: 22px 26px;
+      margin-bottom: 24px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .brand-icon {
-      font-size: 2rem;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: var(--neu-bg);
+      box-shadow: var(--neu-pressed-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
     }
 
     .brand h1 {
@@ -95,170 +108,154 @@
     .brand p {
       font-size: 0.82rem;
       color: var(--text-muted);
-      font-weight: 500;
+      font-weight: 600;
+      margin-top: 2px;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
+    /* Carved Sync Pill */
     .sync-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
+      gap: 8px;
+      padding: 8px 14px;
       border-radius: 999px;
       font-size: 0.78rem;
-      font-weight: 600;
-      background: #f1f5f9;
+      font-weight: 700;
+      background: var(--neu-bg);
       color: var(--text-muted);
-      box-shadow: var(--shadow-inset);
+      box-shadow: var(--neu-pressed-sm);
     }
 
     .sync-dot {
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--text-muted);
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
     }
 
-    .sync-badge.ok .sync-dot { background: var(--success); }
-    .sync-badge.syncing .sync-dot { background: var(--warning); animation: pulse 1s infinite; }
-    .sync-badge.error .sync-dot { background: var(--danger); }
+    .sync-badge.ok .sync-dot {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+    .sync-badge.syncing .sync-dot {
+      background: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+      animation: pulse 1s infinite;
+    }
+    .sync-badge.error .sync-dot {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
-    /* 3D Buttons */
+    /* Neumorphic 3D Buttons */
     .btn {
-      border: none;
-      border-radius: 12px;
-      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 11px 18px;
       font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
+      gap: 7px;
+      transition: all 0.15s ease;
       user-select: none;
+      background: var(--neu-surface);
+      color: var(--text-main);
+      box-shadow: var(--neu-raised-sm);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      color: var(--accent);
     }
 
     .btn:active {
-      transform: translateY(2px);
+      transform: translateY(1px);
+      background: var(--neu-bg);
+      box-shadow: var(--neu-pressed-sm);
     }
 
     .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 4px 0 var(--accent-depth), 0 6px 12px rgba(37, 99, 235, 0.25);
+      background: var(--accent-grad);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 
+        5px 5px 12px #a3b1c6,
+        -5px -5px 12px #ffffff,
+        inset 1px 1px 2px rgba(255, 255, 255, 0.4);
     }
 
     .btn-primary:hover {
-      background: var(--accent-hover);
+      color: #ffffff;
+      filter: brightness(1.06);
+    }
+
+    .btn-primary:active {
+      background: var(--accent);
+      box-shadow: inset 4px 4px 8px rgba(15, 23, 42, 0.35);
     }
 
     .btn-secondary {
-      background: var(--surface-3d);
+      background: var(--neu-surface);
       color: var(--text-main);
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
     }
 
     .btn-danger {
-      background: var(--danger);
-      color: #fff;
-      box-shadow: 0 3px 0 var(--danger-depth), 0 4px 10px rgba(239, 68, 68, 0.22);
-      padding: 7px 12px;
-      font-size: 0.8rem;
+      background: var(--danger-grad);
+      color: #ffffff;
+      border: none;
+      box-shadow: var(--neu-raised-sm);
+      padding: 8px 13px;
+      font-size: 0.82rem;
+    }
+
+    .btn-danger:hover {
+      color: #ffffff;
+      filter: brightness(1.06);
+    }
+
+    .btn-danger:active {
+      box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.3);
     }
 
     .btn-sm {
-      padding: 7px 12px;
+      padding: 8px 14px;
       font-size: 0.8rem;
-      border-radius: 10px;
-    }
-
-    /* Cards & Forms */
-    .card {
-      background: var(--surface-3d);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
-      padding: 22px;
-      margin-bottom: 20px;
-    }
-
-    .card-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .input-group label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .input {
-      width: 100%;
-      padding: 11px 14px;
       border-radius: 12px;
-      border: 1px solid var(--border-shadow);
-      background: #f8fafc;
-      box-shadow: var(--shadow-inset);
-      color: var(--text-main);
-      font-size: 0.92rem;
-      font-weight: 500;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .input:focus {
-      border-color: var(--accent);
-      box-shadow: var(--shadow-inset), 0 0 0 3px var(--focus-ring);
-      background: #fff;
-    }
-
-    /* Stats Bar */
+    /* Neumorphic Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
     }
 
     .stat-box {
-      background: var(--surface-3d);
-      border-radius: 16px;
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
-      padding: 14px 18px;
+      background: var(--neu-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--neu-raised);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .stat-label {
@@ -266,92 +263,167 @@
       font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .stat-value {
-      font-size: 1.35rem;
+      font-size: 1.55rem;
       font-weight: 800;
-      margin-top: 4px;
+      color: var(--accent);
+      text-shadow: 1px 1px 0px #ffffff;
+    }
+
+    /* Neumorphic Main Cards */
+    .card {
+      background: var(--neu-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--neu-raised);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       color: var(--text-main);
     }
 
-    /* Customer List */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .input-group label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding-left: 4px;
+    }
+
+    /* Carved / Inset Neumorphic Inputs */
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: var(--neu-bg);
+      box-shadow: var(--neu-pressed);
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-weight: 600;
+      outline: none;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .input::placeholder {
+      color: #8c9bae;
+      font-weight: 500;
+    }
+
+    .input:focus {
+      border-color: rgba(37, 99, 235, 0.5);
+      box-shadow: 
+        var(--neu-pressed),
+        0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Directory List & Carved Search */
     .search-bar {
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .customer-list {
       display: grid;
-      gap: 12px;
+      gap: 16px;
     }
 
     .customer-item {
-      background: var(--surface-3d);
-      border-radius: 16px;
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
-      padding: 16px 18px;
+      background: var(--neu-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--neu-raised-sm);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 18px 20px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      transition: transform 0.15s ease;
+      gap: 14px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .customer-item:hover {
-      background: var(--surface-hover-3d);
+      transform: translateY(-2px);
+      box-shadow: var(--neu-raised);
     }
 
     .customer-info h3 {
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 1.04rem;
+      font-weight: 800;
       color: var(--text-main);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .customer-meta {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: 10px;
-      font-size: 0.83rem;
+      font-size: 0.84rem;
       color: var(--text-muted);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .badge {
-      padding: 3px 9px;
-      border-radius: 8px;
-      font-size: 0.75rem;
+      padding: 5px 11px;
+      border-radius: 10px;
+      font-size: 0.76rem;
       font-weight: 700;
-      background: #e2e8f0;
+      background: var(--neu-bg);
+      box-shadow: var(--neu-pressed-sm);
       color: var(--text-main);
     }
 
     .badge-amount {
-      background: rgba(37, 99, 235, 0.1);
       color: var(--accent);
+      font-weight: 800;
     }
 
     .customer-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .empty-state {
       text-align: center;
-      padding: 36px 16px;
+      padding: 38px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--neu-pressed);
       color: var(--text-muted);
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    /* Modal for GitHub Settings */
+    /* Neumorphic Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(4px);
+      background: rgba(224, 229, 236, 0.75);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -364,30 +436,36 @@
     }
 
     .modal {
-      background: var(--surface-3d);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
+      background: var(--neu-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: 
+        14px 14px 28px #9aa7b8,
+        -14px -14px 28px #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.6);
       width: 100%;
       max-width: 460px;
-      padding: 24px;
+      padding: 26px;
     }
 
+    /* Neumorphic Floating Toast */
     .toast {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--text-main);
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 12px;
+      bottom: 24px;
+      right: 24px;
+      background: var(--neu-bg);
+      color: var(--text-main);
+      padding: 14px 20px;
+      border-radius: 14px;
       font-size: 0.86rem;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 
+        8px 8px 18px #9aa7b8,
+        -8px -8px 18px #ffffff;
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(12px);
       pointer-events: none;
-      transition: all 0.2s ease;
+      transition: all 0.22s ease;
       z-index: 200;
     }
 
@@ -395,15 +473,29 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    @media (max-width: 600px) {
+      .header-card, .card {
+        padding: 18px;
+      }
+      .customer-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .customer-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Top Header -->
+    <!-- Top Neumorphic Header -->
     <header class="header-card">
       <div class="brand">
-        <span class="brand-icon">📘</span>
+        <div class="brand-icon">📘</div>
         <div>
           <h1>Kabir Emporium Directory</h1>
           <p>Customer & Sales Cloud Directory</p>
@@ -491,26 +583,26 @@
   <div id="settingsModal" class="modal-backdrop">
     <div class="modal">
       <div class="card-title">
-        <span>⚙️ GitHub Cloud Sync (`data.json`)</span>
+        <span>⚙️ GitHub Cloud Sync (data.json)</span>
         <button class="btn btn-secondary btn-sm" onclick="closeSettings()">✕</button>
       </div>
-      <div class="input-group" style="margin-bottom:12px;">
+      <div class="input-group" style="margin-bottom:14px;">
         <label>GitHub Owner / Username</label>
         <input type="text" id="ghOwner" class="input" value="playtv02">
       </div>
-      <div class="input-group" style="margin-bottom:12px;">
+      <div class="input-group" style="margin-bottom:14px;">
         <label>Repository Name</label>
         <input type="text" id="ghRepo" class="input" value="Customer-directory">
       </div>
-      <div class="input-group" style="margin-bottom:12px;">
+      <div class="input-group" style="margin-bottom:14px;">
         <label>File Path</label>
         <input type="text" id="ghPath" class="input" value="data.json">
       </div>
-      <div class="input-group" style="margin-bottom:18px;">
+      <div class="input-group" style="margin-bottom:20px;">
         <label>GitHub Personal Access Token (repo scope)</label>
         <input type="password" id="ghToken" class="input" placeholder="ghp_xxxxxxxxxxxx">
       </div>
-      <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <div style="display:flex; gap:12px; justify-content:flex-end;">
         <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
         <button class="btn btn-primary" onclick="saveSettings()">Save & Connect</button>
       </div>
@@ -519,370 +611,7 @@
 
   <div id="toast" class="toast"></div>
 
-  <script>
-    // --- STATE & STORAGE ---
-    const STORAGE_KEY = 'kabir_emporium_customers_v1';
-    const GH_CONFIG_KEY = 'kabir_emporium_gh_config';
-
-    let entries = [];
-    let isSaving = false;
-    let pendingSave = false;
-
-    // Default Today's Date
-    document.getElementById('custDate').valueAsDate = new Date();
-
-    function getGHConfig() {
-      const saved = JSON.parse(localStorage.getItem(GH_CONFIG_KEY) || '{}');
-      // Fallback compatibility with older token keys if already saved in browser
-      const legacyToken = localStorage.getItem('github_token') || localStorage.getItem('gh_token') || localStorage.getItem('token') || '';
-      return {
-        owner: (saved.owner || 'playtv02').trim(),
-        repo: (saved.repo || 'Customer-directory').trim(),
-        path: (saved.path || 'data.json').trim(),
-        token: (saved.token || legacyToken).trim()
-      };
-    }
-
-    // --- SAFE UTF-8 BASE64 ENCODER / DECODER (Prevents btoa crashes on Hindi/Gujarati/Emojis) ---
-    function utf8ToBase64(str) {
-      const bytes = new TextEncoder().encode(str);
-      let binary = '';
-      const chunkSize = 0x8000;
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
-      }
-      return btoa(binary);
-    }
-
-    function base64ToUtf8(base64) {
-      const clean = base64.replace(/\s/g, '');
-      const binary = atob(clean);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      return new TextDecoder().decode(bytes);
-    }
-
-    // --- UI HELPERS ---
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
-    }
-
-    function setSyncStatus(state, text) {
-      const badge = document.getElementById('syncBadge');
-      const label = document.getElementById('syncText');
-      badge.className = 'sync-badge ' + state;
-      label.textContent = text;
-    }
-
-    function escapeHTML(str) {
-      return String(str || '').replace(/[&<>"']/g, s => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[s]));
-    }
-
-    // --- LOAD DATA FROM GITHUB OR LOCAL ---
-    async function fetchFromGitHub(manual = false) {
-      const cfg = getGHConfig();
-      const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?t=${Date.now()}`;
-
-      setSyncStatus('syncing', 'Loading data.json...');
-
-      try {
-        const headers = { 'Accept': 'application/vnd.github.v3+json' };
-        if (cfg.token) headers['Authorization'] = `Bearer ${cfg.token}`;
-
-        const res = await fetch(apiUrl, { headers, cache: 'no-store' });
-
-        if (res.status === 404) {
-          // data.json doesn't exist yet; start empty and create on first save
-          setSyncStatus('ok', 'Ready (New data.json)');
-          return;
-        }
-
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-
-        const fileData = await res.json();
-        const decodedText = base64ToUtf8(fileData.content || 'W10=');
-        const parsed = JSON.parse(decodedText);
-
-        if (Array.isArray(parsed)) {
-          entries = parsed;
-        } else if (parsed && Array.isArray(parsed.customers)) {
-          entries = parsed.customers;
-        } else if (parsed && Array.isArray(parsed.entries)) {
-          entries = parsed.entries;
-        }
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-        renderList();
-        setSyncStatus('ok', cfg.token ? 'Synced with data.json' : 'Read-Only (Add Token to Save)');
-        if (manual) showToast('Loaded latest data.json from GitHub');
-      } catch (err) {
-        console.warn('GitHub fetch fallback:', err);
-        setSyncStatus('error', 'Offline / Local Cache');
-        if (manual) showToast('Could not fetch from GitHub: ' + err.message);
-      }
-    }
-
-    // --- RELIABLE SAVE TO GITHUB WITH FRESH SHA & AUTO-RETRY ---
-    async function syncToGitHub(retryCount = 0) {
-      const cfg = getGHConfig();
-      if (!cfg.token) {
-        setSyncStatus('error', 'Saved Locally (No Token)');
-        showToast('Saved locally. Add GitHub Token in ⚙️ to update data.json');
-        return;
-      }
-
-      if (isSaving) {
-        pendingSave = true;
-        return;
-      }
-
-      isSaving = true;
-      setSyncStatus('syncing', 'Saving to data.json...');
-
-      const baseApiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
-      const headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': `Bearer ${cfg.token}`,
-        'Content-Type': 'application/json'
-      };
-
-      try {
-        // STEP 1: Always fetch the latest SHA with cache busting right before PUT
-        let latestSha = null;
-        const getRes = await fetch(`${baseApiUrl}?t=${Date.now()}`, {
-          method: 'GET',
-          headers,
-          cache: 'no-store'
-        });
-
-        if (getRes.ok) {
-          const getJson = await getRes.json();
-          latestSha = getJson.sha;
-        } else if (getRes.status !== 404) {
-          const errJson = await getRes.json().catch(() => ({}));
-          throw new Error(errJson.message || `Failed to read SHA (${getRes.status})`);
-        }
-
-        // STEP 2: Encode JSON safely and PUT to GitHub
-        const contentStr = JSON.stringify(entries, null, 2);
-        const bodyPayload = {
-          message: `Update ${cfg.path} (${new Date().toLocaleString('en-IN')})`,
-          content: utf8ToBase64(contentStr)
-        };
-        if (latestSha) {
-          bodyPayload.sha = latestSha;
-        }
-
-        const putRes = await fetch(baseApiUrl, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(bodyPayload)
-        });
-
-        // STEP 3: Auto-retry if 409 Conflict or 422 SHA mismatch happens
-        if ((putRes.status === 409 || putRes.status === 422) && retryCount < 3) {
-          isSaving = false;
-          await new Promise(r => setTimeout(r, 600 * (retryCount + 1)));
-          return syncToGitHub(retryCount + 1);
-        }
-
-        if (!putRes.ok) {
-          const errData = await putRes.json().catch(() => ({}));
-          throw new Error(errData.message || `HTTP ${putRes.status}`);
-        }
-
-        setSyncStatus('ok', 'Saved to data.json ✓');
-        showToast('Saved to data.json successfully!');
-      } catch (err) {
-        console.error('Error saving data.json:', err);
-        setSyncStatus('error', 'Save Error (Retained Locally)');
-        showToast('data.json error: ' + err.message);
-      } finally {
-        isSaving = false;
-        if (pendingSave) {
-          pendingSave = false;
-          syncToGitHub(0);
-        }
-      }
-    }
-
-    // --- CRUD OPERATIONS ---
-    function handleSaveEntry(e) {
-      e.preventDefault();
-
-      const editId = document.getElementById('editId').value;
-      const name = document.getElementById('custName').value.trim();
-      const phone = document.getElementById('custPhone').value.trim();
-      const city = document.getElementById('custCity').value.trim();
-      const amount = parseFloat(document.getElementById('custAmount').value) || 0;
-      const notes = document.getElementById('custNotes').value.trim();
-      const date = document.getElementById('custDate').value || new Date().toISOString().slice(0, 10);
-
-      if (!name || !phone) {
-        showToast('Please enter both Name and Mobile Number');
-        return;
-      }
-
-      if (editId) {
-        const idx = entries.findIndex(item => String(item.id) === String(editId));
-        if (idx > -1) {
-          entries[idx] = { ...entries[idx], name, phone, city, amount, notes, date, updatedAt: Date.now() };
-        }
-      } else {
-        entries.unshift({
-          id: Date.now().toString(),
-          name,
-          phone,
-          city,
-          amount,
-          notes,
-          date,
-          createdAt: Date.now()
-        });
-      }
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-      resetForm();
-      renderList();
-      syncToGitHub();
-    }
-
-    function editEntry(id) {
-      const item = entries.find(x => String(x.id) === String(id));
-      if (!item) return;
-
-      document.getElementById('editId').value = item.id;
-      document.getElementById('custName').value = item.name || '';
-      document.getElementById('custPhone').value = item.phone || '';
-      document.getElementById('custCity').value = item.city || '';
-      document.getElementById('custAmount').value = item.amount || '';
-      document.getElementById('custNotes').value = item.notes || '';
-      document.getElementById('custDate').value = item.date || new Date().toISOString().slice(0, 10);
-
-      document.getElementById('formTitle').textContent = '✏️ Edit Customer Entry';
-      document.getElementById('saveBtn').textContent = '💾 Update Entry';
-      document.getElementById('cancelEditBtn').style.display = 'inline-flex';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function deleteEntry(id) {
-      if (!confirm('Delete this customer entry?')) return;
-      entries = entries.filter(x => String(x.id) !== String(id));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-      renderList();
-      syncToGitHub();
-    }
-
-    function resetForm() {
-      document.getElementById('entryForm').reset();
-      document.getElementById('editId').value = '';
-      document.getElementById('custDate').valueAsDate = new Date();
-      document.getElementById('formTitle').textContent = '➕ Add Customer Entry';
-      document.getElementById('saveBtn').textContent = '💾 Save Entry';
-      document.getElementById('cancelEditBtn').style.display = 'none';
-    }
-
-    // --- RENDER & SEARCH ---
-    function renderList() {
-      const listEl = document.getElementById('customerList');
-      const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
-
-      const filtered = entries.filter(item => {
-        return (
-          (item.name || '').toLowerCase().includes(q) ||
-          (item.phone || '').toLowerCase().includes(q) ||
-          (item.city || '').toLowerCase().includes(q) ||
-          (item.notes || '').toLowerCase().includes(q)
-        );
-      });
-
-      // Update Summary Stats
-      document.getElementById('statCount').textContent = entries.length;
-      const totalAmt = entries.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-      document.getElementById('statAmount').textContent = '₹' + totalAmt.toLocaleString('en-IN');
-
-      if (filtered.length === 0) {
-        listEl.innerHTML = `<div class="empty-state">No customer entries found.</div>`;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map(item => `
-        <div class="customer-item">
-          <div class="customer-info">
-            <h3>${escapeHTML(item.name)}</h3>
-            <div class="customer-meta">
-              <span>📞 <a href="tel:${escapeHTML(item.phone)}" style="color:inherit;text-decoration:none;">${escapeHTML(item.phone)}</a></span>
-              ${item.city ? `<span>📍 ${escapeHTML(item.city)}</span>` : ''}
-              ${item.date ? `<span>📅 ${escapeHTML(item.date)}</span>` : ''}
-              ${item.amount ? `<span class="badge badge-amount">₹${Number(item.amount).toLocaleString('en-IN')}</span>` : ''}
-              ${item.notes ? `<span class="badge">${escapeHTML(item.notes)}</span>` : ''}
-            </div>
-          </div>
-          <div class="customer-actions">
-            <button class="btn btn-secondary btn-sm" onclick="editEntry('${escapeHTML(item.id)}')">✏️ Edit</button>
-            <button class="btn btn-danger" onclick="deleteEntry('${escapeHTML(item.id)}')">🗑️</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // --- SETTINGS MODAL & BACKUP ---
-    function openSettings() {
-      const cfg = getGHConfig();
-      document.getElementById('ghOwner').value = cfg.owner;
-      document.getElementById('ghRepo').value = cfg.repo;
-      document.getElementById('ghPath').value = cfg.path;
-      document.getElementById('ghToken').value = cfg.token;
-      document.getElementById('settingsModal').classList.add('open');
-    }
-
-    function closeSettings() {
-      document.getElementById('settingsModal').classList.remove('open');
-    }
-
-    function saveSettings() {
-      const cfg = {
-        owner: document.getElementById('ghOwner').value.trim() || 'playtv02',
-        repo: document.getElementById('ghRepo').value.trim() || 'Customer-directory',
-        path: document.getElementById('ghPath').value.trim() || 'data.json',
-        token: document.getElementById('ghToken').value.trim()
-      };
-      localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(cfg));
-      closeSettings();
-      fetchFromGitHub(true);
-    }
-
-    function exportJSON() {
-      const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'data.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // --- INITIALIZE ---
-    (function init() {
-      try {
-        const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        if (Array.isArray(local)) entries = local;
-      } catch (e) {
-        entries = [];
-      }
-      renderList();
-      fetchFromGitHub(false);
-    })();
-  </script>
+  <!-- External Script -->
+  <script src="script.js"></script>
 </body>
 </html>
