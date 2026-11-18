@@ -1,63 +1,261 @@
-const GITHUB_OWNER = 'playtv02';
-const GITHUB_REPO = 'Customer-directory';
-const FILE_PATH = 'data.json';
+// --- STATE & STORAGE ---
+const STORAGE_KEY = 'kabir_emporium_customers_v1';
+const GH_CONFIG_KEY = 'kabir_emporium_gh_config';
 
-let records = [];
-let fileSha = null;
-let deleteTargetId = null;
+let entries = [];
+let isSaving = false;
+let pendingSave = false;
+let currentEditingId = null;
 
-// Helper to handle multiple items calculation robustly
-function getRecordTotals(r) {
-  if (r.itemList && r.itemList.length > 0) {
-    let bill = 0, qty = 0;
-    r.itemList.forEach(i => {
-      bill += (i.qty * i.price);
-      qty += i.qty;
-    });
-    return { bill, qty };
-  }
-  return { bill: (r.items || 1) * (Number(r.price) || 0), qty: r.items || 1 };
-}
-
-function getLocalTodayDate() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().split('T')[0];
-}
-
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-  const todayStr = getLocalTodayDate();
-  document.getElementById('cust-date').value = todayStr;
-  document.getElementById('banner-year').textContent = new Date().getFullYear();
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('cust-date');
+  if (dateInput) dateInput.value = today;
 
-  addBillItemRow();
-  checkBankHoliday();
+  loadLocalRecords();
+  initBillItemRow();
+  renderRecords();
   updateDashboard();
-  checkTokenAndLoad();
+  fetchFromGitHub(false);
 
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-wrapper')) {
-      document.getElementById('search-suggestions').classList.remove('active');
-    }
-  });
+  // Form submit handler
+  const form = document.getElementById('record-form');
+  if (form) {
+    form.addEventListener('submit', handleFormSubmit);
+  }
 });
 
-// Dynamic Bill Items Logic
-function addBillItemRow(desc = '', qty = 1, price = '') {
+function loadLocalRecords() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      entries = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Error loading local storage:', e);
+    entries = [];
+  }
+}
+
+function saveLocalRecords() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+// --- GITHUB CONFIG & SYNC ---
+function getGHConfig() {
+  const saved = JSON.parse(localStorage.getItem(GH_CONFIG_KEY) || '{}');
+  const legacyToken = localStorage.getItem('github_token') || localStorage.getItem('gh_token') || localStorage.getItem('token') || '';
+  return {
+    owner: (saved.owner || 'playtv02').trim(),
+    repo: (saved.repo || 'Customer-directory').trim(),
+    path: (saved.path || 'data.json').trim(),
+    token: (saved.token || legacyToken).trim()
+  };
+}
+
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settings-panel');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') {
+    const cfg = getGHConfig();
+    const tokenInput = document.getElementById('gh-token');
+    if (tokenInput) tokenInput.value = cfg.token;
+  }
+}
+
+function saveToken() {
+  const tokenInput = document.getElementById('gh-token');
+  if (!tokenInput) return;
+  const token = tokenInput.value.trim();
+
+  const cfg = getGHConfig();
+  cfg.token = token;
+  localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(cfg));
+
+  toggleSettingsPanel();
+  showToast('Token saved successfully!');
+  fetchFromGitHub(true);
+}
+
+function setSyncStatus(status, text) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  if (dot) dot.className = `status-dot ${status}`;
+  if (txt) txt.textContent = text;
+}
+
+// --- SAFE UTF-8 BASE64 ENCODER / DECODER (Prevents btoa/Unicode crashes) ---
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function base64ToUtf8(base64) {
+  const clean = base64.replace(/\s/g, '');
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+// --- FETCH FROM GITHUB ---
+async function fetchFromGitHub(manual = false) {
+  const cfg = getGHConfig();
+  if (!cfg.token) {
+    setSyncStatus('error', 'No Token');
+    if (manual) showToast('Please add GitHub token in settings.');
+    return;
+  }
+
+  setSyncStatus('syncing', 'Syncing...');
+  const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?t=${Date.now()}`;
+
+  try {
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'Authorization': `Bearer ${cfg.token}`
+    };
+
+    const res = await fetch(apiUrl, { headers, cache: 'no-store' });
+    if (res.status === 404) {
+      setSyncStatus('active', 'Ready (New File)');
+      return;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const fileData = await res.json();
+    const decodedText = base64ToUtf8(fileData.content || 'W10=');
+    const parsed = JSON.parse(decodedText);
+
+    if (Array.isArray(parsed)) {
+      entries = parsed;
+      saveLocalRecords();
+      renderRecords();
+      updateDashboard();
+      setSyncStatus('active', 'Synced');
+      if (manual) showToast('Data loaded from GitHub!');
+    }
+  } catch (err) {
+    console.error('Fetch error:', err);
+    setSyncStatus('error', 'Sync Failed');
+    if (manual) showToast('Sync failed: ' + err.message);
+  }
+}
+
+// --- RELIABLE SAVE TO GITHUB WITH SHA AUTO-RETRY ---
+async function syncToGitHub(retryCount = 0) {
+  const cfg = getGHConfig();
+  if (!cfg.token) {
+    setSyncStatus('error', 'Local Only');
+    showToast('Saved locally. Add GitHub token to sync online.');
+    return;
+  }
+
+  if (isSaving) {
+    pendingSave = true;
+    return;
+  }
+
+  isSaving = true;
+  setSyncStatus('syncing', 'Saving...');
+
+  const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+  const headers = {
+    'Accept': 'application/vnd.github.v3+json',
+    'Authorization': `Bearer ${cfg.token}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    // 1. Fetch latest SHA with cache-busting right before PUT
+    let latestSha = null;
+    const getRes = await fetch(`${apiUrl}?t=${Date.now()}`, {
+      method: 'GET',
+      headers,
+      cache: 'no-store'
+    });
+
+    if (getRes.ok) {
+      const json = await getRes.json();
+      latestSha = json.sha;
+    } else if (getRes.status !== 404) {
+      const errJson = await getRes.json().catch(() => ({}));
+      throw new Error(errJson.message || `Failed to fetch SHA (${getRes.status})`);
+    }
+
+    // 2. Prepare PUT payload
+    const contentStr = JSON.stringify(entries, null, 2);
+    const bodyPayload = {
+      message: `Save customer records (${new Date().toLocaleString('en-IN')})`,
+      content: utf8ToBase64(contentStr)
+    };
+    if (latestSha) {
+      bodyPayload.sha = latestSha;
+    }
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(bodyPayload)
+    });
+
+    // 3. Auto-retry on 409 Conflict or 422 SHA mismatch up to 3 times
+    if ((putRes.status === 409 || putRes.status === 422) && retryCount < 3) {
+      isSaving = false;
+      await new Promise(r => setTimeout(r, 600 * (retryCount + 1)));
+      return syncToGitHub(retryCount + 1);
+    }
+
+    if (!putRes.ok) {
+      const errData = await putRes.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP ${putRes.status}`);
+    }
+
+    setSyncStatus('active', 'Synced ✓');
+    showToast('Saved & Synced to GitHub!');
+  } catch (err) {
+    console.error('Save error:', err);
+    setSyncStatus('error', 'Save Error');
+    showToast('GitHub Save Error: ' + err.message);
+  } finally {
+    isSaving = false;
+    if (pendingSave) {
+      pendingSave = false;
+      syncToGitHub(0);
+    }
+  }
+}
+
+// --- MULTI-ITEM BILLING & FORM LOGIC ---
+function initBillItemRow() {
   const wrapper = document.getElementById('bill-items-wrapper');
+  if (wrapper && wrapper.children.length === 0) {
+    addBillItemRow();
+  }
+}
+
+function addBillItemRow(name = '', qty = 1, price = '') {
+  const wrapper = document.getElementById('bill-items-wrapper');
+  if (!wrapper) return;
+
   const row = document.createElement('div');
   row.className = 'bill-item-row';
-  row.style.cssText = 'display: flex; flex-direction: column; gap: 8px; background: #eef2f6; padding: 12px; border-radius: 12px; box-shadow: var(--shadow-pressed);';
-
+  row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1.2fr auto; gap: 8px; align-items: center;';
+  
   row.innerHTML = `
-    <div style="width: 100%;">
-      <input type="text" class="form-control item-desc" placeholder="Item Name" value="${desc}" style="width: 100%; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;">
-    </div>
-    <div style="display: flex; gap: 6px; width: 100%; align-items: center;">
-      <input type="number" class="form-control item-qty" placeholder="Qty" value="${qty}" min="1" required style="flex: 1; min-width: 60px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
-      <input type="number" class="form-control item-price" placeholder="Price (₹)" step="0.01" min="0" value="${price}" required style="flex: 2; min-width: 90px; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;" oninput="updateLiveTotal()">
-      <button type="button" class="btn-icon" style="margin-bottom: 0; padding: 10px; background: #fff; box-shadow: 0 2px 4px rgba(15,23,42,0.05); flex-shrink: 0;" onclick="removeBillItemRow(this)" title="Remove">🗑️</button>
-    </div>
+    <input type="text" class="form-control item-name" placeholder="Item Name" value="${escapeHtml(name)}" required oninput="updateLiveTotal()">
+    <input type="number" class="form-control item-qty" placeholder="Qty" value="${qty}" min="1" step="any" required oninput="updateLiveTotal()">
+    <input type="number" class="form-control item-price" placeholder="Price (₹)" value="${price}" min="0" step="any" required oninput="updateLiveTotal()">
+    <button type="button" class="btn-icon" onclick="removeBillItemRow(this)" title="Remove item">❌</button>
   `;
   wrapper.appendChild(row);
   updateLiveTotal();
@@ -65,638 +263,483 @@ function addBillItemRow(desc = '', qty = 1, price = '') {
 
 function removeBillItemRow(btn) {
   const wrapper = document.getElementById('bill-items-wrapper');
-  if (wrapper.children.length > 1) {
+  if (wrapper && wrapper.children.length > 1) {
     btn.closest('.bill-item-row').remove();
     updateLiveTotal();
   } else {
-    showToast('⚠️ Bill must have at least one item');
-  }
-}
-
-// Bank Holiday Checker
-function checkBankHoliday() {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const dateOfMonth = now.getDate();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(dateOfMonth).padStart(2, '0');
-  const mmdd = `${month}-${day}`;
-
-  const fixedHolidays = { '01-26': true, '08-15': true, '10-02': true, '12-25': true };
-  const pill = document.getElementById('bank-holiday-pill');
-  const icon = document.getElementById('bank-status-icon');
-  const text = document.getElementById('bank-status-text');
-
-  let isClosed = false;
-  if (fixedHolidays[mmdd]) {
-    isClosed = true;
-  } else if (dayOfWeek === 0) {
-    isClosed = true;
-  } else if (dayOfWeek === 6) {
-    const weekOfMonth = Math.ceil(dateOfMonth / 7);
-    if (weekOfMonth === 2 || weekOfMonth === 4) {
-      isClosed = true;
-    }
-  }
-
-  if (isClosed) {
-    pill.className = 'bank-status-pill closed';
-    icon.textContent = '🔴';
-    text.textContent = 'Bank';
-  } else {
-    pill.className = 'bank-status-pill open';
-    icon.textContent = '🟢';
-    text.textContent = 'Bank';
+    showToast('At least one item is required.');
   }
 }
 
 function toggleCreditFields() {
   const mode = document.getElementById('payment-mode').value;
-  const creditContainer = document.getElementById('credit-container');
-  if (mode === 'Credit') {
-    creditContainer.style.display = 'block';
-  } else {
-    creditContainer.style.display = 'none';
-    document.getElementById('credit-deposit').value = 0;
+  const container = document.getElementById('credit-container');
+  if (container) {
+    container.style.display = mode === 'Credit' ? 'block' : 'none';
   }
   updateLiveTotal();
 }
 
 function updateLiveTotal() {
+  const rows = document.querySelectorAll('.bill-item-row');
   let total = 0;
-  document.querySelectorAll('.bill-item-row').forEach(row => {
-    const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+  rows.forEach(row => {
+    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
-    total += (qty * price);
+    total += qty * price;
   });
-  document.getElementById('live-bill-total').textContent = `₹${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const mode = document.getElementById('payment-mode').value;
+  const mode = document.getElementById('payment-mode')?.value;
   if (mode === 'Credit') {
-    const deposit = parseFloat(document.getElementById('credit-deposit').value) || 0;
+    const deposit = parseFloat(document.getElementById('credit-deposit')?.value) || 0;
     const remaining = Math.max(0, total - deposit);
-    document.getElementById('remaining-credit-balance').textContent = `₹${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const remEl = document.getElementById('remaining-credit-balance');
+    if (remEl) remEl.textContent = '₹' + remaining.toFixed(2);
   }
+
+  const liveTotalEl = document.getElementById('live-bill-total');
+  if (liveTotalEl) liveTotalEl.textContent = '₹' + total.toFixed(2);
 }
 
-function populateCustomerDatalist() {
-  const datalist = document.getElementById('customer-datalist');
-  if (!datalist) return;
-  const uniqueNames = [...new Set(records.map(r => r.name).filter(Boolean))];
-  datalist.innerHTML = uniqueNames.map(name => `<option value="${name.replace(/"/g, '&quot;')}">`).join('');
-}
+function handleFormSubmit(e) {
+  e.preventDefault();
 
-function autoFillCustomerCity() {
-  const typedName = document.getElementById('cust-name').value.trim().toLowerCase();
-  if (!typedName) return;
-  const match = records.find(r => r.name && r.name.toLowerCase() === typedName);
-  if (match && match.city) {
-    document.getElementById('cust-city').value = match.city;
-  }
-}
+  const name = document.getElementById('cust-name').value.trim();
+  const city = document.getElementById('cust-city').value.trim();
+  const paymentMode = document.getElementById('payment-mode').value;
+  const date = document.getElementById('cust-date').value;
 
-function showToast(message) {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  container.appendChild(toast);
+  const rows = document.querySelectorAll('.bill-item-row');
+  const items = [];
+  let totalAmount = 0;
 
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(40px) scale(0.9)';
-    toast.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-    setTimeout(() => toast.remove(), 400);
-  }, 3000);
-}
-
-function toggleSettingsPanel() {
-  const panel = document.getElementById('settings-panel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-}
-
-function openModal(id) {
-  deleteTargetId = id;
-  document.getElementById('confirm-modal').classList.add('active');
-}
-
-function closeModal() {
-  deleteTargetId = null;
-  document.getElementById('confirm-modal').classList.remove('active');
-}
-
-document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-  if (deleteTargetId) {
-    const previousRecords = records.slice();
-    records = records.filter(r => r.id !== deleteTargetId);
-    closeModal();
-    updateDashboard();
-    renderRecords();
-    renderHoveringCities();
-    populateCustomerDatalist();
-    const saved = await pushDataToGitHub();
-    if (!saved) {
-      records = previousRecords;
-      updateDashboard();
-      renderRecords();
-      renderHoveringCities();
-      populateCustomerDatalist();
-      return;
+  rows.forEach(row => {
+    const itemName = row.querySelector('.item-name').value.trim();
+    const qty = parseFloat(row.querySelector('.item-qty').value) || 1;
+    const price = parseFloat(row.querySelector('.item-price').value) || 0;
+    const subtotal = qty * price;
+    totalAmount += subtotal;
+    if (itemName) {
+      items.push({ name: itemName, qty, price, subtotal });
     }
-    showToast('✅ Record deleted from GitHub');
-  }
-});
+  });
 
-function updateStatus(message, state) {
-  document.getElementById('status-text').textContent = message;
-  document.getElementById('status-dot').className = 'status-dot ' + state;
-}
-
-function checkTokenAndLoad() {
-  const token = localStorage.getItem('ke_gh_token');
-  if (!token) {
-    document.getElementById('settings-panel').style.display = 'block';
-    updateStatus('Disconnected', 'error');
-  } else {
-    document.getElementById('settings-panel').style.display = 'none';
-    fetchDataFromGitHub();
-  }
-}
-
-function saveToken() {
-  const val = document.getElementById('gh-token').value.trim();
-  if (val) {
-    localStorage.setItem('ke_gh_token', val);
-    checkTokenAndLoad();
-    showToast('🔑 Token saved');
-  } else {
-    showToast('⚠️ Please enter a valid GitHub token');
-  }
-}
-
-const encodeBase64 = str => btoa(unescape(encodeURIComponent(str)));
-const decodeBase64 = str => decodeURIComponent(escape(atob(str)));
-
-async function fetchDataFromGitHub() {
-  updateStatus('Fetching', 'syncing');
-  const token = localStorage.getItem('ke_gh_token');
-  try {
-    const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
-      cache: 'no-store'
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      fileSha = data.sha;
-      records = JSON.parse(decodeBase64(data.content));
-      updateDashboard();
-      renderRecords();
-      renderHoveringCities();
-      populateCustomerDatalist();
-      updateStatus('Synced', 'active');
-    } else if (response.status === 404) {
-      records = [];
-      updateDashboard();
-      renderRecords();
-      renderHoveringCities();
-      populateCustomerDatalist();
-      updateStatus('Ready (New File)', 'active');
-    } else {
-      throw new Error('Auth Error');
-    }
-  } catch (e) {
-    updateStatus('Cloud Error', 'error');
-    document.getElementById('settings-panel').style.display = 'block';
-    showToast('❌ Failed to fetch from GitHub repository');
-  }
-}
-
-async function pushDataToGitHub() {
-  const token = localStorage.getItem('ke_gh_token');
-  const saveBtn = document.getElementById('save-btn');
-  if (!token) {
-    const settings = document.getElementById('settings-panel');
-    settings.style.display = 'block';
-    settings.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    showToast('⚠️ GitHub token missing. Add your token above.');
-    return false;
-  }
-
-  updateStatus('Syncing to GitHub...', 'syncing');
-  if (saveBtn) {
-    saveBtn.disabled = true;
-    saveBtn.textContent = '⏳ Saving...';
-  }
-
-  try {
-    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-    const checkRes = await fetch(apiUrl, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
-      cache: 'no-store'
-    });
-
-    let latestSha = null;
-    if (checkRes.ok) {
-      latestSha = (await checkRes.json()).sha;
-    } else if (checkRes.status !== 404) {
-      const err = await checkRes.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub read error (${checkRes.status})`);
-    }
-
-    const body = {
-      message: `Save customer records (${new Date().toLocaleString()})`,
-      content: encodeBase64(JSON.stringify(records, null, 2))
-    };
-    if (latestSha) body.sha = latestSha;
-
-    const response = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || `GitHub save error (${response.status})`);
-
-    fileSha = result.content?.sha || latestSha;
-    updateStatus('Synced', 'active');
-    showToast('✅ Saved successfully to GitHub');
-    return true;
-  } catch (err) {
-    updateStatus('Sync Failed', 'error');
-    showToast('❌ Save failed: ' + (err.message || 'Check internet and GitHub token'));
-    return false;
-  } finally {
-    if (saveBtn) {
-      saveBtn.disabled = false;
-      const isEditing = Boolean(document.getElementById('edit-record-id')?.value);
-      saveBtn.textContent = isEditing ? '✏️ Update Record on GitHub' : '💾 Save directly to GitHub';
-    }
-  }
-}
-
-window.saveCustomerRecord = async function(event) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  const form = document.getElementById('record-form');
-  if (!form) return;
-
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    showToast('⚠️ Please complete all required fields.');
+  if (items.length === 0) {
+    showToast('Please add at least one valid item.');
     return;
   }
 
-  const previousRecords = records.slice();
+  let deposit = 0;
+  let remainingCredit = 0;
+  if (paymentMode === 'Credit') {
+    deposit = parseFloat(document.getElementById('credit-deposit').value) || 0;
+    remainingCredit = Math.max(0, totalAmount - deposit);
+  }
+
   const editId = document.getElementById('edit-record-id').value;
-  const paymentMode = document.getElementById('payment-mode').value;
-  const depositAmt = paymentMode === 'Credit' ? (parseFloat(document.getElementById('credit-deposit').value) || 0) : 0;
-
-  const itemList = [];
-  document.querySelectorAll('.bill-item-row').forEach(row => {
-    itemList.push({
-      desc: row.querySelector('.item-desc').value.trim(),
-      qty: parseInt(row.querySelector('.item-qty').value) || 1,
-      price: parseFloat(row.querySelector('.item-price').value) || 0
-    });
-  });
-
-  const recordData = {
-    id: editId || Date.now().toString(),
-    name: document.getElementById('cust-name').value.trim(),
-    city: document.getElementById('cust-city').value.trim(),
-    itemList: itemList,
-    payment: paymentMode,
-    deposit: depositAmt,
-    date: document.getElementById('cust-date').value || getLocalTodayDate()
-  };
 
   if (editId) {
-    records = records.map(r => r.id === editId ? recordData : r);
+    const idx = entries.findIndex(r => String(r.id) === String(editId));
+    if (idx > -1) {
+      entries[idx] = {
+        ...entries[idx],
+        name,
+        city,
+        paymentMode,
+        date,
+        items,
+        totalAmount,
+        deposit,
+        remainingCredit,
+        updatedAt: Date.now()
+      };
+    }
+    showToast('Record updated successfully!');
   } else {
-    records = [recordData, ...records];
+    const newRecord = {
+      id: Date.now().toString(),
+      name,
+      city,
+      paymentMode,
+      date,
+      items,
+      totalAmount,
+      deposit,
+      remainingCredit,
+      createdAt: Date.now()
+    };
+    entries.unshift(newRecord);
+    showToast('New record added successfully!');
   }
 
-  const saved = await pushDataToGitHub();
-  if (!saved) {
-    records = previousRecords;
-    return;
-  }
-
-  cancelEditMode();
-  updateDashboard();
+  saveLocalRecords();
+  resetForm();
   renderRecords();
-  renderHoveringCities();
-  populateCustomerDatalist();
-};
+  updateDashboard();
+  syncToGitHub();
+}
 
-function startEditRecord(id) {
-  const rec = records.find(r => r.id === id);
-  if (!rec) return;
-
-  document.getElementById('edit-record-id').value = rec.id;
-  document.getElementById('cust-name').value = rec.name;
-  document.getElementById('cust-city').value = rec.city;
-  document.getElementById('payment-mode').value = rec.payment || 'Cash';
-  document.getElementById('credit-deposit').value = rec.deposit || 0;
-  document.getElementById('cust-date').value = rec.date;
-
+function resetForm() {
+  const form = document.getElementById('record-form');
+  if (form) form.reset();
+  document.getElementById('edit-record-id').value = '';
+  document.getElementById('cust-date').value = new Date().toISOString().split('T')[0];
+  
   const wrapper = document.getElementById('bill-items-wrapper');
-  wrapper.innerHTML = '';
-  if (rec.itemList && rec.itemList.length > 0) {
-    rec.itemList.forEach(item => addBillItemRow(item.desc, item.qty, item.price));
-  } else {
-    addBillItemRow('', rec.items || 1, rec.price || '');
-  }
+  if (wrapper) wrapper.innerHTML = '';
+  addBillItemRow();
 
   toggleCreditFields();
-  updateLiveTotal();
-
-  const saveBtn = document.getElementById('save-btn');
-  saveBtn.textContent = '✏️ Update Record on GitHub';
-  document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-  document.getElementById('record-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  showToast(`✏️ Editing ${rec.name}`);
+  document.getElementById('save-btn').textContent = '💾 SUBMIT';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+  currentEditingId = null;
 }
 
 function cancelEditMode() {
-  const form = document.getElementById('record-form');
-  form.reset();
-  document.getElementById('edit-record-id').value = '';
-  document.getElementById('bill-items-wrapper').innerHTML = '';
-  addBillItemRow();
-  document.getElementById('payment-mode').value = 'Cash';
-  toggleCreditFields();
-  document.getElementById('cust-date').value = getLocalTodayDate();
-  updateLiveTotal();
-
-  const saveBtn = document.getElementById('save-btn');
-  saveBtn.textContent = '💾 Save directly to GitHub';
-  document.getElementById('cancel-edit-btn').style.display = 'none';
-  updateDashboard();
+  resetForm();
+  showToast('Editing cancelled.');
 }
 
-document.getElementById('record-form').addEventListener('submit', function(event) {
-  event.preventDefault();
-  window.saveCustomerRecord(event);
+function editRecord(id) {
+  const record = entries.find(r => String(r.id) === String(id));
+  if (!record) return;
+
+  document.getElementById('edit-record-id').value = record.id;
+  document.getElementById('cust-name').value = record.name || '';
+  document.getElementById('cust-city').value = record.city || '';
+  document.getElementById('payment-mode').value = record.paymentMode || 'Cash';
+  document.getElementById('cust-date').value = record.date || new Date().toISOString().split('T')[0];
+
+  toggleCreditFields();
+  if (record.paymentMode === 'Credit') {
+    document.getElementById('credit-deposit').value = record.deposit || 0;
+  }
+
+  const wrapper = document.getElementById('bill-items-wrapper');
+  if (wrapper) {
+    wrapper.innerHTML = '';
+    if (record.items && record.items.length > 0) {
+      record.items.forEach(item => {
+        addBillItemRow(item.name, item.qty, item.price);
+      });
+    } else {
+      addBillItemRow();
+    }
+  }
+
+  document.getElementById('save-btn').textContent = '💾 UPDATE RECORD';
+  document.getElementById('cancel-edit-btn').style.display = 'block';
+  currentEditingId = record.id;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast('Loaded record for editing.');
+}
+
+// --- DELETE WITH MODAL ---
+let recordToDeleteId = null;
+
+function promptDelete(id) {
+  recordToDeleteId = id;
+  const modal = document.getElementById('confirm-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeModal() {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) modal.classList.remove('active');
+  recordToDeleteId = null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const confirmBtn = document.getElementById('confirm-delete-btn');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      if (recordToDeleteId) {
+        entries = entries.filter(r => String(r.id) !== String(recordToDeleteId));
+        saveLocalRecords();
+        renderRecords();
+        updateDashboard();
+        syncToGitHub();
+        showToast('Record deleted.');
+      }
+      closeModal();
+    });
+  }
 });
 
-// Search & Autocomplete
-function handleSearchInput() {
-  const query = document.getElementById('search-bar').value.trim().toLowerCase();
-  renderRecords();
-  renderHoveringCities();
+// --- DASHBOARD & STATISTICS ---
+function updateDashboard() {
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  let daySale = 0;
+  let totalItemsCount = 0;
+  const citiesSet = new Set();
 
-  const dropdown = document.getElementById('search-suggestions');
-  if (!query) {
-    dropdown.classList.remove('active');
-    dropdown.innerHTML = '';
-    return;
-  }
-
-  const seen = new Set();
-  const matchList = [];
-  records.forEach(r => {
-    if (r.name && r.name.toLowerCase().includes(query) && !seen.has('n:' + r.name.toLowerCase())) {
-      seen.add('n:' + r.name.toLowerCase());
-      matchList.push({ type: '👤 Customer', text: r.name });
+  entries.forEach(r => {
+    if (r.date === todayDateStr) {
+      daySale += parseFloat(r.totalAmount) || 0;
     }
-    if (r.city && r.city.toLowerCase().includes(query) && !seen.has('c:' + r.city.toLowerCase())) {
-      seen.add('c:' + r.city.toLowerCase());
-      matchList.push({ type: '🏙️ City', text: r.city });
+    if (r.city) citiesSet.add(r.city.trim().toLowerCase());
+    if (r.items) {
+      r.items.forEach(i => {
+        totalItemsCount += parseFloat(i.qty) || 0;
+      });
     }
   });
 
-  const topMatches = matchList.slice(0, 5);
-  if (topMatches.length > 0) {
-    dropdown.innerHTML = topMatches.map(m => `
-      <div class="suggestion-item" onclick="selectSuggestion('${m.text.replace(/'/g, "\\'")}')">
-        <span>${m.text}</span>
-        <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted);">${m.type}</span>
-      </div>
-    `).join('');
-    dropdown.classList.add('active');
-  } else {
-    dropdown.classList.remove('active');
-    dropdown.innerHTML = '';
-  }
-}
+  const daySaleEl = document.getElementById('stat-day-sale');
+  const recordsEl = document.getElementById('stat-records');
+  const itemsEl = document.getElementById('stat-items');
+  const citiesEl = document.getElementById('stat-cities');
+  const bannerYearEl = document.getElementById('banner-year');
 
-function selectSuggestion(val) {
-  document.getElementById('search-bar').value = val;
-  document.getElementById('search-suggestions').classList.remove('active');
-  renderRecords();
+  if (daySaleEl) daySaleEl.textContent = '₹' + daySale.toFixed(2);
+  if (recordsEl) recordsEl.textContent = entries.length;
+  if (itemsEl) itemsEl.textContent = totalItemsCount;
+  if (citiesEl) citiesEl.textContent = citiesSet.size;
+  if (bannerYearEl) bannerYearEl.textContent = new Date().getFullYear();
+
+  renderYearSummary();
   renderHoveringCities();
+  updateCustomerDatalist();
 }
 
-function renderHoveringCities() {
-  const container = document.getElementById('hovering-cities');
-  const currentQuery = document.getElementById('search-bar').value.trim().toLowerCase();
-  const citiesMap = {};
+function renderYearSummary() {
+  const container = document.getElementById('year-summary-container');
+  if (!container) return;
 
-  records.forEach(r => {
-    if (r.city) {
-      const cityName = r.city.trim();
-      const key = cityName.toLowerCase();
-      if (!citiesMap[key]) citiesMap[key] = { name: cityName, count: 0 };
-      citiesMap[key].count++;
-    }
+  const yearMap = {};
+  entries.forEach(r => {
+    if (!r.date) return;
+    const year = r.date.split('-')[0];
+    if (!yearMap[year]) yearMap[year] = 0;
+    yearMap[year] += parseFloat(r.totalAmount) || 0;
   });
 
-  const uniqueCities = Object.values(citiesMap);
-  if (uniqueCities.length === 0) {
-    container.innerHTML = '';
+  const years = Object.keys(yearMap).sort().reverse();
+  if (years.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color: var(--text-muted); font-size:0.85rem;">No fiscal years recorded yet.</div>';
     return;
   }
 
-  container.innerHTML = `
-    <div class="city-hover-pill ${currentQuery === '' ? 'active' : ''}" onclick="filterByCity('')">
-      🌐 All Cities
-    </div>
-  ` + uniqueCities.map(c => `
-    <div class="city-hover-pill ${currentQuery === c.name.toLowerCase() ? 'active' : ''}" onclick="filterByCity('${c.name.replace(/'/g, "\\'")}')">
-      📍 ${c.name} <span style="opacity: 0.6; font-size: 0.7rem;">(${c.count})</span>
+  container.innerHTML = years.map(yr => `
+    <div class="card-3d year-card">
+      <div class="year-card-title">📅 Year ${yr}</div>
+      <div class="year-card-total">₹${yearMap[yr].toFixed(2)}</div>
     </div>
   `).join('');
 }
 
+function renderHoveringCities() {
+  const container = document.getElementById('hovering-cities');
+  if (!container) return;
+
+  const cityMap = {};
+  entries.forEach(r => {
+    if (r.city) {
+      const c = r.city.trim();
+      cityMap[c] = (cityMap[c] || 0) + 1;
+    }
+  });
+
+  const cities = Object.keys(cityMap).sort();
+  if (cities.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = `<div class="city-hover-pill active" onclick="filterByCity('')">🌍 All Cities</div>`;
+  html += cities.map(c => `
+    <div class="city-hover-pill" onclick="filterByCity('${escapeHtml(c)}')">📍 ${escapeHtml(c)} (${cityMap[c]})</div>
+  `).join('');
+  container.innerHTML = html;
+}
+
+let activeCityFilter = '';
 function filterByCity(cityName) {
-  document.getElementById('search-bar').value = cityName;
-  document.getElementById('search-suggestions').classList.remove('active');
+  activeCityFilter = cityName;
+  document.querySelectorAll('.city-hover-pill').forEach(pill => {
+    if (cityName === '' && pill.textContent.includes('All Cities')) {
+      pill.classList.add('active');
+    } else if (pill.textContent.includes(cityName)) {
+      pill.classList.add('active');
+    } else {
+      pill.classList.remove('active');
+    }
+  });
   renderRecords();
-  renderHoveringCities();
+}
+
+function updateCustomerDatalist() {
+  const datalist = document.getElementById('customer-datalist');
+  if (!datalist) return;
+  const uniqueNames = [...new Set(entries.map(r => r.name).filter(Boolean))];
+  datalist.innerHTML = uniqueNames.map(n => `<option value="${escapeHtml(n)}">`).join('');
+}
+
+function autoFillCustomerCity() {
+  const nameInput = document.getElementById('cust-name');
+  const cityInput = document.getElementById('cust-city');
+  if (!nameInput || !cityInput) return;
+
+  const val = nameInput.value.trim().toLowerCase();
+  const match = entries.find(r => r.name && r.name.trim().toLowerCase() === val);
+  if (match && match.city) {
+    cityInput.value = match.city;
+  }
+}
+
+// --- RENDER & SEARCH RECORDS ---
+function handleSearchInput() {
+  renderRecords();
+  updateSearchSuggestions();
+}
+
+function updateSearchSuggestions() {
+  const searchBar = document.getElementById('search-bar');
+  const dropdown = document.getElementById('search-suggestions');
+  if (!searchBar || !dropdown) return;
+
+  const q = searchBar.value.trim().toLowerCase();
+  if (!q || q.length < 2) {
+    dropdown.classList.remove('active');
+    return;
+  }
+
+  const matches = [];
+  entries.forEach(r => {
+    if (r.name && r.name.toLowerCase().includes(q) && !matches.includes(r.name)) matches.push(r.name);
+    if (r.city && r.city.toLowerCase().includes(q) && !matches.includes(r.city)) matches.push(r.city);
+  });
+
+  if (matches.length === 0) {
+    dropdown.classList.remove('active');
+    return;
+  }
+
+  dropdown.innerHTML = matches.slice(0, 5).map(m => `
+    <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(m)}')">
+      <span>🔍 ${escapeHtml(m)}</span>
+    </div>
+  `).join('');
+  dropdown.classList.add('active');
+}
+
+function selectSuggestion(val) {
+  const searchBar = document.getElementById('search-bar');
+  const dropdown = document.getElementById('search-suggestions');
+  if (searchBar) searchBar.value = val;
+  if (dropdown) dropdown.classList.remove('active');
+  renderRecords();
 }
 
 function renderRecords() {
-  const rawQuery = document.getElementById('search-bar').value.trim().toLowerCase();
-  const paymentFilter = document.getElementById('filter-payment')?.value || 'all';
   const container = document.getElementById('records-container');
-  container.innerHTML = '';
+  const countEl = document.getElementById('showing-count');
+  const searchBar = document.getElementById('search-bar');
+  const paymentFilter = document.getElementById('filter-payment');
 
-  const filtered = records.filter(r => {
-    const totals = getRecordTotals(r);
-    const paymentMode = (r.payment || 'Cash').toLowerCase();
-    const deposit = r.deposit || 0;
-    const remaining = Math.max(0, totals.bill - deposit);
+  if (!container) return;
 
-    const matchesQuery = !rawQuery ||
-      (r.name && r.name.toLowerCase().includes(rawQuery)) ||
-      (r.city && r.city.toLowerCase().includes(rawQuery)) ||
-      paymentMode.includes(rawQuery) ||
-      ((rawQuery === 'udhar' || rawQuery === 'credit') && paymentMode === 'credit') ||
-      ((rawQuery === 'pending' || rawQuery === 'balance') && remaining > 0);
+  const query = searchBar ? searchBar.value.trim().toLowerCase() : '';
+  const filterVal = paymentFilter ? paymentFilter.value : 'all';
 
-    if (!matchesQuery) return false;
-    if (paymentFilter === 'Cash' && paymentMode !== 'cash') return false;
-    if (paymentFilter === 'UPI' && paymentMode !== 'upi') return false;
-    if (paymentFilter === 'Credit' && paymentMode !== 'credit') return false;
-    if (paymentFilter === 'PendingCredit' && (paymentMode !== 'credit' || remaining <= 0)) return false;
+  let filtered = entries.filter(r => {
+    if (activeCityFilter && (!r.city || r.city.trim().toLowerCase() !== activeCityFilter.toLowerCase())) {
+      return false;
+    }
+    if (filterVal === 'Cash' && r.paymentMode !== 'Cash') return false;
+    if (filterVal === 'UPI' && r.paymentMode !== 'UPI') return false;
+    if (filterVal === 'Credit' && r.paymentMode !== 'Credit') return false;
+    if (filterVal === 'PendingCredit' && (r.paymentMode !== 'Credit' || (parseFloat(r.remainingCredit) || 0) <= 0)) return false;
+
+    if (query) {
+      const matchName = r.name && r.name.toLowerCase().includes(query);
+      const matchCity = r.city && r.city.toLowerCase().includes(query);
+      const matchMode = r.paymentMode && r.paymentMode.toLowerCase().includes(query);
+      const matchItem = r.items && r.items.some(i => i.name.toLowerCase().includes(query));
+      if (!matchName && !matchCity && !matchMode && !matchItem) return false;
+    }
 
     return true;
   });
 
-  filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id));
-  document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
+  if (countEl) countEl.textContent = `📊 Showing ${filtered.length} of ${entries.length} records`;
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No matching records found</div>`;
+    container.innerHTML = '<div class="card-3d" style="padding:32px; text-align:center; color:var(--text-muted);">No matching sale records found.</div>';
     return;
   }
 
-  filtered.forEach(r => {
-    const totals = getRecordTotals(r);
-    const payment = r.payment || 'Cash';
-    const deposit = r.deposit || 0;
-    const remaining = Math.max(0, totals.bill - deposit);
-    const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
-
-    let paymentText = payment;
-    if (payment === 'Cash') paymentText = '💵 Cash';
-    else if (payment === 'UPI') paymentText = '📱 UPI';
-    else if (payment === 'Credit') {
-      paymentText = `📒 Credit (Paid: ₹${deposit.toFixed(2)} | Bal: ₹${remaining.toFixed(2)})`;
-    }
-
-    let itemsHtml = '';
-    if (r.itemList && r.itemList.length > 0) {
-      itemsHtml = r.itemList.map(i => `
-        <div class="record-item-line">
-          <span class="record-item-name">${i.desc || 'Item'} <span class="record-item-qty">(x${i.qty} @ ₹${Number(i.price).toFixed(2)})</span></span>
-          <span class="record-item-price">₹${(i.qty * i.price).toFixed(2)}</span>
-        </div>
-      `).join('');
-    } else {
-      itemsHtml = `
-        <div class="record-item-line">
-          <span class="record-item-name">Legacy Record <span class="record-item-qty">(x${r.items || 1} @ ₹${Number(r.price || 0).toFixed(2)})</span></span>
-          <span class="record-item-price">₹${(Number(r.price) * (r.items || 1)).toFixed(2)}</span>
-        </div>
-      `;
-    }
-
-    const card = document.createElement('div');
-    card.className = 'card-3d record-card';
-    card.innerHTML = `
-      <div class="record-header">
-        <span class="record-date">📅 ${d}/${m}/${y}</span>
-        <div class="record-header-meta">
-          <span class="badge record-city" onclick="filterByCity('${r.city.replace(/'/g, "\\'")}')">📍 ${r.city}</span>
-          <span class="record-payment">${paymentText}</span>
-        </div>
-        <div class="record-actions">
-          <button type="button" class="btn-icon edit" onclick="startEditRecord('${r.id}')" title="Edit Record" aria-label="Edit Record">✏️</button>
-          <button type="button" class="btn-icon" onclick="openModal('${r.id}')" title="Delete" aria-label="Delete Record">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
-        </div>
-      </div>
-      <div class="record-name">👤 ${r.name}</div>
-
+  container.innerHTML = filtered.map(r => {
+    const itemsHtml = r.items && r.items.length > 0 ? `
       <div class="record-items-panel">
-        <div class="record-items-title">🛒 Items List</div>
+        <div class="record-items-title">Purchased Items</div>
+        ${r.items.map(i => `
+          <div class="record-item-line">
+            <span class="record-item-name">${escapeHtml(i.name)}</span>
+            <span class="record-item-qty">Qty: ${i.qty} × ₹${i.price}</span>
+            <span class="record-item-price">₹${(i.subtotal || (i.qty * i.price)).toFixed(2)}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    const creditBadge = r.paymentMode === 'Credit' ? `
+      <div style="margin-top:8px; font-size:0.75rem; font-weight:700; color:var(--danger);">
+        📌 Deposit: ₹${parseFloat(r.deposit || 0).toFixed(2)} | Remaining: ₹${parseFloat(r.remainingCredit || 0).toFixed(2)}
+      </div>
+    ` : '';
+
+    return `
+      <div class="card-3d record-card">
+        <div class="record-header">
+          <div class="record-date">${escapeHtml(r.date)}</div>
+          <div class="record-header-meta">
+            <span class="badge record-city" onclick="filterByCity('${escapeHtml(r.city)}')">📍 ${escapeHtml(r.city)}</span>
+            <span class="badge record-payment">${escapeHtml(r.paymentMode)}</span>
+          </div>
+          <div class="record-actions">
+            <button class="btn-icon edit" onclick="editRecord('${r.id}')" title="Edit record">✏️</button>
+            <button class="btn-icon" onclick="promptDelete('${r.id}')" title="Delete record">🗑️</button>
+          </div>
+        </div>
+
+        <div class="record-name">${escapeHtml(r.name)}</div>
         ${itemsHtml}
-      </div>
+        ${creditBadge}
 
-      <div class="record-details">
-        <div class="record-calc">📦 Total Qty: ${totals.qty}</div>
-        <div class="record-total">₹${Number(totals.bill).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div class="record-details">
+          <span class="record-calc">${r.items ? r.items.length : 1} item(s) total</span>
+          <span class="record-total">₹${parseFloat(r.totalAmount || 0).toFixed(2)}</span>
+        </div>
       </div>
     `;
-    container.appendChild(card);
-  });
+  }).join('');
 }
 
-// Dashboard Calculation
-function updateDashboard() {
-  const selectedDate = document.getElementById('cust-date').value;
-  let daySale = 0, totalItems = 0, cities = new Set();
-  const yearMap = {};
-
-  records.forEach(r => {
-    const totals = getRecordTotals(r);
-    const realizedSale = (r.payment === 'Credit') ? (r.deposit || 0) : totals.bill;
-
-    if (r.date === selectedDate) {
-      daySale += realizedSale;
-    }
-    totalItems += totals.qty;
-    if (r.city) cities.add(r.city.toLowerCase());
-
-    const year = r.date ? r.date.split('-')[0] : 'Unknown';
-    if (!yearMap[year]) {
-      yearMap[year] = { sale: 0, count: 0, items: 0 };
-    }
-    yearMap[year].sale += realizedSale;
-    yearMap[year].count += 1;
-    yearMap[year].items += totals.qty;
-  });
-
-  if (selectedDate) {
-    const [y, m, d] = selectedDate.split('-');
-    document.getElementById('stat-day-label').textContent = `📈 Sale (${d}/${m})`;
-  } else {
-    document.getElementById('stat-day-label').textContent = '📈 Day Sale';
-  }
-
-  document.getElementById('stat-day-sale').textContent = `₹${daySale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('stat-records').textContent = records.length;
-  document.getElementById('stat-items').textContent = totalItems;
-  document.getElementById('stat-cities').textContent = cities.size;
-
-  renderYearSummary(yearMap);
+// --- UTILS & TOASTS ---
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-function renderYearSummary(yearMap) {
-  const container = document.getElementById('year-summary-container');
-  container.innerHTML = '';
+function showToast(msg) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
 
-  const sortedYears = Object.keys(yearMap).sort((a, b) => b.localeCompare(a));
-  if (sortedYears.length === 0) {
-    container.innerHTML = `<div class="card-3d year-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-weight: 700;">No year data available</div>`;
-    return;
-  }
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  container.appendChild(toast);
 
-  sortedYears.forEach(year => {
-    const data = yearMap[year];
-    const card = document.createElement('div');
-    card.className = 'card-3d year-card';
-    card.innerHTML = `
-      <div class="year-card-title">
-        <span>📅 ${year}</span>
-        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">${data.count} records</span>
-      </div>
-      <div class="year-card-total">₹${data.sale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-      <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">📦 ${data.items} items sold</div>
-    `;
-    container.appendChild(card);
-  });
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px) scale(0.9)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3200);
 }
