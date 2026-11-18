@@ -12,64 +12,60 @@ document.addEventListener("DOMContentLoaded", () => {
 function initApp() {
   checkBankHoliday();
   setupEventListeners();
-  addBillItemRow(); // Start with at least one bill item row
+  addBillItemRow();
   loadData();
   startLiveSync();
 }
 
 function setupEventListeners() {
   const searchInput = document.getElementById("search-input");
-  if (searchInput) {
-    searchInput.addEventListener("input", handleSearchInput);
-  }
+  if (searchInput) searchInput.addEventListener("input", handleSearchInput);
 
   const paymentModeSelect = document.getElementById("payment-mode");
-  if (paymentModeSelect) {
-    paymentModeSelect.addEventListener("change", toggleCreditFields);
-  }
+  if (paymentModeSelect) paymentModeSelect.addEventListener("change", toggleCreditFields);
 
   const form = document.getElementById("customer-form");
-  if (form) {
-    form.addEventListener("submit", handleFormSubmit);
-  }
+  if (form) form.addEventListener("submit", handleFormSubmit);
 }
 
-// --- Bank Holiday / Status Check ---
+// --- Bank Holiday / Status Check (Non-blocking) ---
 function checkBankHoliday() {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-  const dateNum = today.getDate();
+  try {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const dateNum = today.getDate();
 
-  const isSunday = dayOfWeek === 0;
-  const isSecondOrFourthSaturday = dayOfWeek === 6 && ((dateNum > 7 && dateNum <= 14) || (dateNum > 21 && dateNum <= 28));
-  
-  const pill = document.getElementById("bank-holiday-pill");
-  const icon = document.getElementById("bank-status-icon");
-  const text = document.getElementById("bank-status-text");
+    const isSunday = dayOfWeek === 0;
+    const isSecondOrFourthSaturday = dayOfWeek === 6 && ((dateNum > 7 && dateNum <= 14) || (dateNum > 21 && dateNum <= 28));
+    
+    const pill = document.getElementById("bank-holiday-pill");
+    const icon = document.getElementById("bank-status-icon");
+    const text = document.getElementById("bank-status-text");
 
-  if (pill && icon && text) {
-    if (isSunday || isSecondOrFourthSaturday) {
-      icon.textContent = "🔴";
-      text.textContent = "Bank Holiday / Weekend";
-      pill.style.background = "#fee2e2";
-      pill.style.color = "#991b1b";
-    } else {
-      icon.textContent = "🟢";
-      text.textContent = "Working Day";
-      pill.style.background = "#dcfce7";
-      pill.style.color = "#166534";
+    if (pill && icon && text) {
+      if (isSunday || isSecondOrFourthSaturday) {
+        icon.textContent = "🔴";
+        text.textContent = "Bank Holiday / Weekend";
+        pill.style.background = "#fee2e2";
+        pill.style.color = "#991b1b";
+      } else {
+        icon.textContent = "🟢";
+        text.textContent = "Working Day";
+        pill.style.background = "#dcfce7";
+        pill.style.color = "#166534";
+      }
     }
+  } catch (e) {
+    console.error("Bank holiday check error:", e);
   }
 }
 
-// --- Data Loading with Robust Local Fallback ---
+// --- Data Loading (Guaranteed Non-Blocking Fallback) ---
 async function loadData() {
   updateStatus("Connecting...", "connecting");
   try {
     const res = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) {
-      throw new Error("data.json not found or inaccessible");
-    }
+    if (!res.ok) throw new Error("data.json not found");
     const data = await res.json();
     records = Array.isArray(data) ? data : (data.records || []);
     localStorage.setItem("kabir_records", JSON.stringify(records));
@@ -77,19 +73,16 @@ async function loadData() {
     renderRecords();
     updateStatus("Connected", "online");
   } catch (err) {
-    console.warn("Falling back to local storage:", err);
+    console.warn("Using local cache fallback:", err);
     const local = localStorage.getItem("kabir_records");
     if (local) {
       records = JSON.parse(local);
-      updateDashboard();
-      renderRecords();
-      updateStatus("Connected (Local)", "online");
     } else {
       records = [];
-      updateDashboard();
-      renderRecords();
-      updateStatus("Ready (New)", "online");
     }
+    updateDashboard();
+    renderRecords();
+    updateStatus("Connected (Local)", "online");
   }
 }
 
@@ -110,7 +103,7 @@ function startLiveSync() {
         }
       }
     } catch (e) {
-      // Silent background poll fail
+      // Silent poll fail
     }
   }, 5000);
 }
@@ -318,15 +311,6 @@ function handleSearchInput(e) {
   renderRecords(filtered);
 }
 
-function filterRecordsByMode(mode) {
-  if (mode === 'All') {
-    renderRecords(records);
-  } else {
-    const filtered = records.filter(r => r.paymentMode === mode);
-    renderRecords(filtered);
-  }
-}
-
 function editRecord(index) {
   const r = records[index];
   if (!r) return;
@@ -372,38 +356,3 @@ function saveRecordsToGitHub() {
 
 async function pushDataToGitHub(token) {
   const owner = "playtv02";
-  const repo = "Customer-directory";
-  const path = "data.json";
-  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-
-  try {
-    const getRes = await fetch(url, {
-      headers: { Authorization: `token ${token}` }
-    });
-    let sha = "";
-    if (getRes.ok) {
-      const fileData = await getRes.json();
-      sha = fileData.sha;
-    }
-
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify({ records }, null, 2))));
-    const putRes = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `token ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: `Save customer records (${new Date().toLocaleString()})`,
-        content: content,
-        sha: sha
-      })
-    });
-
-    if (putRes.ok) {
-      updateStatus("Synced with GitHub", "online");
-    }
-  } catch (err) {
-    console.error("GitHub sync error:", err);
-  }
-}
