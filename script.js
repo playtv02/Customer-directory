@@ -5,517 +5,603 @@ const FILE_PATH = 'data.json';
 let records = [];
 let fileSha = null;
 let deleteTargetId = null;
+let liveSyncInterval = null;
 
 function getRecordTotals(r) {
-  if (r.itemList && r.itemList.length > 0) {
-    let bill = 0, qty = 0;
-    r.itemList.forEach(i => {
-      bill += (i.qty * i.price);
-      qty += i.qty;
-    });
-    return { bill, qty };
-  }
-  return { bill: r.totalBill || 0, qty: r.totalQty || 0 };
+    if (r.itemList && r.itemList.length > 0) {
+        let bill = 0, qty = 0;
+        r.itemList.forEach(i => {
+            bill += (Number(i.qty) || 0) * (Number(i.price) || 0);
+            qty += Number(i.qty) || 0;
+        });
+        return { bill, qty };
+    }
+    return { bill: (Number(r.items) || 1) * (Number(r.price) || 0), qty: Number(r.items) || 1 };
 }
 
 function getLocalTodayDate() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset).toISOString().split('T')[0];
 }
 
 function addBillItemRow(item = {}) {
-  const container = document.getElementById('bill-items-container');
-  if (!container) return;
-  const div = document.createElement('div');
-  div.className = 'bill-item-row flex gap-2 items-center mb-2';
-  div.innerHTML = `
-    <input type="text" class="item-name border p-2 rounded flex-1 dark:bg-gray-700 dark:text-white" placeholder="Item Name" value="${item.name || ''}" required>
-    <input type="number" class="item-qty border p-2 rounded w-20 dark:bg-gray-700 dark:text-white" placeholder="Qty" value="${item.qty !== undefined ? item.qty : ''}" min="1" oninput="updateLiveTotal()">
-    <input type="number" class="item-price border p-2 rounded w-24 dark:bg-gray-700 dark:text-white" placeholder="Price" value="${item.price !== undefined ? item.price : ''}" min="0" step="0.01" oninput="updateLiveTotal()">
-    <button type="button" onclick="removeBillItemRow(this)" class="text-red-500 hover:text-red-700 px-2 font-bold">X</button>
-  `;
-  container.appendChild(div);
-  updateLiveTotal();
+    const container = document.getElementById('bill-items-container');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = 'bill-item-row flex gap-2 items-center mb-2';
+    div.innerHTML = `
+        <input type="text" class="item-name form-input flex-1 p-2 border rounded" placeholder="Item Name" value="${item.name || ''}" required>
+        <input type="number" class="item-qty form-input w-20 p-2 border rounded" placeholder="Qty" value="${item.qty !== undefined ? item.qty : 1}" min="1" oninput="updateLiveTotal()" required>
+        <input type="number" class="item-price form-input w-24 p-2 border rounded" placeholder="Price" value="${item.price !== undefined ? item.price : ''}" step="0.01" min="0" oninput="updateLiveTotal()" required>
+        <button type="button" onclick="removeBillItemRow(this)" class="text-red-500 hover:text-red-700 px-2 font-bold">✕</button>
+    `;
+    container.appendChild(div);
+    updateLiveTotal();
 }
 
 function removeBillItemRow(btn) {
-  const row = btn.closest('.bill-item-row');
-  if (row) {
-    row.remove();
-    updateLiveTotal();
-  }
-}
-
-function checkBankHoliday() {
-  const dateInput = document.getElementById('cust-date');
-  const warning = document.getElementById('holiday-warning');
-  if (!dateInput || !warning) return;
-  const d = new Date(dateInput.value);
-  if (!isNaN(d.getTime())) {
-    const day = d.getDay();
-    if (day === 0) {
-      warning.classList.remove('hidden');
-      return;
+    const row = btn.closest('.bill-item-row');
+    if (row) {
+        row.remove();
+        updateLiveTotal();
     }
-  }
-  warning.classList.add('hidden');
 }
 
 function updateLiveTotal() {
-  const rows = document.querySelectorAll('.bill-item-row');
-  let totalBill = 0;
-  let totalQty = 0;
-  rows.forEach(row => {
-    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-    const price = parseFloat(row.querySelector('.item-price').value) || 0;
-    totalBill += (qty * price);
-    totalQty += qty;
-  });
-  const totalBillEl = document.getElementById('live-total-bill');
-  const totalQtyEl = document.getElementById('live-total-qty');
-  if (totalBillEl) totalBillEl.textContent = totalBill.toFixed(2);
-  if (totalQtyEl) totalQtyEl.textContent = totalQty;
+    const rows = document.querySelectorAll('.bill-item-row');
+    let total = 0;
+    rows.forEach(row => {
+        const qty = parseFloat(row.querySelector('.item-qty')?.value) || 0;
+        const price = parseFloat(row.querySelector('.item-price')?.value) || 0;
+        total += qty * price;
+    });
+
+    const liveTotalEl = document.getElementById('live-bill-total');
+    if (liveTotalEl) {
+        liveTotalEl.textContent = '₹' + total.toFixed(2);
+    }
+
+    const payMode = document.getElementById('payment-mode')?.value;
+    if (payMode === 'Credit') {
+        const deposit = parseFloat(document.getElementById('credit-deposit')?.value) || 0;
+        const remaining = total - deposit;
+        const remEl = document.getElementById('remaining-credit-balance');
+        if (remEl) {
+            remEl.textContent = '₹' + Math.max(0, remaining).toFixed(2);
+        }
+    }
 }
 
 function toggleCreditFields() {
-  const paymentType = document.getElementById('cust-payment-type');
-  const creditFields = document.getElementById('credit-fields');
-  if (paymentType && creditFields) {
-    if (paymentType.value === 'Credit') {
-      creditFields.classList.remove('hidden');
-    } else {
-      creditFields.classList.add('hidden');
+    const payMode = document.getElementById('payment-mode')?.value;
+    const creditContainer = document.getElementById('credit-container');
+    if (creditContainer) {
+        if (payMode === 'Credit') {
+            creditContainer.classList.remove('hidden');
+        } else {
+            creditContainer.classList.add('hidden');
+        }
     }
-  }
+    updateLiveTotal();
 }
 
-function populateCustomerDatalist() {
-  const datalist = document.getElementById('customer-names-list');
-  if (!datalist) return;
-  datalist.innerHTML = '';
-  const names = [...new Set(records.map(r => r.name).filter(Boolean))];
-  names.forEach(n => {
-    const opt = document.createElement('option');
-    opt.value = n;
-    datalist.appendChild(opt);
-  });
+function checkBankHoliday() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const dateOfMonth = now.getDate();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(dateOfMonth).padStart(2, '0');
+    const mmdd = `${month}-${day}`;
+
+    const fixedHolidays = { '01-26': true, '08-15': true, '10-02': true, '12-25': true };
+    const pill = document.getElementById('bank-holiday-pill');
+    const icon = document.getElementById('bank-status-icon');
+    const text = document.getElementById('bank-status-text');
+
+    let isClosed = false;
+    if (fixedHolidays[mmdd]) {
+        isClosed = true;
+    } else if (dayOfWeek === 0) {
+        isClosed = true;
+    } else if (dayOfWeek === 6) {
+        const weekOfMonth = Math.ceil(dateOfMonth / 7);
+        if (weekOfMonth === 2 || weekOfMonth === 4) {
+            isClosed = true;
+        }
+    }
+
+    if (isClosed) {
+        if (pill) pill.className = 'bank-status-pill closed';
+        if (icon) icon.textContent = '🔴';
+        if (text) text.textContent = 'Bank Holiday';
+    } else {
+        if (pill) pill.className = 'bank-status-pill open';
+        if (icon) icon.textContent = '🟢';
+        if (text) text.textContent = 'Working Day';
+    }
 }
 
-function autoFillCustomerCity() {
-  const nameInput = document.getElementById('cust-name');
-  const cityInput = document.getElementById('cust-city');
-  if (!nameInput || !cityInput) return;
-  const match = records.find(r => r.name && r.name.toLowerCase() === nameInput.value.toLowerCase().trim());
-  if (match && match.city) {
-    cityInput.value = match.city;
-  }
-}
-
-function showToast(message, type = 'info') {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.textContent = message;
-  toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg text-white z-50 ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}`;
-  toast.classList.remove('hidden');
-  setTimeout(() => toast.classList.add('hidden'), 3000);
+function updateStatus(text, type) {
+    const statusText = document.getElementById('status-text');
+    const statusDot = document.getElementById('status-dot');
+    if (statusText) statusText.textContent = text;
+    if (statusDot) {
+        statusDot.className = 'status-dot ' + (type || 'online');
+    }
 }
 
 function toggleSettingsPanel() {
-  const panel = document.getElementById('settings-panel');
-  if (panel) panel.classList.toggle('hidden');
-}
-
-function openModal() {
-  const modal = document.getElementById('record-modal');
-  if (modal) modal.classList.remove('hidden');
-}
-
-function closeModal() {
-  const modal = document.getElementById('record-modal');
-  if (modal) modal.classList.add('hidden');
-  cancelEditMode();
-}
-
-function updateStatus(msg, type = 'info') {
-  const el = document.getElementById('status-message');
-  if (el) {
-    el.textContent = msg;
-    el.className = `text-sm font-medium ${type === 'error' ? 'text-red-500' : 'text-green-500'}`;
-  }
+    const panel = document.getElementById('settings-panel');
+    if (panel) {
+        if (panel.style.display === 'none' || !panel.style.display) {
+            panel.style.display = 'block';
+            const input = document.getElementById('gh-token');
+            if (input) input.value = localStorage.getItem('gh_token') || '';
+        } else {
+            panel.style.display = 'none';
+        }
+    }
 }
 
 function saveToken() {
-  const tokenInput = document.getElementById('github-token');
-  if (tokenInput && tokenInput.value) {
-    localStorage.setItem('gh_pat', tokenInput.value.trim());
-    showToast('Token saved successfully');
+    const input = document.getElementById('gh-token');
+    if (!input) return;
+    const val = input.value.trim();
+    if (val) {
+        localStorage.setItem('gh_token', val);
+        showToast('Token saved!', 'success');
+    } else {
+        localStorage.removeItem('gh_token');
+        showToast('Token cleared.', 'info');
+    }
+    const panel = document.getElementById('settings-panel');
+    if (panel) panel.style.display = 'none';
     checkTokenAndLoad();
-  }
 }
 
-function encodeBase64(str) {
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
-function decodeBase64(str) {
-  return decodeURIComponent(escape(atob(str.replace(/\s/g, ''))));
-}
-
-async function checkTokenAndLoad() {
-  await loadData();
-  await loadEmployees();
-}
-
-async function fetchDataFromGitHub() {
-  await loadData();
-}
-
-async function pushDataToGitHub(data, commitMsg = 'Update customer records') {
-  const token = localStorage.getItem('gh_pat');
-  if (!token) {
-    showToast('GitHub token missing. Please set token in settings.', 'error');
-    return false;
-  }
-  try {
-    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      headers: { 'Authorization': `token ${token}` }
-    });
-    let sha = null;
-    if (getRes.ok) {
-      const fileData = await getRes.json();
-      sha = fileData.sha;
+async function loadData(silent = false) {
+    if (!silent) updateStatus('Syncing...', 'syncing');
+    const token = localStorage.getItem('gh_token') || '';
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (token) {
+        headers['Authorization'] = `token ${token}`;
     }
-    const content = encodeBase64(JSON.stringify(data, null, 2));
-    const putBody = {
-      message: commitMsg,
-      content: content
-    };
-    if (sha) putBody.sha = sha;
-    const putRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(putBody)
-    });
-    if (putRes.ok) {
-      showToast('Saved to GitHub successfully');
-      return true;
-    } else {
-      const err = await putRes.json();
-      showToast(`GitHub save failed: ${err.message}`, 'error');
-      return false;
+
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}?ref=main&t=${Date.now()}`;
+
+    try {
+        const res = await fetch(url, { headers, cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+        fileSha = data.sha;
+
+        const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+        const parsed = JSON.parse(content);
+        const newRecords = Array.isArray(parsed) ? parsed : [];
+
+        const dataChanged = JSON.stringify(newRecords) !== JSON.stringify(records);
+        if (dataChanged) {
+            records = newRecords;
+            updateDashboard();
+            renderRecords();
+            renderHoveringCities();
+            populateCustomerDatalist();
+        }
+        updateStatus('Connected', 'online');
+    } catch (err) {
+        console.error('Error loading data:', err);
+        if (!silent) {
+            updateStatus('Offline', 'offline');
+            showToast('Failed to load data from GitHub', 'danger');
+        }
     }
-  } catch (e) {
-    showToast(`Error saving to GitHub: ${e.message}`, 'error');
-    return false;
-  }
-}
-
-async function saveCustomerRecord(e) {
-  if (e) e.preventDefault();
-  const idInput = document.getElementById('edit-record-id');
-  const nameInput = document.getElementById('cust-name');
-  const cityInput = document.getElementById('cust-city');
-  const dateInput = document.getElementById('cust-date');
-  const paymentTypeInput = document.getElementById('cust-payment-type');
-  const creditDaysInput = document.getElementById('credit-days');
-  const isPaidInput = document.getElementById('cust-is-paid');
-
-  const rows = document.querySelectorAll('.bill-item-row');
-  const itemList = [];
-  rows.forEach(row => {
-    const name = row.querySelector('.item-name').value.trim();
-    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-    const price = parseFloat(row.querySelector('.item-price').value) || 0;
-    if (name) {
-      itemList.push({ name, qty, price });
-    }
-  });
-
-  const totals = itemList.reduce((acc, i) => {
-    acc.bill += (i.qty * i.price);
-    acc.qty += i.qty;
-    return acc;
-  }, { bill: 0, qty: 0 });
-
-  const recordId = idInput && idInput.value ? parseInt(idInput.value) : Date.now();
-
-  const newRecord = {
-    id: recordId,
-    name: nameInput ? nameInput.value.trim() : '',
-    city: cityInput ? cityInput.value.trim() : '',
-    date: dateInput ? dateInput.value : getLocalTodayDate(),
-    paymentType: paymentTypeInput ? paymentTypeInput.value : 'Cash',
-    creditDays: paymentTypeInput && paymentTypeInput.value === 'Credit' ? (parseInt(creditDaysInput.value) || 0) : 0,
-    isPaid: isPaidInput ? isPaidInput.checked : false,
-    itemList: itemList,
-    totalBill: totals.bill,
-    totalQty: totals.qty
-  };
-
-  const existingIndex = records.findIndex(r => r.id === recordId);
-  if (existingIndex >= 0) {
-    records[existingIndex] = newRecord;
-  } else {
-    records.push(newRecord);
-  }
-
-  renderRecords();
-  closeModal();
-  await pushDataToGitHub(records, 'Save customer record');
-}
-
-function startEditRecord(id) {
-  const record = records.find(r => r.id === id);
-  if (!record) return;
-  openModal();
-  document.getElementById('edit-record-id').value = record.id;
-  document.getElementById('cust-name').value = record.name || '';
-  document.getElementById('cust-city').value = record.city || '';
-  document.getElementById('cust-date').value = record.date || getLocalTodayDate();
-  document.getElementById('cust-payment-type').value = record.paymentType || 'Cash';
-  toggleCreditFields();
-  if (record.paymentType === 'Credit') {
-    document.getElementById('credit-days').value = record.creditDays || 0;
-  }
-  document.getElementById('cust-is-paid').checked = record.isPaid || false;
-
-  const container = document.getElementById('bill-items-container');
-  if (container) {
-    container.innerHTML = '';
-    if (record.itemList && record.itemList.length > 0) {
-      record.itemList.forEach(item => addBillItemRow(item));
-    } else {
-      addBillItemRow({ name: 'Default Item', qty: record.totalQty || 1, price: record.totalBill || 0 });
-    }
-  }
-  updateLiveTotal();
-}
-
-function cancelEditMode() {
-  const idInput = document.getElementById('edit-record-id');
-  if (idInput) idInput.value = '';
-  const form = document.getElementById('record-form');
-  if (form) form.reset();
-  const container = document.getElementById('bill-items-container');
-  if (container) container.innerHTML = '';
-  const dateInput = document.getElementById('cust-date');
-  if (dateInput) dateInput.value = getLocalTodayDate();
-  toggleCreditFields();
-  updateLiveTotal();
-}
-
-function handleSearchInput() {
-  renderRecords();
-}
-
-function selectSuggestion(val) {
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) searchInput.value = val;
-  renderRecords();
-}
-
-function renderHoveringCities() {
-  const container = document.getElementById('city-pills-container');
-  if (!container) return;
-  container.innerHTML = '';
-  const cities = [...new Set(records.map(r => r.city).filter(Boolean))];
-  cities.forEach(city => {
-    const pill = document.createElement('button');
-    pill.className = 'px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-xs hover:bg-blue-500 hover:text-white transition';
-    pill.textContent = city;
-    pill.onclick = () => filterByCity(city);
-    container.appendChild(pill);
-  });
-}
-
-function filterByCity(city) {
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) searchInput.value = city;
-  renderRecords();
-}
-
-function renderRecords() {
-  populateCustomerDatalist();
-  renderHoveringCities();
-  updateDashboard();
-
-  const container = document.getElementById('records-list');
-  if (!container) return;
-  container.innerHTML = '';
-
-  const searchInput = document.getElementById('search-input');
-  const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-  const filtered = records.filter(r => {
-    if (!query) return true;
-    return (r.name && r.name.toLowerCase().includes(query)) ||
-           (r.city && r.city.toLowerCase().includes(query)) ||
-           (r.date && r.date.includes(query));
-  });
-
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="text-center py-8 text-gray-500">No records found.</div>';
-    return;
-  }
-
-  filtered.forEach(r => {
-    const totals = getRecordTotals(r);
-    const card = document.createElement('div');
-    card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4 flex flex-col justify-between';
-    card.innerHTML = `
-      <div class="flex justify-between items-start mb-2">
-        <div>
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">${r.name || 'Unnamed'}</h3>
-          <p class="text-xs text-gray-500">${r.city || 'No City'} • ${r.date || ''}</p>
-        </div>
-        <span class="px-2 py-1 text-xs rounded ${r.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-          ${r.isPaid ? 'Paid' : 'Unpaid'} (${r.paymentType || 'Cash'})
-        </span>
-      </div>
-      <div class="text-sm my-2 text-gray-700 dark:text-gray-300">
-        <p>Total Items: <span class="font-semibold">${totals.qty}</span></p>
-        <p>Total Bill: <span class="font-semibold">₹${totals.bill.toFixed(2)}</span></p>
-      </div>
-      <div class="flex gap-2 justify-end mt-2">
-        <button onclick="startEditRecord(${r.id})" class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">Edit</button>
-        <button onclick="deleteRecord(${r.id})" class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">Delete</button>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function updateDashboard() {
-  let totalSales = 0;
-  let totalQty = 0;
-  let pendingAmount = 0;
-
-  records.forEach(r => {
-    const totals = getRecordTotals(r);
-    totalSales += totals.bill;
-    totalQty += totals.qty;
-    if (!r.isPaid) {
-      pendingAmount += totals.bill;
-    }
-  });
-
-  const totalSalesEl = document.getElementById('dash-total-sales');
-  const totalQtyEl = document.getElementById('dash-total-qty');
-  const pendingEl = document.getElementById('dash-pending-amount');
-  const recordCountEl = document.getElementById('dash-record-count');
-
-  if (totalSalesEl) totalSalesEl.textContent = `₹${totalSales.toFixed(2)}`;
-  if (totalQtyEl) totalQtyEl.textContent = totalQty;
-  if (pendingEl) pendingEl.textContent = `₹${pendingAmount.toFixed(2)}`;
-  if (recordCountEl) recordCountEl.textContent = records.length;
-
-  renderYearSummary();
-}
-
-function renderYearSummary() {
-  const el = document.getElementById('year-summary-container');
-  if (!el) return;
-  const yearlyData = {};
-  records.forEach(r => {
-    const year = r.date ? r.date.split('-')[0] : 'Unknown';
-    const totals = getRecordTotals(r);
-    yearlyData[year] = (yearlyData[year] || 0) + totals.bill;
-  });
-  el.innerHTML = Object.entries(yearlyData).map(([yr, amt]) => `
-    <div class="flex justify-between text-xs py-1 border-b dark:border-gray-700">
-      <span>${yr}</span>
-      <span class="font-semibold">₹${amt.toFixed(2)}</span>
-    </div>
-  `).join('');
-}
-
-function deleteRecord(id) {
-  deleteTargetId = id;
-  const modal = document.getElementById('delete-modal');
-  if (modal) modal.classList.remove('hidden');
-}
-
-async function confirmDeleteRecord() {
-  if (deleteTargetId !== null) {
-    records = records.filter(r => r.id !== deleteTargetId);
-    deleteTargetId = null;
-    cancelDeleteModal();
-    renderRecords();
-    await pushDataToGitHub(records, 'Delete customer record');
-  }
-}
-
-function cancelDeleteModal() {
-  deleteTargetId = null;
-  const modal = document.getElementById('delete-modal');
-  if (modal) modal.classList.add('hidden');
-}
-
-async function saveRecordsToGitHub() {
-  await pushDataToGitHub(records, 'Update records');
-}
-
-function renderEmployees(employees) {
-  const container = document.getElementById('employee-list');
-  if (!container || !Array.isArray(employees)) return;
-  container.innerHTML = employees.map(emp => `
-    <div class="p-2 border-b dark:border-gray-700 flex justify-between items-center text-sm">
-      <span>${emp.name || emp.title}</span>
-      <span class="text-xs text-gray-500">${emp.role || ''}</span>
-    </div>
-  `).join('');
-}
-
-async function loadData() {
-  try {
-    const res = await fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (res.ok) {
-      records = await res.json();
-      if (typeof renderRecords === 'function') renderRecords();
-    }
-  } catch (e) {
-    console.error("Failed to load data.json", e);
-  }
-}
-
-async function loadEmployees() {
-  try {
-    const res = await fetch(`employees.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (res.ok) {
-      const employees = await res.json();
-      if (typeof renderEmployees === 'function') renderEmployees(employees);
-    }
-  } catch (e) {
-    console.error("Failed to load employees.json", e);
-  }
 }
 
 function startLiveSync() {
-  loadData();
-  loadEmployees();
-  setInterval(() => {
-    loadData();
-    loadEmployees();
-  }, 5000);
+    if (liveSyncInterval) clearInterval(liveSyncInterval);
+    liveSyncInterval = setInterval(() => {
+        loadData(true);
+    }, 5000);
+}
+
+async function checkTokenAndLoad() {
+    const input = document.getElementById('gh-token');
+    if (input) input.value = localStorage.getItem('gh_token') || '';
+    await loadData();
+    startLiveSync();
+}
+
+async function pushDataToGitHub(newRecords, commitMessage) {
+    updateStatus('Syncing...', 'syncing');
+    const token = localStorage.getItem('gh_token') || '';
+    if (!token) {
+        showToast('GitHub Token required to save changes', 'warning');
+        toggleSettingsPanel();
+        updateStatus('Offline', 'offline');
+        return false;
+    }
+
+    const contentStr = JSON.stringify(newRecords, null, 2);
+    const encodedContent = btoa(unescape(encodeURIComponent(contentStr)));
+
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+    const payload = {
+        message: commitMessage || 'Update customer records',
+        content: encodedContent,
+        branch: 'main'
+    };
+    if (fileSha) payload.sha = fileSha;
+
+    try {
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.message || 'Failed to save');
+        }
+
+        const resData = await res.json();
+        fileSha = resData.content.sha;
+        records = newRecords;
+        updateDashboard();
+        renderRecords();
+        renderHoveringCities();
+        populateCustomerDatalist();
+        updateStatus('Connected', 'online');
+        showToast('Saved to GitHub successfully!', 'success');
+        return true;
+    } catch (err) {
+        console.error('Save error:', err);
+        showToast('Error saving to GitHub: ' + err.message, 'danger');
+        updateStatus('Offline', 'offline');
+        return false;
+    }
+}
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const editId = document.getElementById('edit-record-id')?.value;
+    const name = document.getElementById('cust-name')?.value.trim();
+    const city = document.getElementById('cust-city')?.value.trim();
+    const date = document.getElementById('cust-date')?.value;
+    const paymentMode = document.getElementById('payment-mode')?.value || 'Cash';
+    
+    let deposit = 0;
+    if (paymentMode === 'Credit') {
+        deposit = parseFloat(document.getElementById('credit-deposit')?.value) || 0;
+    }
+
+    const itemRows = document.querySelectorAll('.bill-item-row');
+    const itemList = [];
+    itemRows.forEach(row => {
+        const iName = row.querySelector('.item-name')?.value.trim();
+        const iQty = parseFloat(row.querySelector('.item-qty')?.value) || 1;
+        const iPrice = parseFloat(row.querySelector('.item-price')?.value) || 0;
+        if (iName) {
+            itemList.push({ name: iName, qty: iQty, price: iPrice });
+        }
+    });
+
+    if (!name || !date || itemList.length === 0) {
+        showToast('Please fill in required fields and add at least one item', 'warning');
+        return;
+    }
+
+    const { bill: totalBill, qty: totalQty } = getRecordTotals({ itemList });
+
+    const newRecord = {
+        id: editId ? Number(editId) : Date.now(),
+        name,
+        city: city || 'Local',
+        date,
+        items: totalQty,
+        price: totalBill > 0 ? (totalBill / totalQty) : 0,
+        itemList,
+        paymentMode,
+        deposit: paymentMode === 'Credit' ? deposit : 0
+    };
+
+    let updatedRecords = [...records];
+    if (editId) {
+        const idx = updatedRecords.findIndex(r => r.id === Number(editId));
+        if (idx !== -1) updatedRecords[idx] = newRecord;
+    } else {
+        updatedRecords.unshift(newRecord);
+    }
+
+    const success = await pushDataToGitHub(updatedRecords, editId ? `Update record #${editId}` : `Add record for ${name}`);
+    if (success) {
+        resetForm();
+    }
+}
+
+function resetForm() {
+    const form = document.getElementById('record-form');
+    if (form) form.reset();
+    document.getElementById('edit-record-id').value = '';
+    document.getElementById('cust-date').value = getLocalTodayDate();
+    document.getElementById('save-btn').textContent = 'Save Record';
+    document.getElementById('cancel-edit-btn').classList.add('hidden');
+    document.getElementById('bill-items-container').innerHTML = '';
+    toggleCreditFields();
+    addBillItemRow();
+}
+
+function cancelEditMode() {
+    resetForm();
+}
+
+function editRecord(id) {
+    const r = records.find(rec => rec.id === id);
+    if (!r) return;
+
+    document.getElementById('edit-record-id').value = r.id;
+    document.getElementById('cust-name').value = r.name || '';
+    document.getElementById('cust-city').value = r.city || '';
+    document.getElementById('cust-date').value = r.date || getLocalTodayDate();
+    document.getElementById('payment-mode').value = r.paymentMode || 'Cash';
+
+    toggleCreditFields();
+    if (r.paymentMode === 'Credit') {
+        document.getElementById('credit-deposit').value = r.deposit || 0;
+    }
+
+    const container = document.getElementById('bill-items-container');
+    container.innerHTML = '';
+    if (r.itemList && r.itemList.length > 0) {
+        r.itemList.forEach(item => addBillItemRow(item));
+    } else {
+        addBillItemRow({ name: 'Item', qty: r.items || 1, price: r.price || 0 });
+    }
+
+    document.getElementById('save-btn').textContent = 'Update Record';
+    document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openDeleteModal(id) {
+    deleteTargetId = id;
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    deleteTargetId = null;
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function executeDelete() {
+    if (!deleteTargetId) return;
+    const updatedRecords = records.filter(r => r.id !== deleteTargetId);
+    closeModal();
+    await pushDataToGitHub(updatedRecords, `Delete record #${deleteTargetId}`);
+}
+
+function updateDashboard() {
+    const selectedDate = document.getElementById('cust-date')?.value || getLocalTodayDate();
+    let totalDaySale = 0;
+    let totalItems = 0;
+    const citiesSet = new Set();
+
+    records.forEach(r => {
+        const totals = getRecordTotals(r);
+        if (r.date === selectedDate) {
+            totalDaySale += totals.bill;
+        }
+        totalItems += totals.qty;
+        if (r.city) citiesSet.add(r.city);
+    });
+
+    const dayLabel = document.getElementById('stat-day-label');
+    if (dayLabel) dayLabel.textContent = selectedDate;
+
+    const daySaleEl = document.getElementById('stat-day-sale');
+    if (daySaleEl) daySaleEl.textContent = '₹' + totalDaySale.toFixed(2);
+
+    const recordsEl = document.getElementById('stat-records');
+    if (recordsEl) recordsEl.textContent = records.length;
+
+    const itemsEl = document.getElementById('stat-items');
+    if (itemsEl) itemsEl.textContent = totalItems;
+
+    const citiesEl = document.getElementById('stat-cities');
+    if (citiesEl) citiesEl.textContent = citiesSet.size;
+}
+
+function handleSearchInput() {
+    const query = document.getElementById('search-bar')?.value.toLowerCase().trim() || '';
+    const sugBox = document.getElementById('search-suggestions');
+    if (!sugBox) return;
+
+    if (!query) {
+        sugBox.classList.remove('active');
+        sugBox.innerHTML = '';
+        renderRecords();
+        return;
+    }
+
+    const matches = records.filter(r => 
+        (r.name && r.name.toLowerCase().includes(query)) ||
+        (r.city && r.city.toLowerCase().includes(query)) ||
+        (r.itemList && r.itemList.some(i => i.name.toLowerCase().includes(query)))
+    );
+
+    if (matches.length > 0) {
+        sugBox.innerHTML = matches.map(r => `
+            <div class="suggestion-item p-2 hover:bg-gray-100 cursor-pointer border-b" onclick="selectSearchSuggestion('${r.name.replace(/'/g, "\\'")}')">
+                <span class="font-bold">${r.name}</span> <span class="text-xs text-gray-500">(${r.city || 'Local'})</span>
+            </div>
+        `).join('');
+        sugBox.classList.add('active');
+    } else {
+        sugBox.innerHTML = '<div class="p-2 text-gray-500 text-sm">No matching records</div>';
+        sugBox.classList.add('active');
+    }
+    renderRecords();
+}
+
+function selectSearchSuggestion(name) {
+    const searchBar = document.getElementById('search-bar');
+    if (searchBar) searchBar.value = name;
+    document.getElementById('search-suggestions')?.classList.remove('active');
+    renderRecords();
+}
+
+function renderRecords() {
+    const container = document.getElementById('records-container');
+    const showingCount = document.getElementById('showing-count');
+    if (!container) return;
+
+    const query = document.getElementById('search-bar')?.value.toLowerCase().trim() || '';
+    const filterPay = document.getElementById('filter-payment')?.value || 'ALL';
+
+    let filtered = records.filter(r => {
+        const matchesQuery = !query || 
+            (r.name && r.name.toLowerCase().includes(query)) ||
+            (r.city && r.city.toLowerCase().includes(query)) ||
+            (r.itemList && r.itemList.some(i => i.name.toLowerCase().includes(query)));
+        
+        const matchesPay = filterPay === 'ALL' || (r.paymentMode || 'Cash') === filterPay;
+        return matchesQuery && matchesPay;
+    });
+
+    if (showingCount) {
+        showingCount.textContent = `Showing ${filtered.length} of ${records.length} records`;
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-gray-500">No records found.</div>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(r => {
+        const totals = getRecordTotals(r);
+        const payMode = r.paymentMode || 'Cash';
+        let payBadge = `<span class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">${payMode}</span>`;
+        if (payMode === 'Credit') {
+            const deposit = r.deposit || 0;
+            const remaining = totals.bill - deposit;
+            payBadge = `<span class="px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">Credit (Rem: ₹${remaining.toFixed(2)})</span>`;
+        } else if (payMode === 'UPI') {
+            payBadge = `<span class="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800">UPI</span>`;
+        }
+
+        let itemsHtml = '';
+        if (r.itemList && r.itemList.length > 0) {
+            itemsHtml = r.itemList.map(i => `${i.name} (x${i.qty} @ ₹${i.price})`).join(', ');
+        } else {
+            itemsHtml = `Items: ${r.items || 1} @ ₹${r.price || 0}`;
+        }
+
+        return `
+            <div class="record-card p-4 border rounded shadow-sm bg-white hover:shadow-md transition mb-3">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">${r.name}</h3>
+                        <p class="text-xs text-gray-500">${r.city || 'Local'} • ${r.date || ''}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${payBadge}
+                        <button onclick="editRecord(${r.id})" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Edit</button>
+                        <button onclick="openDeleteModal(${r.id})" class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-700 mb-2">${itemsHtml}</div>
+                <div class="text-right font-bold text-gray-900">Total: ₹${totals.bill.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderHoveringCities() {
+    const container = document.getElementById('hovering-cities');
+    if (!container) return;
+    const citiesSet = new Set();
+    records.forEach(r => { if (r.city) citiesSet.add(r.city); });
+
+    if (citiesSet.size === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = Array.from(citiesSet).map(c => `
+        <span class="inline-block bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full cursor-pointer hover:bg-gray-300 mr-1 mb-1" onclick="filterByCity('${c.replace(/'/g, "\\'")}')">${c}</span>
+    `).join('');
+}
+
+function filterByCity(cityName) {
+    const searchBar = document.getElementById('search-bar');
+    if (searchBar) searchBar.value = cityName;
+    renderRecords();
+}
+
+function populateCustomerDatalist() {
+    const list = document.getElementById('customer-datalist');
+    if (!list) return;
+    const names = new Set();
+    records.forEach(r => { if (r.name) names.add(r.name); });
+    list.innerHTML = Array.from(names).map(n => `<option value="${n}">`).join('');
+}
+
+function autoFillCustomerCity() {
+    const nameInput = document.getElementById('cust-name');
+    const cityInput = document.getElementById('cust-city');
+    if (!nameInput || !cityInput) return;
+    const val = nameInput.value.trim().toLowerCase();
+    if (!val) return;
+    const rec = records.find(r => r.name && r.name.toLowerCase() === val);
+    if (rec && rec.city) {
+        cityInput.value = rec.city;
+    }
+}
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    const bgColors = {
+        success: 'bg-green-600',
+        danger: 'bg-red-600',
+        warning: 'bg-yellow-600',
+        info: 'bg-blue-600'
+    };
+    toast.className = `toast ${bgColors[type] || bgColors.info} text-white px-4 py-2 rounded shadow text-sm transition-opacity duration-300`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const todayStr = getLocalTodayDate();
-  const dateEl = document.getElementById('cust-date');
-  if (dateEl) dateEl.value = todayStr;
-  const bannerYear = document.getElementById('banner-year');
-  if (bannerYear) bannerYear.textContent = new Date().getFullYear();
-  addBillItemRow();
-  checkBankHoliday();
-  startLiveSync();
-});
+    const todayStr = getLocalTodayDate();
+    const dateInput = document.getElementById('cust-date');
+    if (dateInput) dateInput.value = todayStr;
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(console.error);
-}
+    const bannerYear = document.getElementById('banner-year');
+    if (bannerYear) bannerYear.textContent = new Date().getFullYear();
+
+    addBillItemRow();
+    checkBankHoliday();
+    updateDashboard();
+    checkTokenAndLoad();
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-wrapper')) {
+            const sug = document.getElementById('search-suggestions');
+            if (sug) sug.classList.remove('active');
+        }
+    });
+});
