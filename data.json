@@ -1,20 +1,5 @@
 [
   {
-    "id": "1794975204012",
-    "name": "Aman",
-    "city": "Tarapur",
-    "itemList": [
-      {
-        "desc": "Tarapur",
-        "qty": 1,
-        "price": 2500
-      }
-    ],
-    "payment": "Cash",
-    "deposit": 0,
-    "date": "2026-11-18"
-  },
-  {
     "id": "1794921657880",
     "name": "Ranjit Darji",
     "city": "Tarapur",
