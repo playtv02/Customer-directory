@@ -1,602 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Customer directory for Kabir Emporium">
-  <title>Kabir Emporium Directory</title>
-  <link rel="icon" href="book.jpg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="book.jpg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json">
-  <style>
-    :root {
-      --bg-grad: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #cbd5e1 100%);
-      --surface-3d: linear-gradient(145deg, #ffffff, #f8fafc);
-      --surface-hover-3d: linear-gradient(145deg, #ffffff, #f1f5f9);
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --border-highlight: rgba(255, 255, 255, 0.9);
-      --border-shadow: rgba(203, 213, 225, 0.5);
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --accent-depth: #1e3a8a;
-      --danger: #ef4444;
-      --danger-depth: #991b1b;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --radius: 20px;
-      --focus-ring: rgba(37, 99, 235, 0.25);
-
-      /* 3D Shadows */
-      --shadow-3d: 
-        8px 12px 20px rgba(15, 23, 42, 0.08),
-        -4px -4px 12px rgba(255, 255, 255, 0.8),
-        inset 2px 2px 4px rgba(255, 255, 255, 1),
-        inset -2px -2px 6px rgba(15, 23, 42, 0.03);
-      --shadow-3d-hover: 
-        12px 18px 28px rgba(15, 23, 42, 0.12),
-        -6px -6px 16px rgba(255, 255, 255, 0.9),
-        inset 2px 2px 4px rgba(255, 255, 255, 1),
-        inset -2px -2px 6px rgba(15, 23, 42, 0.03);
-      --shadow-3d-inset: 
-        inset 3px 3px 6px rgba(15, 23, 42, 0.1),
-        inset -3px -3px 6px rgba(255, 255, 255, 0.8);
-      --shadow-btn: 
-        0 4px 6px -1px rgba(37, 99, 235, 0.2), 
-        0 2px 4px -1px rgba(37, 99, 235, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: var(--bg-grad);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 900px;
-    }
-
-    /* Header Styling */
-    header {
-      background: var(--surface-3d);
-      border-radius: var(--radius);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      position: relative;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .brand-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.5rem;
-      box-shadow: 0 8px 16px -4px rgba(37, 99, 235, 0.4);
-    }
-
-    .brand-text h1 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: -0.025em;
-    }
-
-    .brand-text p {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .add-btn {
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-hover) 100%);
-      color: white;
-      border: none;
-      padding: 0.875rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      box-shadow: var(--shadow-btn);
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .add-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 12px -2px rgba(37, 99, 235, 0.3);
-    }
-
-    .add-btn:active {
-      transform: translateY(0);
-    }
-
-    /* Search & Stats Bar */
-    .controls {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .search-wrapper {
-      flex: 1;
-      min-width: 280px;
-      position: relative;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 1rem 1rem 1rem 3rem;
-      border-radius: 16px;
-      border: 1px solid var(--border-highlight);
-      background: var(--surface-3d);
-      box-shadow: var(--shadow-3d-inset);
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.2s ease;
-      color: var(--text-main);
-    }
-
-    .search-input:focus {
-      box-shadow: 0 0 0 3px var(--focus-ring), var(--shadow-3d-inset);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 1.2rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-
-    /* Grid Layout */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* 3D Customer Cards */
-    .card {
-      background: var(--surface-3d);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-3d);
-      border: 1px solid var(--border-highlight);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--shadow-3d-hover);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: var(--accent);
-      box-shadow: var(--shadow-3d-inset);
-      font-size: 1.1rem;
-    }
-
-    .card-title {
-      font-weight: 700;
-      font-size: 1.1rem;
-      line-height: 1.2;
-    }
-
-    .card-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .card-details {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex-grow: 1;
-    }
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .card-actions {
-      margin-top: 1.5rem;
-      display: flex;
-      gap: 0.5rem;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 1rem;
-    }
-
-    .action-btn {
-      flex: 1;
-      padding: 0.5rem;
-      border-radius: 8px;
-      border: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s ease;
-      background: #e2e8f0;
-      color: var(--text-main);
-    }
-
-    .action-btn:hover {
-      background: #cbd5e1;
-    }
-
-    .action-btn.delete {
-      color: var(--danger);
-      background: #fee2e2;
-    }
-
-    .action-btn.delete:hover {
-      background: #fca5a5;
-    }
-
-    /* Modal Styling */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.4);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal {
-      background: var(--surface-3d);
-      padding: 2rem;
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 450px;
-      box-shadow: var(--shadow-3d-hover);
-      border: 1px solid var(--border-highlight);
-      transform: scale(0.95);
-      transition: transform 0.2s ease;
-    }
-
-    .modal-overlay.active .modal {
-      transform: scale(1);
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-      color: var(--text-muted);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--focus-ring);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid #cbd5e1;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      grid-column: 1 / -1;
-      color: var(--text-muted);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Customer directory for Kabir Emporium">
+    <title>Kabir Emporium Directory</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="book.jpg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="book.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Links to external style.css -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="app-container">
-    <header>
-      <div class="brand">
-        <div class="brand-icon">📚</div>
-        <div class="brand-text">
-          <h1>Kabir Emporium</h1>
-          <p>Customer Directory & Directory</p>
+<div class="container">
+    <!-- Brand Header Card -->
+    <div class="card-3d brand-header-card">
+        <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
+        <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
+
+        <div class="brand-info">
+            <h1 class="brand-title">📖 Kabir Emporium</h1>
+            <span class="brand-subtitle">Customer &amp; Sales Directory System</span>
         </div>
-      </div>
-      <button class="add-btn" id="openModalBtn">
-        <span>+</span> Add Customer
-      </button>
-    </header>
 
-    <div class="controls">
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" class="search-input" placeholder="Search by name, phone, or tags...">
-      </div>
-    </div>
-
-    <div class="grid" id="customerGrid"></div>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <h2 class="modal-title" id="modalTitle">Add New Customer</h2>
-      <form id="customerForm">
-        <input type="hidden" id="customerId">
-        <div class="form-group">
-          <label>Full Name *</label>
-          <input type="text" id="nameInput" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>Phone Number *</label>
-          <input type="tel" id="phoneInput" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="emailInput" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Notes / Address</label>
-          <textarea id="notesInput" class="form-input" rows="3"></textarea>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="closeModalBtn">Cancel</button>
-          <button type="submit" class="add-btn" style="padding: 0.6rem 1.2rem;">Save Customer</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    // Initial State & Local Storage Management
-    const STORAGE_KEY = 'kabir_directory_customers';
-    
-    const initialCustomers = [
-      { id: '1', name: 'Aarav Sharma', phone: '+91 98765 43210', email: 'aarav@example.com', notes: 'Regular buyer of textbooks.' },
-      { id: '2', name: 'Priya Patel', phone: '+91 98765 12345', email: 'priya@example.com', notes: 'Wholesale order for stationery.' },
-      { id: '3', name: 'Rahul Verma', phone: '+91 91234 56789', email: 'rahul@example.com', notes: 'Requested novel restocks.' }
-    ];
-
-    function getCustomers() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : initialCustomers;
-    }
-
-    function saveCustomers(customers) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
-      render();
-    }
-
-    // DOM Elements
-    const grid = document.getElementById('customerGrid');
-    const searchInput = document.getElementById('searchInput');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const openModalBtn = document.getElementById('openModalBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const customerForm = document.getElementById('customerForm');
-    const modalTitle = document.getElementById('modalTitle');
-
-    // Render Function
-    function render(query = '') {
-      const customers = getCustomers();
-      const filtered = customers.filter(c => 
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.phone.includes(query) ||
-        (c.email && c.email.toLowerCase().includes(query.toLowerCase())) ||
-        (c.notes && c.notes.toLowerCase().includes(query.toLowerCase()))
-      );
-
-      grid.innerHTML = '';
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '<div class="empty-state">No customers found matching your query.</div>';
-        return;
-      }
-
-      filtered.forEach(c => {
-        const initials = c.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="card-header">
-            <div class="avatar">${initials}</div>
-            <div>
-              <div class="card-title">${escapeHtml(c.name)}</div>
-              <div class="card-subtitle">ID: #${c.id.substring(0, 6)}</div>
+        <!-- Pill Container for forced same-line layout -->
+        <div class="header-pills-row">
+            <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token">
+                <div id="status-dot" class="status-dot"></div>
+                <span id="status-text">Connecting...</span>
             </div>
-          </div>
-          <div class="card-details">
-            <div class="detail-item">📞 ${escapeHtml(c.phone)}</div>
-            ${c.email ? `<div class="detail-item">✉️ ${escapeHtml(c.email)}</div>` : ''}
-            ${c.notes ? `<div class="detail-item">📝 ${escapeHtml(c.notes)}</div>` : ''}
-          </div>
-          <div class="card-actions">
-            <button class="action-btn" onclick="editCustomer('${c.id}')">Edit</button>
-            <button class="action-btn delete" onclick="deleteCustomer('${c.id}')">Delete</button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
 
-    function escapeHtml(str) {
-      return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-      );
-    }
+            <div id="bank-holiday-pill" class="bank-status-pill">
+                <span id="bank-status-icon">🏦</span>
+                <span id="bank-status-text">Checking Bank Status...</span>
+            </div>
+        </div>
+    </div>
 
-    // Modal Control
-    openModalBtn.addEventListener('click', () => {
-      customerForm.reset();
-      document.getElementById('customerId').value = '';
-      modalTitle.textContent = 'Add New Customer';
-      modalOverlay.classList.add('active');
-    });
+    <!-- Collapsible Settings Panel -->
+    <div id="settings-panel" class="card-3d settings-panel" style="display: none;">
+        <h3>⚙️ Sync Settings (GitHub Integration)</h3>
+        <div class="form-group">
+            <label for="gh-token">GitHub Personal Access Token (PAT):</label>
+            <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+            <small>Requires 'repo' scope. Token is saved locally in your browser.</small>
+        </div>
+        <div class="form-group">
+            <label for="gh-repo">Repository (username/repo):</label>
+            <input type="text" id="gh-repo" value="playtv02/Customer-directory">
+        </div>
+        <div class="form-group">
+            <label for="gh-path">File Path:</label>
+            <input type="text" id="gh-path" value="data.json">
+        </div>
+        <button onclick="saveSettings()" class="btn-primary">Save Settings &amp; Sync</button>
+        <button onclick="toggleSettingsPanel()" class="btn-secondary">Close</button>
+    </div>
 
-    closeModalBtn.addEventListener('click', () => {
-      modalOverlay.classList.remove('active');
-    });
+    <!-- Controls Row -->
+    <div class="controls-card card-3d">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Search by customer name, mobile, address, bill no, item...">
+        </div>
+        <div class="action-buttons">
+            <button onclick="openModal('add-customer-modal')" class="btn-primary">➕ Add Customer</button>
+            <button onclick="openModal('add-employee-modal')" class="btn-secondary">👔 Add Employee</button>
+            <button onclick="openModal('view-employees-modal')" class="btn-secondary">👥 Employees</button>
+            <button onclick="exportData()" class="btn-secondary">📥 Export JSON</button>
+        </div>
+    </div>
 
-    // Form Submit
-    customerForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const id = document.getElementById('customerId').value;
-      const name = document.getElementById('nameInput').value;
-      const phone = document.getElementById('phoneInput').value;
-      const email = document.getElementById('emailInput').value;
-      const notes = document.getElementById('notesInput').value;
+    <!-- Stats Bar -->
+    <div class="stats-row">
+        <div class="stat-card card-3d">
+            <span class="stat-number" id="stat-total-customers">0</span>
+            <span class="stat-label">Total Customers</span>
+        </div>
+        <div class="stat-card card-3d">
+            <span class="stat-number" id="stat-total-sales">₹0</span>
+            <span class="stat-label">Total Sales</span>
+        </div>
+        <div class="stat-card card-3d">
+            <span class="stat-number" id="stat-total-bills">0</span>
+            <span class="stat-label">Total Bills</span>
+        </div>
+        <div class="stat-card card-3d">
+            <span class="stat-number" id="stat-avg-bill">₹0</span>
+            <span class="stat-label">Avg Bill Value</span>
+        </div>
+    </div>
 
-      let customers = getCustomers();
+    <!-- Main Content Area: Customers List -->
+    <div id="customers-list" class="customers-grid">
+        <!-- Customer Cards will be dynamically inserted here -->
+    </div>
+</div>
 
-      if (id) {
-        // Edit
-        customers = customers.map(c => c.id === id ? { id, name, phone, email, notes } : c);
-      } else {
-        // Create
-        const newCust = {
-          id: Date.now().toString(),
-          name, phone, email, notes
-        };
-        customers.push(newCust);
-      }
+<!-- Add Customer Modal -->
+<div id="add-customer-modal" class="modal">
+    <div class="modal-content card-3d">
+        <div class="modal-header">
+            <h2>➕ Add New Customer</h2>
+            <span class="close-modal" onclick="closeModal('add-customer-modal')">&times;</span>
+        </div>
+        <form id="add-customer-form" onsubmit="handleAddCustomer(event)">
+            <div class="form-group">
+                <label for="cust-name">Customer Name *</label>
+                <input type="text" id="cust-name" required placeholder="e.g. Rajesh Kumar">
+            </div>
+            <div class="form-group">
+                <label for="cust-mobile">Mobile Number *</label>
+                <input type="tel" id="cust-mobile" required placeholder="e.g. 9876543210">
+            </div>
+            <div class="form-group">
+                <label for="cust-address">Address</label>
+                <textarea id="cust-address" placeholder="Customer address..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">Save Customer</button>
+                <button type="button" onclick="closeModal('add-customer-modal')" class="btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-      saveCustomers(customers);
-      modalOverlay.classList.remove('active');
-    });
+<!-- Add Employee Modal -->
+<div id="add-employee-modal" class="modal">
+    <div class="modal-content card-3d">
+        <div class="modal-header">
+            <h2>👔 Add New Employee</h2>
+            <span class="close-modal" onclick="closeModal('add-employee-modal')">&times;</span>
+        </div>
+        <form id="add-employee-form" onsubmit="handleAddEmployee(event)">
+            <div class="form-group">
+                <label for="emp-name">Employee Name *</label>
+                <input type="text" id="emp-name" required placeholder="e.g. Amit Sharma">
+            </div>
+            <div class="form-group">
+                <label for="emp-role">Role / Position</label>
+                <input type="text" id="emp-role" placeholder="e.g. Sales Executive">
+            </div>
+            <div class="form-group">
+                <label for="emp-mobile">Mobile</label>
+                <input type="tel" id="emp-mobile" placeholder="e.g. 9876543210">
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">Save Employee</button>
+                <button type="button" onclick="closeModal('add-employee-modal')" class="btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-    // Edit/Delete Handlers
-    window.editCustomer = function(id) {
-      const c = getCustomers().find(item => item.id === id);
-      if (!c) return;
+<!-- View Employees Modal -->
+<div id="view-employees-modal" class="modal">
+    <div class="modal-content card-3d modal-large">
+        <div class="modal-header">
+            <h2>👥 Employee List</h2>
+            <span class="close-modal" onclick="closeModal('view-employees-modal')">&times;</span>
+        </div>
+        <div id="employees-list" class="employees-grid">
+            <!-- Employee items dynamically inserted here -->
+        </div>
+    </div>
+</div>
 
-      document.getElementById('customerId').value = c.id;
-      document.getElementById('nameInput').value = c.name;
-      document.getElementById('phoneInput').value = c.phone;
-      document.getElementById('emailInput').value = c.email || '';
-      document.getElementById('notesInput').value = c.notes || '';
-      
-      modalTitle.textContent = 'Edit Customer';
-      modalOverlay.classList.add('active');
-    };
+<!-- Add Bill Modal -->
+<div id="add-bill-modal" class="modal">
+    <div class="modal-content card-3d modal-large">
+        <div class="modal-header">
+            <h2 id="add-bill-title">🧾 Add New Bill</h2>
+            <span class="close-modal" onclick="closeModal('add-bill-modal')">&times;</span>
+        </div>
+        <form id="add-bill-form" onsubmit="handleAddBill(event)">
+            <input type="hidden" id="bill-cust-id">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bill-no">Bill Number *</label>
+                    <input type="text" id="bill-no" required placeholder="e.g. INV-1001">
+                </div>
+                <div class="form-group">
+                    <label for="bill-date">Date *</label>
+                    <input type="date" id="bill-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="bill-employee">Salesperson / Employee</label>
+                    <select id="bill-employee">
+                        <option value="">Select Employee...</option>
+                    </select>
+                </div>
+            </div>
 
-    window.deleteCustomer = function(id) {
-      if (confirm('Are you sure you want to delete this customer?')) {
-        const customers = getCustomers().filter(c => c.id !== id);
-        saveCustomers(customers);
-      }
-    };
+            <h3>Items</h3>
+            <div id="bill-items-container">
+                <div class="bill-item-row">
+                    <input type="text" class="item-name" placeholder="Item description" required>
+                    <input type="number" class="item-qty" placeholder="Qty" value="1" min="1" required onchange="calculateBillTotal()">
+                    <input type="number" class="item-rate" placeholder="Rate (₹)" min="0" step="0.01" required onchange="calculateBillTotal()">
+                    <span class="item-amount">₹0.00</span>
+                    <button type="button" class="btn-danger-sm" onclick="removeBillItemRow(this)">🗑️</button>
+                </div>
+            </div>
+            <button type="button" onclick="addBillItemRow()" class="btn-secondary-sm">➕ Add Item</button>
 
-    // Search Handler
-    searchInput.addEventListener('input', (e) => {
-      render(e.target.value);
-    });
+            <div class="bill-summary">
+                <div class="summary-line">
+                    <span>Total Amount:</span>
+                    <strong id="bill-total-amount">₹0.00</strong>
+                </div>
+                <div class="form-group">
+                    <label for="bill-payment-mode">Payment Mode</label>
+                    <select id="bill-payment-mode">
+                        <option value="Cash">Cash</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Card">Card</option>
+                        <option value="Credit/Udhar">Credit / Udhar</option>
+                    </select>
+                </div>
+            </div>
 
-    // Register Service Worker for PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
-      });
-    }
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">Save Bill</button>
+                <button type="button" onclick="closeModal('add-bill-modal')" class="btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-    // Initial Render
-    render();
-  </script>
+    <!-- Links to external script.js -->
+    <script src="script.js"></script>
+    <script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
+    </script>
 </body>
 </html>
