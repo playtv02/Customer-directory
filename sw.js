@@ -1,10 +1,9 @@
-const CACHE_NAME = 'customer-dir-v1';
+const CACHE_NAME = 'customer-dir-v2';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './data.json',
-  './employees.json'
+  './manifest.json',
+  './book.jpg'
 ];
 
 self.addEventListener('install', (event) => {
