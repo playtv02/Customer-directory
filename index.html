@@ -27,23 +27,10 @@
       --warning: #f59e0b;
       --radius: 20px;
       --focus-ring: rgba(37, 99, 235, 0.25);
-
       /* 3D Shadows */
-      --shadow-3d:
-        8px 12px 20px rgba(15, 23, 42, 0.08),
-        -4px -4px 12px rgba(255, 255, 255, 0.8),
-        inset 2px 2px 4px rgba(255, 255, 255, 1),
-        inset -2px -2px 6px rgba(15, 23, 42, 0.03);
-      --shadow-3d-hover:
-        12px 18px 28px rgba(15, 23, 42, 0.12),
-        -6px -6px 16px rgba(255, 255, 255, 0.9),
-        inset 2px 2px 4px rgba(255, 255, 255, 1),
-        inset -2px -2px 6px rgba(15, 23, 42, 0.04);
-      --shadow-pressed:
-        inset 4px 4px 8px rgba(15, 23, 42, 0.08),
-        inset -4px -4px 8px rgba(255, 255, 255, 0.9),
-        0 2px 2px rgba(255, 255, 255, 0.6);
-
+      --shadow-3d: 8px 12px 20px rgba(15, 23, 42, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8), inset 2px 2px 4px rgba(255, 255, 255, 1), inset -2px -2px 6px rgba(15, 23, 42, 0.03);
+      --shadow-3d-hover: 12px 18px 28px rgba(15, 23, 42, 0.12), -6px -6px 16px rgba(255, 255, 255, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 1), inset -2px -2px 6px rgba(15, 23, 42, 0.04);
+      --shadow-pressed: inset 4px 4px 8px rgba(15, 23, 42, 0.08), inset -4px -4px 8px rgba(255, 255, 255, 0.9), 0 2px 2px rgba(255, 255, 255, 0.6);
       --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -121,17 +108,13 @@
       background: #ffffff;
       padding: 6px 14px;
       border-radius: 12px;
-      box-shadow:
-        0 6px 0 #cbd5e1,
-        0 10px 15px rgba(15, 23, 42, 0.15),
-        inset 0 2px 2px rgba(255, 255, 255, 1);
+      box-shadow: 0 6px 0 #cbd5e1, 0 10px 15px rgba(15, 23, 42, 0.15), inset 0 2px 2px rgba(255, 255, 255, 1);
       border: 1px solid rgba(255, 255, 255, 0.8);
       animation: float3D 3s infinite ease-in-out alternate;
     }
 
     .om-symbol { color: var(--danger); font-size: 0.9rem; text-shadow: 0 1px 1px rgba(239, 68, 68, 0.4); }
     .swastik-symbol { color: var(--warning); font-size: 0.9rem; text-shadow: 0 1px 1px rgba(245, 158, 11, 0.4); }
-
     .shubh-labh-left { left: 20px; animation-delay: 0s; }
     .shubh-labh-right { right: 20px; animation-delay: 1.5s; }
 
@@ -174,10 +157,7 @@
       font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-main);
-      box-shadow:
-        3px 4px 8px rgba(15, 23, 42, 0.06),
-        -2px -2px 6px rgba(255, 255, 255, 0.8),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
       transition: var(--transition-smooth);
       cursor: pointer;
     }
@@ -187,11 +167,7 @@
       box-shadow: 5px 6px 12px rgba(15, 23, 42, 0.1), -3px -3px 8px rgba(255, 255, 255, 0.9);
     }
 
-    @keyframes blink-sync {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
+    @keyframes blink-sync { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     @keyframes pulse-green {
       0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
       70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0), inset 2px 2px 4px rgba(255, 255, 255, 0.6); }
@@ -235,10 +211,7 @@
       font-size: 0.72rem;
       font-weight: 800;
       color: var(--text-muted);
-      box-shadow:
-        3px 4px 8px rgba(15, 23, 42, 0.06),
-        -2px -2px 6px rgba(255, 255, 255, 0.8),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
       border: 1px solid var(--border-highlight);
       transition: var(--transition-smooth);
     }
@@ -270,24 +243,17 @@
       align-items: center;
       margin-bottom: 32px;
       border-top: 2px solid rgba(255, 255, 255, 0.4);
-      box-shadow:
-        0 8px 0 var(--accent-depth),
-        0 15px 25px rgba(37, 99, 235, 0.3),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 0 var(--accent-depth), 0 15px 25px rgba(37, 99, 235, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
       transition: var(--transition-spring);
     }
 
     .year-banner:hover {
       transform: translateY(-4px);
-      box-shadow:
-        0 12px 0 var(--accent-depth),
-        0 20px 30px rgba(37, 99, 235, 0.4),
-        inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 12px 0 var(--accent-depth), 0 20px 30px rgba(37, 99, 235, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
     }
 
-    /* Dashboard 3D Grid (Reduced Column Gap) */
+    /* Dashboard 3D Grid */
     .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 36px; }
-
     .stat-item { display: flex; flex-direction: column; gap: 8px; padding: 20px 14px; border-radius: 18px; }
     .stat-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
     .stat-value { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.03em; color: var(--accent); text-shadow: 1px 1px 0 rgba(255, 255, 255, 1); }
@@ -296,7 +262,7 @@
       .dashboard { grid-template-columns: 1fr 1fr; gap: 10px; }
     }
 
-    /* Year-Wise Breakdown Grid (Reduced Column Gap) */
+    /* Year-Wise Breakdown Grid */
     .year-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 36px; }
     .year-card { padding: 22px; display: flex; flex-direction: column; gap: 8px; }
     .year-card-title { font-size: 0.85rem; font-weight: 800; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
@@ -304,7 +270,6 @@
 
     /* 3D Forms & Inputs */
     .form-group { margin-bottom: 20px; }
-
     .form-group label {
       display: block;
       font-size: 0.8rem;
@@ -347,6 +312,7 @@
       box-shadow: var(--shadow-pressed);
       font-weight: 800;
     }
+
     .live-total-box span:first-child { font-size: 0.8rem; color: var(--text-muted); }
     .live-total-box span:last-child { font-size: 1.25rem; color: var(--accent); text-shadow: 1px 1px 0 rgba(255, 255, 255, 1); }
 
@@ -372,28 +338,19 @@
       color: #ffffff;
       border: 1px solid var(--accent-hover);
       border-top: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow:
-        0 8px 0 var(--accent-depth),
-        0 15px 20px rgba(37, 99, 235, 0.3),
-        inset 0 2px 4px rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 0 var(--accent-depth), 0 15px 20px rgba(37, 99, 235, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
       margin-bottom: 8px;
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow:
-        0 10px 0 var(--accent-depth),
-        0 20px 25px rgba(37, 99, 235, 0.4),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 0 var(--accent-depth), 0 20px 25px rgba(37, 99, 235, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
     }
 
     .btn-primary:active {
       transform: translateY(8px);
-      box-shadow:
-        0 0px 0 var(--accent-depth),
-        0 2px 5px rgba(37, 99, 235, 0.4),
-        inset 0 4px 6px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0px 0 var(--accent-depth), 0 2px 5px rgba(37, 99, 235, 0.4), inset 0 4px 6px rgba(0, 0, 0, 0.2);
       border-top: 1px solid transparent;
     }
 
@@ -419,10 +376,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow:
-        0 5px 0 #cbd5e1,
-        0 8px 15px rgba(15, 23, 42, 0.08),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 0 5px 0 #cbd5e1, 0 8px 15px rgba(15, 23, 42, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 1);
       transition: var(--transition-spring);
       margin-bottom: 4px;
     }
@@ -430,13 +384,7 @@
     .btn-secondary-3d:hover { transform: translateY(-2px); color: var(--accent); }
     .btn-secondary-3d:active { transform: translateY(5px); box-shadow: 0 0 0 #cbd5e1, 0 2px 4px rgba(15, 23, 42, 0.1); }
 
-    .filter-controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      width: 100%;
-    }
+    .filter-controls { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; width: 100%; }
 
     .filter-select {
       flex: 1;
@@ -450,10 +398,7 @@
       font-size: 0.82rem;
       font-weight: 700;
       color: var(--text-main);
-      box-shadow:
-        3px 4px 8px rgba(15, 23, 42, 0.06),
-        -2px -2px 6px rgba(255, 255, 255, 0.8),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 3px 4px 8px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
       cursor: pointer;
       outline: none;
       box-sizing: border-box;
@@ -518,10 +463,7 @@
       color: var(--text-muted);
       cursor: pointer;
       white-space: nowrap;
-      box-shadow:
-        4px 6px 10px rgba(15, 23, 42, 0.06),
-        -2px -2px 6px rgba(255, 255, 255, 0.8),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 4px 6px 10px rgba(15, 23, 42, 0.06), -2px -2px 6px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 1);
       transition: var(--transition-spring);
     }
 
@@ -529,17 +471,13 @@
       background: var(--accent);
       color: #ffffff;
       border-color: var(--accent-hover);
-      box-shadow:
-        0 6px 0 var(--accent-depth),
-        0 10px 15px rgba(37, 99, 235, 0.3),
-        inset 0 2px 2px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 6px 0 var(--accent-depth), 0 10px 15px rgba(37, 99, 235, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.3);
       transform: translateY(-4px);
     }
 
     .showing-text { text-align: right; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-top: 0; margin-bottom: 20px; padding-right: 8px; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8); }
 
     /* Record Cards */
-    /* Refined customer record cards — same palette and overall 3D UI */
     .record-card {
       padding: 22px;
       margin-bottom: 16px;
@@ -548,14 +486,18 @@
       background: linear-gradient(155deg, #ffffff 0%, #f8fafc 72%, #f1f5f9 100%);
       box-shadow: 0 7px 18px rgba(15, 23, 42, 0.07), 0 2px 5px rgba(15, 23, 42, 0.035), inset 0 1px 0 #fff;
     }
+
     .record-card::before {
       content: "";
       position: absolute;
-      left: 0; top: 0; bottom: 0;
+      left: 0;
+      top: 0;
+      bottom: 0;
       width: 4px;
       background: linear-gradient(180deg, #60a5fa, var(--accent));
       opacity: .9;
     }
+
     .record-header {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
@@ -565,49 +507,14 @@
       padding-bottom: 12px;
       border-bottom: 1px solid rgba(148, 163, 184, .2);
     }
-    .record-date {
-      grid-column: 1;
-      grid-row: 1;
-      justify-self: start;
-      padding-top: 8px;
-      color: var(--text-muted);
-      font-size: .76rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .record-header-meta {
-      grid-column: 2;
-      grid-row: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 7px;
-      min-width: 0;
-    }
-    .record-city {
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    .record-header .record-payment {
-      white-space: nowrap;
-    }
-    .record-header .record-actions {
-      grid-column: 3;
-      grid-row: 1;
-      justify-self: end;
-    }
-    .record-name {
-      font-weight: 800;
-      font-size: 1.08rem;
-      line-height: 1.3;
-      letter-spacing: -0.025em;
-      color: var(--text-main);
-      overflow-wrap: anywhere;
-    }
+
+    .record-date { grid-column: 1; grid-row: 1; justify-self: start; padding-top: 8px; color: var(--text-muted); font-size: .76rem; font-weight: 700; white-space: nowrap; }
+    .record-header-meta { grid-column: 2; grid-row: 1; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 7px; min-width: 0; }
+    .record-city { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .record-header .record-payment { white-space: nowrap; }
+    .record-header .record-actions { grid-column: 3; grid-row: 1; justify-self: end; }
+    .record-name { font-weight: 800; font-size: 1.08rem; line-height: 1.3; letter-spacing: -0.025em; color: var(--text-main); overflow-wrap: anywhere; }
+
     .record-payment {
       display: inline-flex;
       align-items: center;
@@ -620,6 +527,7 @@
       font-weight: 750;
       overflow-wrap: anywhere;
     }
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -633,7 +541,9 @@
       box-shadow: none;
       transition: var(--transition-smooth);
     }
+
     .badge:hover { background: rgba(37, 99, 235, .12); transform: translateY(-1px); }
+
     .record-items-panel {
       background: rgba(241, 245, 249, .72);
       padding: 13px 14px;
@@ -641,14 +551,9 @@
       margin-top: 14px;
       border: 1px solid rgba(148, 163, 184, .2);
     }
-    .record-items-title {
-      font-size: .68rem;
-      font-weight: 800;
-      color: #64748b;
-      margin-bottom: 7px;
-      text-transform: uppercase;
-      letter-spacing: .09em;
-    }
+
+    .record-items-title { font-size: .68rem; font-weight: 800; color: #64748b; margin-bottom: 7px; text-transform: uppercase; letter-spacing: .09em; }
+
     .record-item-line {
       display: flex;
       justify-content: space-between;
@@ -658,10 +563,12 @@
       font-size: .82rem;
       border-bottom: 1px solid rgba(148, 163, 184, .18);
     }
+
     .record-item-line:last-child { border-bottom: 0; padding-bottom: 1px; }
     .record-item-name { min-width: 0; font-weight: 650; color: var(--text-main); overflow-wrap: anywhere; }
     .record-item-qty { color: var(--text-muted); font-size: .73rem; font-weight: 550; }
     .record-item-price { flex-shrink: 0; font-weight: 750; color: var(--text-main); font-variant-numeric: tabular-nums; }
+
     .record-details {
       display: flex;
       justify-content: space-between;
@@ -671,31 +578,28 @@
       padding: 13px 2px 0;
       border-top: 1px solid rgba(148, 163, 184, .25);
     }
+
     .record-calc { font-size: .78rem; font-weight: 700; color: var(--text-muted); }
-    .record-total {
-      font-weight: 850;
-      font-size: 1.35rem;
-      letter-spacing: -0.035em;
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-    }
+    .record-total { font-weight: 850; font-size: 1.35rem; letter-spacing: -0.035em; color: var(--accent); font-variant-numeric: tabular-nums; }
     .record-actions { display: flex; gap: 7px; flex-shrink: 0; }
+
     .record-actions .btn-icon {
-      width: 38px; height: 38px; padding: 8px;
+      width: 38px;
+      height: 38px;
+      padding: 8px;
       border-radius: 11px;
       box-shadow: 0 2px 5px rgba(15, 23, 42, .06), inset 0 1px 0 #fff;
       border: 1px solid rgba(148, 163, 184, .22);
       margin-bottom: 0;
     }
+
     .record-actions .btn-icon.edit { color: var(--accent); }
     .record-actions .btn-icon:not(.edit) { color: #64748b; }
     .record-actions .btn-icon:not(.edit):hover { color: var(--danger); }
+
     @media (max-width: 520px) {
       .record-card { padding: 17px 15px 16px 18px; }
-      .record-header {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        gap: 7px;
-      }
+      .record-header { grid-template-columns: auto minmax(0, 1fr) auto; gap: 7px; }
       .record-date { padding-top: 7px; font-size: .69rem; }
       .record-header-meta { gap: 5px; justify-content: center; }
       .record-city, .record-payment { font-size: .67rem; }
@@ -706,8 +610,6 @@
       .record-item-line { font-size: .78rem; }
     }
 
-    .record-actions { display: flex; gap: 8px; flex-shrink: 0; }
-
     .btn-icon {
       background: var(--surface-3d);
       border: 1px solid var(--border-highlight);
@@ -715,10 +617,7 @@
       cursor: pointer;
       padding: 10px;
       border-radius: 12px;
-      box-shadow:
-        0 4px 0 #cbd5e1,
-        0 6px 10px rgba(15, 23, 42, 0.08),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 0 4px 0 #cbd5e1, 0 6px 10px rgba(15, 23, 42, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 1);
       transition: var(--transition-spring);
       margin-bottom: 4px;
       display: inline-flex;
@@ -729,16 +628,10 @@
     .btn-icon:hover {
       color: var(--danger);
       transform: translateY(-2px);
-      box-shadow:
-        0 6px 0 #cbd5e1,
-        0 10px 15px rgba(15, 23, 42, 0.1),
-        inset 1px 1px 2px rgba(255, 255, 255, 1);
+      box-shadow: 0 6px 0 #cbd5e1, 0 10px 15px rgba(15, 23, 42, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 1);
     }
 
-    .btn-icon.edit:hover {
-      color: var(--accent);
-    }
-
+    .btn-icon.edit:hover { color: var(--accent); }
     .settings-panel p { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-bottom: 20px; }
 
     /* Toast Notifications */
@@ -763,7 +656,18 @@
     }
 
     /* Custom Confirm Modal */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); display: none; place-items: center; z-index: 1000; opacity: 0; transition: opacity 0.4s var(--transition-smooth); }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+      display: none;
+      place-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.4s var(--transition-smooth);
+    }
+
     .modal-overlay.active { display: grid; opacity: 1; }
 
     .modal-content {
@@ -784,30 +688,39 @@
     .modal-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); margin-bottom: 32px; }
     .modal-actions { display: flex; gap: 12px; }
     .modal-btn { flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 0.95rem; transition: var(--transition-spring); margin-bottom: 6px; }
-    .modal-btn-cancel { background: var(--surface-3d); color: var(--text-main); border: 1px solid var(--border-highlight); box-shadow: 0 6px 0 #cbd5e1, 0 8px 15px rgba(15, 23, 42, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 1); }
-    .modal-btn-danger { background: var(--danger); color: white; border: 1px solid var(--danger-depth); border-top: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 6px 0 var(--danger-depth), 0 10px 15px rgba(239, 68, 68, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.3); }
+
+    .modal-btn-cancel {
+      background: var(--surface-3d);
+      color: var(--text-main);
+      border: 1px solid var(--border-highlight);
+      box-shadow: 0 6px 0 #cbd5e1, 0 8px 15px rgba(15, 23, 42, 0.1), inset 1px 1px 2px rgba(255, 255, 255, 1);
+    }
+
+    .modal-btn-danger {
+      background: var(--danger);
+      color: white;
+      border: 1px solid var(--danger-depth);
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 6px 0 var(--danger-depth), 0 10px 15px rgba(239, 68, 68, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.3);
+    }
   </style>
 </head>
 <body>
-
   <div class="container">
     <!-- Brand Header Card -->
     <div class="card-3d brand-header-card">
       <span class="shubh-labh-left"><span class="om-symbol">ॐ</span> शुभ</span>
       <span class="shubh-labh-right">लाभ <span class="swastik-symbol">卐</span></span>
-
       <div class="brand-info">
         <h1 class="brand-title">📘 Kabir Emporium</h1>
         <span class="brand-subtitle">Customer & Sales Directory System</span>
       </div>
-
       <!-- Pill Container for forced same-line layout -->
       <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap; width: 100%; overflow-x: auto; padding-bottom: 4px;">
         <div class="sync-pill" onclick="toggleSettingsPanel()" title="Click to configure GitHub Token" style="white-space: nowrap;">
           <div id="status-dot" class="status-dot"></div>
           <span id="status-text">Connecting...</span>
         </div>
-
         <div id="bank-holiday-pill" class="bank-status-pill" style="white-space: nowrap;">
           <span id="bank-status-icon">🏦</span>
           <span id="bank-status-text">Checking Bank Status...</span>
@@ -855,19 +768,15 @@
     <div class="card-3d card form-card-static">
       <form id="record-form">
         <input type="hidden" id="edit-record-id" value="">
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group" style="grid-column: span 2;">
             <label for="cust-name">👤 Customer Name</label>
-            <input type="text" id="cust-name" list="customer-datalist" class="form-control" required placeholder="e.g. Aman Bhatia" oninput="autoFillCustomerCity()">
-            <datalist id="customer-datalist"></datalist>
+            <input type="text" id="cust-name" class="form-control" required placeholder="e.g. Aman Bhatia" autocomplete="off" oninput="autoFillCustomerCity()">
           </div>
-
           <div class="form-group" style="grid-column: span 2;">
             <label for="cust-city">🏙️ City/Village</label>
             <input type="text" id="cust-city" class="form-control" required placeholder="e.g. Tarapur">
           </div>
-
           <!-- Multiple Items Container -->
           <div class="form-group" style="grid-column: span 2;">
             <label>🛒 Bill Items</label>
@@ -876,7 +785,6 @@
             </div>
             <button type="button" class="btn-secondary-3d" style="width: 100%; border: 2px dashed rgba(37,99,235,0.4); background: transparent;" onclick="addBillItemRow()">➕ Add Another Item</button>
           </div>
-
           <div class="form-group" style="grid-column: span 2;">
             <label for="payment-mode">💳 Payment Mode</label>
             <select id="payment-mode" class="form-control" onchange="toggleCreditFields()">
@@ -885,7 +793,6 @@
               <option value="Credit">📒 Credit (Udhar)</option>
             </select>
           </div>
-
           <!-- Credit Specific Fields (Hidden by default) -->
           <div id="credit-container" style="grid-column: span 2; display: none; background: #eef2f6; padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow-pressed);">
             <div class="form-group" style="margin-bottom: 12px;">
@@ -897,18 +804,15 @@
               <span id="remaining-credit-balance" style="color: var(--danger);">₹0.00</span>
             </div>
           </div>
-
           <div class="form-group" style="grid-column: span 2;">
             <label for="cust-date">📅 Date</label>
             <input type="date" id="cust-date" class="form-control" required onchange="updateDashboard()">
           </div>
         </div>
-
         <div class="live-total-box">
           <span>🧮 Bill Total Preview</span>
           <span id="live-bill-total">₹0.00</span>
         </div>
-
         <button type="submit" class="btn-primary btn" id="save-btn" style="margin-top: 8px;">💾 SUBMIT</button>
         <button type="button" class="btn-secondary-3d" id="cancel-edit-btn" style="display: none; width: 100%; margin-top: 10px;" onclick="cancelEditMode()">❌ Cancel Editing</button>
       </form>
@@ -969,7 +873,6 @@
     const GITHUB_OWNER = 'playtv02';
     const GITHUB_REPO = 'Customer-directory';
     const FILE_PATH = 'data.json';
-
     let records = [];
     let fileSha = null;
     let deleteTargetId = null;
@@ -997,12 +900,10 @@
       const todayStr = getLocalTodayDate();
       document.getElementById('cust-date').value = todayStr;
       document.getElementById('banner-year').textContent = new Date().getFullYear();
-
       addBillItemRow();
       checkBankHoliday();
       updateDashboard();
       checkTokenAndLoad();
-
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-wrapper')) {
           document.getElementById('search-suggestions').classList.remove('active');
@@ -1016,7 +917,6 @@
       const row = document.createElement('div');
       row.className = 'bill-item-row';
       row.style.cssText = 'display: flex; flex-direction: column; gap: 8px; background: #eef2f6; padding: 12px; border-radius: 12px; box-shadow: var(--shadow-pressed);';
-
       row.innerHTML = `
         <div style="width: 100%;">
           <input type="text" class="form-control item-desc" placeholder="Item Name" value="${desc}" style="width: 100%; padding: 12px; box-shadow: none; border: 1px solid rgba(15,23,42,0.1); background: #fff;">
@@ -1049,12 +949,10 @@
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(dateOfMonth).padStart(2, '0');
       const mmdd = `${month}-${day}`;
-
       const fixedHolidays = { '01-26': true, '08-15': true, '10-02': true, '12-25': true };
       const pill = document.getElementById('bank-holiday-pill');
       const icon = document.getElementById('bank-status-icon');
       const text = document.getElementById('bank-status-text');
-
       let isClosed = false;
       if (fixedHolidays[mmdd]) {
         isClosed = true;
@@ -1066,7 +964,6 @@
           isClosed = true;
         }
       }
-
       if (isClosed) {
         pill.className = 'bank-status-pill closed';
         icon.textContent = '🔴';
@@ -1098,20 +995,12 @@
         total += (qty * price);
       });
       document.getElementById('live-bill-total').textContent = `₹${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
       const mode = document.getElementById('payment-mode').value;
       if (mode === 'Credit') {
         const deposit = parseFloat(document.getElementById('credit-deposit').value) || 0;
         const remaining = Math.max(0, total - deposit);
         document.getElementById('remaining-credit-balance').textContent = `₹${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
-    }
-
-    function populateCustomerDatalist() {
-      const datalist = document.getElementById('customer-datalist');
-      if (!datalist) return;
-      const uniqueNames = [...new Set(records.map(r => r.name).filter(Boolean))];
-      datalist.innerHTML = uniqueNames.map(name => `<option value="${name.replace(/"/g, '&quot;')}">`).join('');
     }
 
     function autoFillCustomerCity() {
@@ -1129,7 +1018,6 @@
       toast.className = 'toast';
       toast.textContent = message;
       container.appendChild(toast);
-
       setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(40px) scale(0.9)';
@@ -1161,14 +1049,12 @@
         updateDashboard();
         renderRecords();
         renderHoveringCities();
-        populateCustomerDatalist();
         const saved = await pushDataToGitHub();
         if (!saved) {
           records = previousRecords;
           updateDashboard();
           renderRecords();
           renderHoveringCities();
-          populateCustomerDatalist();
           return;
         }
         showToast('✅ Record deleted from GitHub');
@@ -1213,7 +1099,6 @@
           headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
           cache: 'no-store'
         });
-
         if (response.ok) {
           const data = await response.json();
           fileSha = data.sha;
@@ -1221,14 +1106,12 @@
           updateDashboard();
           renderRecords();
           renderHoveringCities();
-          populateCustomerDatalist();
           updateStatus('Synced', 'active');
         } else if (response.status === 404) {
           records = [];
           updateDashboard();
           renderRecords();
           renderHoveringCities();
-          populateCustomerDatalist();
           updateStatus('Ready (New File)', 'active');
         } else {
           throw new Error('Auth Error');
@@ -1250,20 +1133,17 @@
         showToast('⚠️ GitHub token missing. Add your token above.');
         return false;
       }
-
       updateStatus('Syncing to GitHub...', 'syncing');
       if (saveBtn) {
         saveBtn.disabled = true;
         saveBtn.textContent = '⏳ Saving...';
       }
-
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
         const checkRes = await fetch(apiUrl, {
           headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
           cache: 'no-store'
         });
-
         let latestSha = null;
         if (checkRes.ok) {
           latestSha = (await checkRes.json()).sha;
@@ -1271,27 +1151,18 @@
           const err = await checkRes.json().catch(() => ({}));
           throw new Error(err.message || `GitHub read error (${checkRes.status})`);
         }
-
         const body = {
           message: `Save customer records (${new Date().toLocaleString()})`,
           content: encodeBase64(JSON.stringify(records, null, 2))
         };
         if (latestSha) body.sha = latestSha;
-
         const response = await fetch(apiUrl, {
           method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
-
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.message || `GitHub save error (${response.status})`);
-
         fileSha = result.content?.sha || latestSha;
         updateStatus('Synced', 'active');
         showToast('✅ Saved successfully to GitHub');
@@ -1314,21 +1185,17 @@
         event.preventDefault();
         event.stopPropagation();
       }
-
       const form = document.getElementById('record-form');
       if (!form) return;
-
       if (!form.checkValidity()) {
         form.reportValidity();
         showToast('⚠️ Please complete all required fields.');
         return;
       }
-
       const previousRecords = records.slice();
       const editId = document.getElementById('edit-record-id').value;
       const paymentMode = document.getElementById('payment-mode').value;
       const depositAmt = paymentMode === 'Credit' ? (parseFloat(document.getElementById('credit-deposit').value) || 0) : 0;
-
       const itemList = [];
       document.querySelectorAll('.bill-item-row').forEach(row => {
         itemList.push({
@@ -1337,7 +1204,6 @@
           price: parseFloat(row.querySelector('.item-price').value) || 0
         });
       });
-
       const recordData = {
         id: editId || Date.now().toString(),
         name: document.getElementById('cust-name').value.trim(),
@@ -1347,37 +1213,31 @@
         deposit: depositAmt,
         date: document.getElementById('cust-date').value || getLocalTodayDate()
       };
-
       if (editId) {
         records = records.map(r => r.id === editId ? recordData : r);
       } else {
         records = [recordData, ...records];
       }
-
       const saved = await pushDataToGitHub();
       if (!saved) {
         records = previousRecords;
         return;
       }
-
       cancelEditMode();
       updateDashboard();
       renderRecords();
       renderHoveringCities();
-      populateCustomerDatalist();
     };
 
     function startEditRecord(id) {
       const rec = records.find(r => r.id === id);
       if (!rec) return;
-
       document.getElementById('edit-record-id').value = rec.id;
       document.getElementById('cust-name').value = rec.name;
       document.getElementById('cust-city').value = rec.city;
       document.getElementById('payment-mode').value = rec.payment || 'Cash';
       document.getElementById('credit-deposit').value = rec.deposit || 0;
       document.getElementById('cust-date').value = rec.date;
-
       const wrapper = document.getElementById('bill-items-wrapper');
       wrapper.innerHTML = '';
       if (rec.itemList && rec.itemList.length > 0) {
@@ -1385,10 +1245,8 @@
       } else {
         addBillItemRow('', rec.items || 1, rec.price || '');
       }
-
       toggleCreditFields();
       updateLiveTotal();
-
       const saveBtn = document.getElementById('save-btn');
       saveBtn.textContent = '✏️ Update Record on GitHub';
       document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
@@ -1406,7 +1264,6 @@
       toggleCreditFields();
       document.getElementById('cust-date').value = getLocalTodayDate();
       updateLiveTotal();
-
       const saveBtn = document.getElementById('save-btn');
       saveBtn.textContent = '💾 Save directly to GitHub';
       document.getElementById('cancel-edit-btn').style.display = 'none';
@@ -1423,14 +1280,12 @@
       const query = document.getElementById('search-bar').value.trim().toLowerCase();
       renderRecords();
       renderHoveringCities();
-
       const dropdown = document.getElementById('search-suggestions');
       if (!query) {
         dropdown.classList.remove('active');
         dropdown.innerHTML = '';
         return;
       }
-
       const seen = new Set();
       const matchList = [];
       records.forEach(r => {
@@ -1443,7 +1298,6 @@
           matchList.push({ type: '🏙️ City', text: r.city });
         }
       });
-
       const topMatches = matchList.slice(0, 5);
       if (topMatches.length > 0) {
         dropdown.innerHTML = topMatches.map(m => `
@@ -1470,7 +1324,6 @@
       const container = document.getElementById('hovering-cities');
       const currentQuery = document.getElementById('search-bar').value.trim().toLowerCase();
       const citiesMap = {};
-
       records.forEach(r => {
         if (r.city) {
           const cityName = r.city.trim();
@@ -1479,13 +1332,11 @@
           citiesMap[key].count++;
         }
       });
-
       const uniqueCities = Object.values(citiesMap);
       if (uniqueCities.length === 0) {
         container.innerHTML = '';
         return;
       }
-
       container.innerHTML = `
         <div class="city-hover-pill ${currentQuery === '' ? 'active' : ''}" onclick="filterByCity('')">
           🌐 All Cities
@@ -1509,51 +1360,42 @@
       const paymentFilter = document.getElementById('filter-payment')?.value || 'all';
       const container = document.getElementById('records-container');
       container.innerHTML = '';
-
       const filtered = records.filter(r => {
         const totals = getRecordTotals(r);
         const paymentMode = (r.payment || 'Cash').toLowerCase();
         const deposit = r.deposit || 0;
         const remaining = Math.max(0, totals.bill - deposit);
-
         const matchesQuery = !rawQuery ||
           (r.name && r.name.toLowerCase().includes(rawQuery)) ||
           (r.city && r.city.toLowerCase().includes(rawQuery)) ||
           paymentMode.includes(rawQuery) ||
           ((rawQuery === 'udhar' || rawQuery === 'credit') && paymentMode === 'credit') ||
           ((rawQuery === 'pending' || rawQuery === 'balance') && remaining > 0);
-
         if (!matchesQuery) return false;
         if (paymentFilter === 'Cash' && paymentMode !== 'cash') return false;
         if (paymentFilter === 'UPI' && paymentMode !== 'upi') return false;
         if (paymentFilter === 'Credit' && paymentMode !== 'credit') return false;
         if (paymentFilter === 'PendingCredit' && (paymentMode !== 'credit' || remaining <= 0)) return false;
-
         return true;
       });
-
       filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '') || Number(b.id) - Number(a.id));
       document.getElementById('showing-count').textContent = `📊 ${filtered.length} records`;
-
       if (filtered.length === 0) {
         container.innerHTML = `<div class="card-3d card" style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 700;">No matching records found</div>`;
         return;
       }
-
       filtered.forEach(r => {
         const totals = getRecordTotals(r);
         const payment = r.payment || 'Cash';
         const deposit = r.deposit || 0;
         const remaining = Math.max(0, totals.bill - deposit);
         const [y, m, d] = r.date ? r.date.split('-') : ['--', '--', '--'];
-
         let paymentText = payment;
         if (payment === 'Cash') paymentText = '💵 Cash';
         else if (payment === 'UPI') paymentText = '📱 UPI';
         else if (payment === 'Credit') {
           paymentText = `📒 Credit (Paid: ₹${deposit.toFixed(2)} | Bal: ₹${remaining.toFixed(2)})`;
         }
-
         let itemsHtml = '';
         if (r.itemList && r.itemList.length > 0) {
           itemsHtml = r.itemList.map(i => `
@@ -1570,7 +1412,6 @@
             </div>
           `;
         }
-
         const card = document.createElement('div');
         card.className = 'card-3d record-card';
         card.innerHTML = `
@@ -1588,12 +1429,10 @@
             </div>
           </div>
           <div class="record-name">👤 ${r.name}</div>
-
           <div class="record-items-panel">
             <div class="record-items-title">🛒 Items List</div>
             ${itemsHtml}
           </div>
-
           <div class="record-details">
             <div class="record-calc">📦 Total Qty: ${totals.qty}</div>
             <div class="record-total">₹${Number(totals.bill).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
@@ -1608,17 +1447,14 @@
       const selectedDate = document.getElementById('cust-date').value;
       let daySale = 0, totalItems = 0, cities = new Set();
       const yearMap = {};
-
       records.forEach(r => {
         const totals = getRecordTotals(r);
         const realizedSale = (r.payment === 'Credit') ? (r.deposit || 0) : totals.bill;
-
         if (r.date === selectedDate) {
           daySale += realizedSale;
         }
         totalItems += totals.qty;
         if (r.city) cities.add(r.city.toLowerCase());
-
         const year = r.date ? r.date.split('-')[0] : 'Unknown';
         if (!yearMap[year]) {
           yearMap[year] = { sale: 0, count: 0, items: 0 };
@@ -1627,32 +1463,27 @@
         yearMap[year].count += 1;
         yearMap[year].items += totals.qty;
       });
-
       if (selectedDate) {
         const [y, m, d] = selectedDate.split('-');
         document.getElementById('stat-day-label').textContent = `📈 Sale (${d}/${m})`;
       } else {
         document.getElementById('stat-day-label').textContent = '📈 Day Sale';
       }
-
       document.getElementById('stat-day-sale').textContent = `₹${daySale.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       document.getElementById('stat-records').textContent = records.length;
       document.getElementById('stat-items').textContent = totalItems;
       document.getElementById('stat-cities').textContent = cities.size;
-
       renderYearSummary(yearMap);
     }
 
     function renderYearSummary(yearMap) {
       const container = document.getElementById('year-summary-container');
       container.innerHTML = '';
-
       const sortedYears = Object.keys(yearMap).sort((a, b) => b.localeCompare(a));
       if (sortedYears.length === 0) {
         container.innerHTML = `<div class="card-3d year-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-weight: 700;">No year data available</div>`;
         return;
       }
-
       sortedYears.forEach(year => {
         const data = yearMap[year];
         const card = document.createElement('div');
