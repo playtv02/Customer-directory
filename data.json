@@ -565,8 +565,8 @@
         "price": 1300
       }
     ],
-    "payment": "Credit",
-    "deposit": 8500,
+    "payment": "UPI",
+    "deposit": 0,
     "date": "2026-11-17"
   },
   {
