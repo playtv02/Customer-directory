@@ -1265,12 +1265,12 @@
     "itemList": [
       {
         "desc": "KHATAR - 40",
-        "qty": 20,
+        "qty": 9,
         "price": 800
       }
     ],
     "payment": "Credit",
-    "deposit": 1000,
+    "deposit": 5000,
     "date": "2026-11-16"
   },
   {
